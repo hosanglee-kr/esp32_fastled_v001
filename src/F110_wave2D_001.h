@@ -15,8 +15,8 @@ all the UI elements you see below.
 
 using namespace fl;
 
-#define HEIGHT 100
-#define WIDTH 100
+#define HEIGHT 8 // 100
+#define WIDTH 8 // 100
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE true
 
