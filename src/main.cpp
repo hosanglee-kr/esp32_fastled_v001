@@ -1,8 +1,12 @@
 #include <Arduino.h>
 
-
-#define F110
+#define F100
 #ifdef F100
+	#include "F110_wave2D_001.h"
+#endif
+	
+#define F110
+#ifdef F110
 	#include "F110_wave2D_001.h"
 #endif
 
@@ -11,6 +15,9 @@ void setup() {
 
 	Serial.begin(115200);
 	
+	#ifdef F100
+	     F100_init();
+    #endif
 
     #ifdef F110
 	     F110_init();
@@ -20,6 +27,10 @@ void setup() {
 }
 
 void loop() {
+	#ifdef F100
+	     F100_run();
+    #endif
+	
     #ifdef F110
 	     F110_run();
     #endif
