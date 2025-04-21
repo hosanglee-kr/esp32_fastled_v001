@@ -1,4 +1,4 @@
-name: Firmware pull request validation
+name: PR
 
 on:
   pull_request:
