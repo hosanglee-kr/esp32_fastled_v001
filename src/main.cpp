@@ -2,7 +2,7 @@
 
 #define F100
 #ifdef F100
-	#include "F110_wave2D_001.h"
+	#include "F100_fxWave2D_001"
 #endif
 	
 #define F110
