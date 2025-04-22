@@ -2,7 +2,7 @@ name: Add firmware links to pull request
 
 on:
   workflow_run:
-    workflows: [Firmware pull request validation]
+    workflows: [PR]
     types: [completed]
 
 jobs:
