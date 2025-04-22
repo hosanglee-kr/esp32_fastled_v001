@@ -15,7 +15,7 @@
 	#include "F120_Blur2d_001.h"
 #endif
 
-#define F130
+//#define F130
 #ifdef F130
 	#include "F130_Wave2d_001.h"
 #endif
