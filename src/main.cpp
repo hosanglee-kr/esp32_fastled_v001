@@ -3,7 +3,7 @@
 
 #define F100
 #ifdef F100
-	#include "F100_fxWave2D_001.h"
+	#include "F100_fxWave2D_002.h"
 #endif
 	
 //#define F110

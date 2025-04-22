@@ -19,8 +19,8 @@ all the UI elements you see below.
 
 using namespace fl;
 
-#define HEIGHT 64
-#define WIDTH 64
+#define HEIGHT  8       // 64
+#define WIDTH   8       // 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 #define IS_SERPINTINE true
 
@@ -74,53 +74,91 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 XYMap xyRect(WIDTH, HEIGHT, false);
 
 ////////////
-WaveFx waveFxLower;
-WaveFx waveFxUpper;
+
+WaveFx::Args lowerArgs;
+WaveFx::Args upperArgs;
+
+WaveFx waveFxLower(xyRect, lowerArgs); // Initialize globally using lowerArgs
+WaveFx waveFxUpper(xyRect, upperArgs); // Initialize globally using upperArgs
 
 
-/*
-WaveFx
-    waveFxLower(xyRect,
-                WaveFx::Args{
-                    .factor = SUPER_SAMPLE_4X,
-                    .half_duplex = true,
-                    .speed = 0.18f,
-                    .dampening = 9.0f,
-                    .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
-                });
+// WaveFx waveFxLower(
+//     xyRect,
+//     WaveFx::Args{
+//         SUPER_SAMPLE_4X,                             // factor
+//         true,                                        // half_duplex
+//         0.18f,                                       // speed
+//         9.0f,                                        // dampening
+//         WaveCrgbGradientMapPtr::New(electricBlueFirePal) // crgbMap
+//     }
+// );
 
-WaveFx waveFxUpper(
-    xyRect, WaveFx::Args{
-                .factor = SUPER_SAMPLE_4X,
-                .half_duplex = true,
-                .speed = 0.25f,
-                .dampening = 3.0f,
-                .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
-            });
+// WaveFx waveFxLower(
+//                     xyRect,
+//                     WaveFx::Args{
+//                         .factor = SUPER_SAMPLE_4X,
+//                         .half_duplex = true,
+//                         .speed = 0.18f,
+//                         .dampening = 9.0f,
+//                         .crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal),
+//                     }
+//                 );
 
-*/
+// WaveFx waveFxUpper(
+//                     xyRect,
+//                     WaveFx::Args{
+//                         .factor = SUPER_SAMPLE_4X,
+//                         .half_duplex = true,
+//                         .speed = 0.25f,
+//                         .dampening = 3.0f,
+//                         .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
+//                     }
+//                 );
+
+
 Blend2d fxBlend(xyMap);
 
-void F100_init()() {
-    // WaveFxLower 초기화 부분 수정 (WaveFx::Args 사용)
-//WaveFx::Args waveArgsLower; // 기본 생성자 호출
-waveArgsLower.factor = SUPER_SAMPLE_4X;
-waveArgsLower.half_duplex = true;
-waveArgsLower.speed = 0.18f;
-waveArgsLower.dampening = 9.0f;
-waveArgsLower.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+void F100_init() {
+    // 2. Set its members individually
+    lowerArgs.factor = SUPER_SAMPLE_4X;
+    lowerArgs.half_duplex = true;
+    lowerArgs.speed = 0.18f;
+    lowerArgs.dampening = 9.0f; // Make sure the type (float/int) matches the member declaration in wave.h
+    lowerArgs.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
 
-waveFxLower(xyRect, waveArgsLower); // 수정된 waveArgsLower 객체를 전달
+    // 3. Pass the initialized object to the WaveFx constructor
+    // WaveFx waveFxLower(xyRect, lowerArgs);
 
-// WaveFxUpper 초기화 부분 수정 (WaveFx::Args 사용)
-//WaveFx::Args waveArgsUpper; // 기본 생성자 호출
-waveArgsUpper.factor = SUPER_SAMPLE_4X;
-waveArgsUpper.half_duplex = true;
-waveArgsUpper.speed = 0.25f;
-waveArgsUpper.dampening = 3.0f;
-waveArgsUpper.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+    // 2. Set its members individually
+    upperArgs.factor = SUPER_SAMPLE_4X;
+    upperArgs.half_duplex = true;
+    upperArgs.speed = 0.25f;
+    upperArgs.dampening = 3.0f; // Make sure type matches (float/int)
+    upperArgs.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+    
+    // 3. Pass the initialized object to the WaveFx constructor
+    // WaveFx waveFxUpper(xyRect, upperArgs);
 
-waveFxUpper(xyRect, waveArgsUpper); // 수정된 waveArgsUpper 객체를 전달
+
+    // // WaveFxLower 초기화 부분 수정 (WaveFx::Args 사용)
+    // WaveFx::Args waveArgsLower; // 기본 생성자 호출
+    // waveArgsLower.factor = SUPER_SAMPLE_4X;
+    // waveArgsLower.half_duplex = true;
+    // waveArgsLower.speed = 0.18f;
+    // waveArgsLower.dampening = 9.0f;
+    // waveArgsLower.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+
+    // waveFxLower(xyRect, waveArgsLower); // 수정된 waveArgsLower 객체를 전달
+
+    // // WaveFxUpper 초기화 부분 수정 (WaveFx::Args 사용)
+    // WaveFx::Args waveArgsUpper; // 기본 생성자 호출
+    // waveArgsUpper.factor = SUPER_SAMPLE_4X;
+    // waveArgsUpper.half_duplex = true;
+    // waveArgsUpper.speed = 0.25f;
+    // waveArgsUpper.dampening = 3.0f;
+    // waveArgsUpper.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+
+    // waveFxUpper(xyRect, waveArgsUpper); // 수정된 waveArgsUpper 객체를 전달
 
 	
     //Serial.begin(115200);
@@ -178,7 +216,8 @@ void applyFancyEffect(uint32_t now, bool button_active) {
     int end_x = mid_x + amount;
     int start_y = mid_y - amount;
     int end_y = mid_y + amount;
-    int curr_alpha = pointTransition.update8(now);
+    int curr_alpha = pointTransition.update(now);
+    // int curr_alpha = pointTransition.update8(now);
     int left_x = map(curr_alpha, 0, 255, mid_x, start_x);
     int down_y = map(curr_alpha, 0, 255, mid_y, start_y);
     int right_x = map(curr_alpha, 0, 255, mid_x, end_x);
@@ -233,22 +272,54 @@ ui_state ui() {
     fxBlend.setGlobalBlurAmount(blurAmount);
     fxBlend.setGlobalBlurPasses(blurPasses);
 
-    Blend2dParams lower_params = {
-        .blur_amount = blurAmountLower,
-        .blur_passes = blurPassesLower,
-    };
+    // Blend2dParams 초기화 수정
+    Blend2dParams lower_params; // 기본 생성자 호출
+    lower_params.blur_amount = blurAmountLower.as<uint8_t>(); // 명시적 타입 변환 및 할당
+    lower_params.blur_passes = blurPassesLower.as<uint8_t>(); // 명시적 타입 변환 및 할당
 
-    Blend2dParams upper_params = {
-        .blur_amount = blurAmountUpper,
-        .blur_passes = blurPassesUpper,
-    };
+
+    // Blend2dParams lower_params = {
+    //     blurAmountLower, // Value for the first member
+    //     blurPassesLower  // Value for the second member
+    // };
+
+    // Blend2dParams lower_params = {
+    //     .blur_amount = blurAmountLower,
+    //     .blur_passes = blurPassesLower,
+    // };
+
+    // Blend2dParams 초기화 수정
+    Blend2dParams upper_params; // 기본 생성자 호출
+    upper_params.blur_amount = blurAmountUpper.as<uint8_t>(); // 명시적 타입 변환 및 할당
+    upper_params.blur_passes = blurPassesUpper.as<uint8_t>(); // 명시적 타입 변환 및 할당
+
+    // Blend2dParams upper_params = {
+    //     blurAmountUpper, // Value for the first member
+    //     blurPassesUpper  // Value for the second member
+    // };
+
+    // Blend2dParams upper_params = {
+    //     .blur_amount = blurAmountUpper,
+    //     .blur_passes = blurPassesUpper,
+    // };
 
     fxBlend.setParams(waveFxLower, lower_params);
     fxBlend.setParams(waveFxUpper, upper_params);
-    ui_state state{
-        .button = button,
-        .bigButton = buttonFancy,
-    };
+
+    // ui_state 초기화 수정
+    ui_state state; // 기본 생성자 호출
+    state.button = button.clicked(); // 멤버에 직접 값 할당 (UIButton의 상태 확인 필요)
+    state.bigButton = buttonFancy.clicked(); // 멤버에 직접 값 할당 (UIButton의 상태 확인 필요)
+
+    // ui_state state{
+    //     button,      // Value for the first member (button)
+    //     buttonFancy  // Value for the second member (bigButton)
+    // };
+
+    // ui_state state{
+    //     .button = button,
+    //     .bigButton = buttonFancy,
+    // };
     return state;
 }
 
