@@ -74,26 +74,9 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 XYMap xyRect(WIDTH, HEIGHT, false);
 
 ////////////
+WaveFx waveFxLower;
+WaveFx waveFxUpper;
 
-// WaveFxLower 초기화 부분 수정 (WaveFx::Args 사용)
-WaveFx::Args waveArgsLower; // 기본 생성자 호출
-waveArgsLower.factor = SUPER_SAMPLE_4X;
-waveArgsLower.half_duplex = true;
-waveArgsLower.speed = 0.18f;
-waveArgsLower.dampening = 9.0f;
-waveArgsLower.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
-
-waveFxLower(xyRect, waveArgsLower); // 수정된 waveArgsLower 객체를 전달
-
-// WaveFxUpper 초기화 부분 수정 (WaveFx::Args 사용)
-WaveFx::Args waveArgsUpper; // 기본 생성자 호출
-waveArgsUpper.factor = SUPER_SAMPLE_4X;
-waveArgsUpper.half_duplex = true;
-waveArgsUpper.speed = 0.25f;
-waveArgsUpper.dampening = 3.0f;
-waveArgsUpper.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
-
-waveFxUpper(xyRect, waveArgsUpper); // 수정된 waveArgsUpper 객체를 전달
 
 /*
 WaveFx
@@ -119,6 +102,27 @@ WaveFx waveFxUpper(
 Blend2d fxBlend(xyMap);
 
 void F100_init()() {
+    // WaveFxLower 초기화 부분 수정 (WaveFx::Args 사용)
+//WaveFx::Args waveArgsLower; // 기본 생성자 호출
+waveArgsLower.factor = SUPER_SAMPLE_4X;
+waveArgsLower.half_duplex = true;
+waveArgsLower.speed = 0.18f;
+waveArgsLower.dampening = 9.0f;
+waveArgsLower.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+
+waveFxLower(xyRect, waveArgsLower); // 수정된 waveArgsLower 객체를 전달
+
+// WaveFxUpper 초기화 부분 수정 (WaveFx::Args 사용)
+//WaveFx::Args waveArgsUpper; // 기본 생성자 호출
+waveArgsUpper.factor = SUPER_SAMPLE_4X;
+waveArgsUpper.half_duplex = true;
+waveArgsUpper.speed = 0.25f;
+waveArgsUpper.dampening = 3.0f;
+waveArgsUpper.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+
+waveFxUpper(xyRect, waveArgsUpper); // 수정된 waveArgsUpper 객체를 전달
+
+	
     //Serial.begin(115200);
     auto screenmap = xyMap.toScreenMap();
     screenmap.setDiameter(.2);
