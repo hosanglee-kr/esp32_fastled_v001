@@ -10,8 +10,11 @@ jobs:
       fail-fast: false
       matrix:
         environments:
-          - "esp32doit"
-          - "esp32-s3-devkitm-1"
+          - "esp32doit_F100"
+          - "esp32doit_F110"
+          - "esp32doit_F120"
+          - "esp32doit_F130"
+          - "esp32-s3-devkitm-1_F100"
 
     runs-on: ubuntu-latest
 
