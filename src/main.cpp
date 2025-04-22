@@ -20,6 +20,11 @@
 	#include "F130_Wave2d_001.h"
 #endif
 
+#ifdef F140
+	#include "F140_fxWater_001.h"
+#endif
+
+
 void setup() {
 
 	Serial.begin(115200);
@@ -38,6 +43,11 @@ void setup() {
 
 	#ifdef F130
 		F130_init();
+	#endif
+
+	
+	#ifdef F140
+		F140_init();
 	#endif
 	
 	Serial.println("11111");
@@ -59,4 +69,8 @@ void loop() {
     #ifdef F130
 	     F130_run();
     #endif
+
+	#ifdef F140
+		F140_init();
+	#endif
 }
