@@ -75,8 +75,8 @@ XYMap xyRect(WIDTH, HEIGHT, false);
 
 ////////////
 
-// WaveFxLower 초기화 부분 수정
-fl::WaveFxArgs waveArgsLower; // 기본 생성자 호출
+// WaveFxLower 초기화 부분 수정 (WaveFx::Args 사용)
+WaveFx::Args waveArgsLower; // 기본 생성자 호출
 waveArgsLower.factor = SUPER_SAMPLE_4X;
 waveArgsLower.half_duplex = true;
 waveArgsLower.speed = 0.18f;
@@ -85,8 +85,8 @@ waveArgsLower.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
 
 waveFxLower(xyRect, waveArgsLower); // 수정된 waveArgsLower 객체를 전달
 
-// WaveFxUpper 초기화 부분 수정
-fl::WaveFxArgs waveArgsUpper; // 기본 생성자 호출
+// WaveFxUpper 초기화 부분 수정 (WaveFx::Args 사용)
+WaveFx::Args waveArgsUpper; // 기본 생성자 호출
 waveArgsUpper.factor = SUPER_SAMPLE_4X;
 waveArgsUpper.half_duplex = true;
 waveArgsUpper.speed = 0.25f;
@@ -94,6 +94,7 @@ waveArgsUpper.dampening = 3.0f;
 waveArgsUpper.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
 
 waveFxUpper(xyRect, waveArgsUpper); // 수정된 waveArgsUpper 객체를 전달
+
 /*
 WaveFx
     waveFxLower(xyRect,
