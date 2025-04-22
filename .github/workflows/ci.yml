@@ -14,7 +14,7 @@ jobs:
           - "esp32doit_F110"
           - "esp32doit_F120"
           - "esp32doit_F130"
-          - "esp32-s3-devkitm-1"
+          - "esp32-s3-devkitm-1_F100"
 
     runs-on: ubuntu-latest
 
