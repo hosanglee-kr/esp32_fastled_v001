@@ -23,6 +23,9 @@
 #ifdef F140
 	#include "F140_fxWater_001.h"
 #endif
+#ifdef R100
+	#include "R100_Robot_eye_T10_002.h"
+#endif
 
 
 void setup() {
@@ -49,6 +52,10 @@ void setup() {
 	#ifdef F140
 		F140_init();
 	#endif
+
+	#ifdef R100
+		R100_init();
+	#endif
 	
 	Serial.println("11111");
 }
@@ -72,5 +79,9 @@ void loop() {
 
 	#ifdef F140
 		F140_init();
+	#endif
+
+	#ifdef R100
+		R100_run();
 	#endif
 }
