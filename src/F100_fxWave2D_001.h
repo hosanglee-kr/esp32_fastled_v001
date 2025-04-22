@@ -72,6 +72,29 @@ DEFINE_GRADIENT_PALETTE(electricGreenFirePal){
 
 XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 XYMap xyRect(WIDTH, HEIGHT, false);
+
+////////////
+
+// WaveFxLower 초기화 부분 수정
+fl::WaveFxArgs waveArgsLower; // 기본 생성자 호출
+waveArgsLower.factor = SUPER_SAMPLE_4X;
+waveArgsLower.half_duplex = true;
+waveArgsLower.speed = 0.18f;
+waveArgsLower.dampening = 9.0f;
+waveArgsLower.crgbMap = WaveCrgbGradientMapPtr::New(electricBlueFirePal);
+
+waveFxLower(xyRect, waveArgsLower); // 수정된 waveArgsLower 객체를 전달
+
+// WaveFxUpper 초기화 부분 수정
+fl::WaveFxArgs waveArgsUpper; // 기본 생성자 호출
+waveArgsUpper.factor = SUPER_SAMPLE_4X;
+waveArgsUpper.half_duplex = true;
+waveArgsUpper.speed = 0.25f;
+waveArgsUpper.dampening = 3.0f;
+waveArgsUpper.crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal);
+
+waveFxUpper(xyRect, waveArgsUpper); // 수정된 waveArgsUpper 객체를 전달
+/*
 WaveFx
     waveFxLower(xyRect,
                 WaveFx::Args{
@@ -91,6 +114,7 @@ WaveFx waveFxUpper(
                 .crgbMap = WaveCrgbGradientMapPtr::New(electricGreenFirePal),
             });
 
+*/
 Blend2d fxBlend(xyMap);
 
 void F100_init()() {
