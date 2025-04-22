@@ -1,28 +1,40 @@
 #include <Arduino.h>
 
-// The build version comes from an environment variable. Use the VERSION
-// define wherever the version is needed.
 
+#define F100
+#ifdef F100
+	#include "F100_fxWave2D_001.h"
+#endif
+	
+//#define F110
+#ifdef F110
+	#include "F110_wave2D_001.h"
 
-#define S10
-#ifdef S10
-	#include "S10.h"
 #endif
 
 void setup() {
 
 	Serial.begin(115200);
+	
+	#ifdef F100
+	     F100_init();
+    #endif
 
+    #ifdef F110
+	     F110_init();
+    #endif
 
-	#ifdef S10
-		S10_setup();
-	#endif
 
 	Serial.println("11111");
 }
 
 void loop() {
-	#ifdef S10
-		S10_loop();
-	#endif
+	#ifdef F100
+	     F100_run();
+    #endif
+	
+    #ifdef F110
+	     F110_run();
+    #endif
+
 }
