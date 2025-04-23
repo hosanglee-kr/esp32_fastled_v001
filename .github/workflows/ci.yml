@@ -29,13 +29,14 @@ jobs:
 
       - name: List PlatformIO environments
         id: list_envs # 이 Step의 ID (파일에 출력)
+        
+        # platformio.ini 파일을 읽어 [env:...] 섹션 이름들을 JSON 배열로 출력
+        # 이 출력은 다음 Step에서 파일로 저장되고 Job 출력으로 설정됨
         run: |
-          # platformio.ini 파일을 읽어 [env:...] 섹션 이름들을 JSON 배열로 출력
-          # 이 출력은 다음 Step에서 파일로 저장되고 Job 출력으로 설정됨
           python -c "
-import configparser
-import json
-import sys
+          import configparser
+          import json
+          import sys
 
 config = configparser.ConfigParser()
 # platformio.ini 파일 경로를 정확하게 지정 (기본: 저장소 루트)
