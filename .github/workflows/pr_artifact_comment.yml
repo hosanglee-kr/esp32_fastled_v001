@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
+    # --- 여기에 permissions 블록 추가 ---
+    permissions:
+      actions: read         # 워크플로우 아티팩트 읽기 권한
+      pull-requests: write  # Pull Request에 댓글 쓰기 권한 (또는 issues: write)
+    # ----------------------------------
+
     steps:
       - name: Get artifacts and generate comment
         uses: actions/github-script@v6
