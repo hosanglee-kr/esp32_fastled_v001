@@ -39,7 +39,11 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
 void F110_init() {
     // Serial.begin(115200);
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
+    FastLED.addLeds<NEOPIXEL, 13>(leds, NUM_LEDS).setScreenMap(xyMap);
+    //FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
+    
+    FastLED.setBrightness(70);	 // 예시: 최대 밝기의 약 40%
+
 }
 
 SuperSample getSuperSample() {

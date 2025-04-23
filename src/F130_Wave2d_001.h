@@ -39,7 +39,11 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
 void F130_init() {
 
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
+    FastLED.addLeds<NEOPIXEL, 13>(leds, NUM_LEDS).setScreenMap(xyMap);
+
+    	// 전체 밝기 설정 (0-255, 선택 사항)
+	FastLED.setBrightness(50);	 // 예시: 최대 밝기의 약 40%
+
 }
 
 SuperSample getSuperSample() {
