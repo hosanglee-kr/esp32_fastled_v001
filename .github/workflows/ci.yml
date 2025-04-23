@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x' # PlatformIO 실행에 필요한 Python 설정
+          python-version: '3.11' # PlatformIO 실행에 필요한 Python 설정
 
       - name: Install PlatformIO
         run: |
