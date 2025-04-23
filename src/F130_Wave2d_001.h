@@ -39,7 +39,7 @@ XYMap xyMap(WIDTH, HEIGHT, IS_SERPINTINE);
 
 void F130_init() {
 
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(xyMap);
+    FastLED.addLeds<NEOPIXEL, 13>(leds, NUM_LEDS).setScreenMap(xyMap);
 }
 
 SuperSample getSuperSample() {

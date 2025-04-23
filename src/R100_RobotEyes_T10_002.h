@@ -134,7 +134,7 @@ void R100_init() {
 	FastLED.addLeds<g_R100_LED_TYPE, g_R100_DATA_PIN, g_R100_COLOR_ORDER>(g_R100_leds, g_R100_NUM_LEDS);
 
 	// 전체 밝기 설정 (0-255, 선택 사항)
-	FastLED.setBrightness(100);	 // 예시: 최대 밝기의 약 40%
+	FastLED.setBrightness(70);	 // 예시: 최대 밝기의 약 40%
 
 	// 디스플레이 클리어 (모든 LED 끄기)
 	fill_solid(g_R100_leds, g_R100_NUM_LEDS, CRGB::Black);	// 모든 LED 색상을 검은색으로 설정

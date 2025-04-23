@@ -19,6 +19,9 @@ all the UI elements you see below.
 
 using namespace fl;
 
+#define g_F100_DATA_PIN			   13		// <-- 실제 WS2812B 데이터 선이 연결된 핀 번호로 변경하세요 (예: 6번 핀)
+
+
 #define HEIGHT  8       // 64
 #define WIDTH   8       // 64
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
@@ -99,7 +102,8 @@ void F100_init() {
     
     auto screenmap = xyMap.toScreenMap();
     screenmap.setDiameter(.2);
-    FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
+    FastLED.addLeds<NEOPIXEL, 13>(leds, NUM_LEDS).setScreenMap(screenmap);
+    //FastLED.addLeds<NEOPIXEL, 2>(leds, NUM_LEDS).setScreenMap(screenmap);
     fxBlend.add(waveFxLower);
     fxBlend.add(waveFxUpper);
 }
