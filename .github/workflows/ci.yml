@@ -37,21 +37,19 @@ jobs:
           import configparser
           import json
           import sys
-
-config = configparser.ConfigParser()
-# platformio.ini 파일 경로를 정확하게 지정 (기본: 저장소 루트)
-# 만약 platformio.ini가 하위 디렉토리에 있다면 경로 수정 필요 (예: 'firmware/platformio.ini')
-config.read('platformio.ini')
-
-envs = []
-for section in config.sections():
-    if section.startswith('env:'):
-        # 'env:' 접두사를 제외한 환경 이름만 추출
-        envs.append(section.split(':', 1)[1])
-
-# GitHub Actions matrix가 인식할 수 있는 JSON 배열 형태로 출력
-print(json.dumps(envs))
-" > envs.json # 출력을 envs.json 파일로 저장
+          config = configparser.ConfigParser()
+          # platformio.ini 파일 경로를 정확하게 지정 (기본: 저장소 루트)
+          # 만약 platformio.ini가 하위 디렉토리에 있다면 경로 수정 필요 (예: 'firmware/platformio.ini')
+          config.read('platformio.ini')
+          
+          envs = []
+          for section in config.sections():
+              if section.startswith('env:'):
+                  # 'env:' 접두사를 제외한 환경 이름만 추출
+                  envs.append(section.split(':', 1)[1])
+          # GitHub Actions matrix가 인식할 수 있는 JSON 배열 형태로 출력
+          print(json.dumps(envs))
+          " > envs.json # 출력을 envs.json 파일로 저장
         shell: bash # bash 쉘을 사용하여 출력 리다이렉션
 
       - name: Read environments to output
