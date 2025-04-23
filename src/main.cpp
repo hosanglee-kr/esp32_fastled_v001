@@ -25,7 +25,7 @@
 #endif
 
 #ifdef R100
-	#include "R100_RobotEyes_T10_002.h.h"
+	#include "R100_RobotEyes_T10_002.h"
 #endif
 
 //#define R110
