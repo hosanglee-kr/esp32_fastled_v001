@@ -30,6 +30,7 @@ jobs:
             console.log(`Triggering workflow run ID: ${run_id}`); // 실행 ID 로그 출력
 
             // 트리거 워크플로우 실행의 아티팩트 목록 가져오기 (댓글 내용 생성을 위해 필요)
+
             // 'actions: read' 권한 필요
             try {
               const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -40,10 +41,12 @@ jobs:
 
               // 아티팩트 목록 이름만 나열하는 댓글 내용 생성
               let body = "Firmware artifacts for this pull request:\n"; // 댓글 시작 내용
+
               if (artifacts.data.artifacts.length > 0) {
                 console.log(`Found ${artifacts.data.artifacts.length} artifacts.`); // 찾은 아티팩트 개수 로그
 
                 artifacts.data.artifacts.forEach(artifact => {
+
                   // 아티팩트 이름만 목록으로 표시 (직접 다운로드 링크 대신)
                   body += `- ${artifact.name}\n`;
                 });
