@@ -257,10 +257,9 @@ void C100_applyFiltering() {
 	g_C100_filtered_gz		= g_C100_alpha * g_C100_g.gyro.z + (1.0 - g_C100_alpha) * g_C100_filtered_gz;
 
 	// 시리얼 모니터로 필터링된 데이터 확인 (튜닝 시 필수)
-	/*
 	Serial.print("Filtered Accel (m/s^2): "); Serial.print(g_C100_filtered_ax); Serial.print(", "); Serial.print(g_C100_filtered_ay); Serial.print(", "); Serial.println(g_C100_filtered_az);
 	Serial.print("Filtered Gyro (deg/s): "); Serial.print(g_C100_filtered_gx); Serial.print(", "); Serial.print(g_C100_filtered_gy); Serial.print(", "); Serial.println(g_C100_filtered_gz);
-	*/
+	
 
 	// 정지 상태 판단을 위한 가속도/자이로 벡터 크기 계산
 	// 가속도 크기는 중력가속도(약 9.8) 근처여야 함
@@ -268,9 +267,8 @@ void C100_applyFiltering() {
 	float v_gyro_magnitude	= sqrt(g_C100_filtered_gx * g_C100_filtered_gx + g_C100_filtered_gy * g_C100_filtered_gy + g_C100_filtered_gz * g_C100_filtered_gz);
 
 	// 시리얼 모니터로 필터링된 크기 확인 (튜닝 시 필수)
-	/*
+	
 	Serial.print("Accel Mag: "); Serial.print(v_accel_magnitude); Serial.print(", Gyro Mag: "); Serial.println(v_gyro_magnitude);
-	*/
 
 	// --- 정지 상태일 때만 가속도 센서로 Roll/Pitch 각도 계산 ---
 	// MPU6050이 완전히 수평일 때 ax=0, ay=0, az=~9.8 로 가정한 계산 (장착 방향에 따라 atan2의 인자 순서 및 부호 변경 필수!)
@@ -279,9 +277,7 @@ void C100_applyFiltering() {
 		g_C100_accel_roll  = atan2(g_C100_filtered_ay, g_C100_filtered_az) * 180.0 / PI;																														 // Y, Z 축으로 Roll 각도 계산 (예시)
 		g_C100_accel_pitch = atan2(-g_C100_filtered_ax, sqrt(g_C100_filtered_ay * g_C100_filtered_ay + g_C100_filtered_az * g_C100_filtered_az)) * 180.0 / PI;													 // X, YZ 평면으로 Pitch 각도 계산 (예시)
 
-		/*
 		Serial.print("Accel Roll: "); Serial.print(g_C100_accel_roll); Serial.print(", Pitch: "); Serial.println(g_C100_accel_pitch);
-		*/
 	}
 }
 
@@ -383,10 +379,10 @@ void C100_inferCarState() {
 	// 시리얼 모니터로 차량 상태 변화 확인 (디버깅 시 유용)
 	if (v_nextCarState != g_C100_currentCarState) {
 		Serial.print("Car state changed from ");
-		// Serial.print(C100_currentStateToString(g_C100_currentCarState)); // 상태를 문자열로 출력하는 헬퍼 함수 필요 시 구현
+		Serial.print(C100_currentStateToString(g_C100_currentCarState)); // 상태를 문자열로 출력하는 헬퍼 함수 필요 시 구현
 		Serial.print(g_C100_currentCarState);
 		Serial.print(" to ");
-		// Serial.println(C100_currentStateToString(v_nextCarState));
+		Serial.println(C100_currentStateToString(v_nextCarState));
 		Serial.println(v_nextCarState);	 // enum 값 자체 출력
 	}
 
@@ -886,7 +882,6 @@ void C100_drawEyeConfused(uint8_t p_matrix_index) {
 // --- 기타 헬퍼 함수 (선택 사항) ---
 
 // 차량 상태 enum 값을 문자열로 변환 (디버깅 출력용)
-/*
 String C100_currentStateToString(CarState p_state) {
   switch (p_state) {
 	case G_C100_STATE_UNKNOWN: return "UNKNOWN";
@@ -901,10 +896,8 @@ String C100_currentStateToString(CarState p_state) {
 	default: return "INVALID";
   }
 }
-*/
 
 // 눈 상태 enum 값을 문자열로 변환 (디버깅 출력용)
-/*
 String C100_eyeStateToString(EyeState p_state) {
   switch (p_state) {
 	case G_C100_E_NEUTRAL: return "NEUTRAL";
@@ -923,10 +916,8 @@ String C100_eyeStateToString(EyeState p_state) {
 	default: return "INVALID";
   }
 }
-*/
 
 // 상보 필터 구현 예시 (C100_applyFiltering 함수 내에서 호출하거나 대체)
-/*
 void C100_complementaryFilter(float p_ax, float p_ay, float p_az, float p_gx, float p_gy, float p_gz, float p_dt) {
 	// 자이로 데이터로 각도 변화 계산
 	float v_gyro_roll_change = p_gx * p_dt;
@@ -945,4 +936,4 @@ void C100_complementaryFilter(float p_ax, float p_ay, float p_az, float p_gx, fl
 
 	// g_C100_comp_yaw = g_C100_comp_yaw + v_gyro_yaw_change; // Yaw는 자이로만 누적 (드리프트 발생)
 }
-*/
+
