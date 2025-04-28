@@ -648,7 +648,6 @@ void R110_init() {
 	FastLED.setBrightness(70);
 
 	// 시리얼 통신 초기화 (디버깅용)
-	Serial.begin(115200);
 	Serial.println("R110 RobotEyes Library Init");
 
 	// 디스플레이 클리어 (모든 LED 끄기)
