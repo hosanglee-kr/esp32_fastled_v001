@@ -25,7 +25,8 @@
 // --- 하드웨어 설정 (전역 상수) ---
 #define G_C100_MPU_I2C_SDA		   21  // MPU6050 I2C SDA 핀 (ESP32 기본값 또는 사용자 지정)
 #define G_C100_MPU_I2C_SCL		   22  // MPU6050 I2C SCL 핀 (ESP32 기본값 또는 사용자 지정)
-#define G_C100_LED_DATA_PIN		   23  // FastLED 데이터 핀 (사용자 지정 ESP32 GPIO 핀)
+
+#define G_C100_LED_DATA_PIN		   13  // FastLED 데이터 핀 (사용자 지정 ESP32 GPIO 핀)
 
 #define G_C100_COLOR_ORDER		   GRB		// LED 색상 순서 (WS2812B는 GRB가 많음, 확인 필요)
 #define G_C100_LED_TYPE			   WS2812B	// 사용 LED 칩 타입
