@@ -29,10 +29,18 @@
 #endif
 
 //#define R110
-#ifdef R110
-	#include "R110_RobotEyes_T20_002.h"
+#ifdef R200
+	#include "R200_RobotEyes_T20_002.h"
 #endif
 
+
+#ifdef R210
+	#include "R210_RobotEyes_T20_004_singleColor.h"
+#endif
+
+#ifdef R220
+	#include "R220_RobotEyes_T20_004_multiColor.h"
+#endif
 
 void setup() {
 
@@ -63,10 +71,19 @@ void setup() {
 		R100_init();
 	#endif
 
-	#ifdef R110
-		R110_init();
+	#ifdef R200
+		R200_init();
 	#endif
-	
+
+	#ifdef R210
+		R210_init();
+	#endif
+
+	#ifdef R220
+		R220_init();
+	#endif
+
+
 	Serial.println("11111");
 }
 
@@ -95,7 +112,17 @@ void loop() {
 		R100_run();
 	#endif
 
-	#ifdef R110
-		R110_run();
+	#ifdef R200
+		R200_run();
 	#endif
+
+
+	#ifdef R210
+		R210_run();
+	#endif
+
+	#ifdef R220
+		R220_run();
+	#endif
+
 }

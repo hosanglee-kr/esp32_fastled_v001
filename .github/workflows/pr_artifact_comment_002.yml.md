@@ -29,7 +29,8 @@ jobs:
             const run_id = context.payload.workflow_run.id;
             console.log(`Triggering workflow run ID: ${run_id}`); // 실행 ID 로그 출력
 
-            // 트리거 워크플로우 실행의 아티팩트 목록 가져오기
+            // 트리거 워크플로우 실행의 아티팩트 목록 가져오기 (댓글 내용 생성을 위해 필요)
+
             // 'actions: read' 권한 필요
             try {
               const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -38,18 +39,25 @@ jobs:
                 run_id: run_id
               });
 
-              let body = "Firmware for this pull request:\n"; // 댓글 시작 내용
+              // 아티팩트 목록 이름만 나열하는 댓글 내용 생성
+              let body = "Firmware artifacts for this pull request:\n"; // 댓글 시작 내용
+
               if (artifacts.data.artifacts.length > 0) {
                 console.log(`Found ${artifacts.data.artifacts.length} artifacts.`); // 찾은 아티팩트 개수 로그
 
                 artifacts.data.artifacts.forEach(artifact => {
-                  // 각 아티팩트 이름과 다운로드 URL 로그 출력
-                  console.log(`Artifact Name: ${artifact.name}`);
-                  console.log(`Download URL: ${artifact.archive_download_url}`);
 
-                  // 각 아티팩트에 대한 마크다운 링크 생성
-                  body += `- [${artifact.name}](${artifact.archive_download_url})\n`;
+                  // 아티팩트 이름만 목록으로 표시 (직접 다운로드 링크 대신)
+                  body += `- ${artifact.name}\n`;
                 });
+
+                // >>>>> 직접 다운로드 URL 대신 워크플로우 실행 페이지 링크 추가 <<<<<
+                // 워크플로우 실행 페이지 URL 생성
+                const run_url = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run_id}`;
+                // 댓글에 워크플로우 실행 페이지 링크 추가
+                body += `\nDownload all artifacts from the workflow run page: [Workflow Run #${run_id}](${run_url})`;
+                 console.log(`Workflow Run URL: ${run_url}`); // 워크플로우 실행 URL 로그 출력
+
               } else {
                  body += "No artifacts found for this run.\n"; // 아티팩트가 없을 경우 메시지
                  console.log("No artifacts found for this run."); // 아티팩트 없음 로그
@@ -64,7 +72,6 @@ jobs:
                 console.log(`Associated with PR #${issue_number}`); // 연결된 PR 번호 로그
 
                 // 연결된 Pull Request에 댓글 작성
-                // 'issues: write' 또는 'pull-requests: write' 권한 필요
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
