@@ -29,7 +29,7 @@ float C100_mapFloat(float p_x, float p_in_min, float p_in_max, float p_out_min, 
 
 void C100_init() {
     // 시리얼 통신 시작 (디버깅용)
-    Serial.begin(115200);
+    //Serial.begin(115200);
     Serial.println("ESP32 Robot Eye Simulation Start!");
 
     // I2C 통신 시작
