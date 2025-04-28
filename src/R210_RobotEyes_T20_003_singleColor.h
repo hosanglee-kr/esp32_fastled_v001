@@ -28,20 +28,20 @@
 //    R210_showEmotion(), R210_animateBlink() 등 개별 함수들을 호출하여 원하는 눈 동작을 구현합니다.
 // ======================================================================
 
-#include <Arduino.h>  // Arduino 핵심 라이브러리 (ESP32 지원)
-#include <FastLED.h>  // FastLED 라이브러리 (WS2812B 제어)
+#include <Arduino.h>  // Arduino 핵심 라이브러리 (ESP32 지원)
+#include <FastLED.h>  // FastLED 라이브러리 (WS2812B 제어)
 
 // -----------------------------------------------------------------------
 // 하드웨어 설정 상수
 // -----------------------------------------------------------------------
-#define g_R210_DATA_PIN			   13		// WS2812B 데이터 핀 번호
-#define g_R210_LED_TYPE			   WS2812B	// 사용하는 LED 칩 타입
-#define g_R210_COLOR_ORDER		   GRB		// LED 색상 순서 (모듈에 맞게 변경)
+#define g_R210_DATA_PIN			   13		// WS2812B 데이터 핀 번호
+#define g_R210_LED_TYPE			   WS2812B	// 사용하는 LED 칩 타입
+#define g_R210_COLOR_ORDER		   GRB		// LED 색상 순서 (모듈에 맞게 변경)
 
-#define g_R210_MATRIX_SIZE		   8												// 8x8 매트릭스 크기
-#define g_R210_NUM_MATRICES		   2												// 사용하는 8x8 매트릭스 개수 (1 또는 2)
+#define g_R210_MATRIX_SIZE			8												// 8x8 매트릭스 크기
+#define g_R210_NUM_MATRICES			2												// 사용하는 8x8 매트릭스 개수 (1 또는 2)
 #define g_R210_NUM_LEDS_PER_MATRIX (g_R210_MATRIX_SIZE * g_R210_MATRIX_SIZE)		// 매트릭스 하나당 LED 개수
-#define g_R210_NUM_LEDS			   (g_R210_NUM_LEDS_PER_MATRIX * g_R210_NUM_MATRICES)	// WS2812B 총 LED 개수
+#define g_R210_NUM_LEDS				(g_R210_NUM_LEDS_PER_MATRIX * g_R210_NUM_MATRICES)	// WS2812B 총 LED 개수
 
 // FastLED LED 배열 - 모든 WS2812B LED의 색상 값을 저장
 CRGB g_R210_leds[g_R210_NUM_LEDS];
@@ -64,11 +64,11 @@ int	 R210_getLedIndex(int p_matrix_addr, int p_row, int p_col) {
 	 // 지그재그(serpentine) 방식 가정 - 실제 배선에 따라 아래 로직을 수정하세요!
 	 if (p_row % 2 == 0) {	// 짝수 행 (0, 2, 4, 6)은 왼쪽 -> 오른쪽으로 인덱스 증가
 		 v_local_index = p_row * g_R210_MATRIX_SIZE + p_col;
-	 } else {  // 홀수 행 (1, 3, 5, 7)은 오른쪽 -> 왼쪽으로 인덱스 증가
+	 } else {  // 홀수 행 (1, 3, 5, 7)은 오른쪽 -> 왼쪽으로 인덱스 증가
 		 v_local_index = p_row * g_R210_MATRIX_SIZE + (g_R210_MATRIX_SIZE - 1 - p_col);
 	 }
 
-	 return v_base_index + v_local_index;  // 전체 LED 배열에서의 최종 인덱스
+	 return v_base_index + v_local_index;  // 전체 LED 배열에서의 최종 인덱스
 }
 
 
@@ -231,18 +231,18 @@ const PupilPos g_R210_confusedPupilPos[2] = {
 // EmotionIndex와 직접 매핑되지 않으며, R210_displayEmotionState에서 특정 EmotionIndex일 때 사용됩니다.
 // {왼쪽 눈 패턴 데이터 포인터, 오른쪽 눈 패턴 데이터 포인터} 쌍의 배열
 // -----------------------------------------------------------------------
-const byte *const g_R210_fullOverridePatternsData[]				   = {
-	BlinkOpen_eye, BlinkOpen_eye,	   // For E_BLINK_OPEN (1)
-	BlinkMid_eye, BlinkMid_eye,		   // For E_BLINK_MID (2)
-	BlinkClose_eye, BlinkClose_eye,	   // For E_BLINK_CLOSE (3)
-	Squint_eye, Squint_eye,			   // For E_SQUINT (8)
-	SquintTight_eye, SquintTight_eye,  // For E_SQUINT_TIGHT (9)
-	BlinkClose_eye, Neutral_eye,	   // For E_LEFT_WINK (10) - 왼감, 오뜸 (오른쪽 눈에 기존 Neutral 패턴 사용)
-	Neutral_eye, BlinkClose_eye,	   // For E_RIGHT_WINK (11) - 왼뜸, 오감 (왼쪽 눈에 기존 Neutral 패턴 사용)
-	Sleepy_eye, Sleepy_eye,			   // For E_SLEEPY (12)
-	Angry_eye, Angry_eye,			   // For E_ANGRY (13)
-	Absurd_eye, Absurd_eye,			   // For E_ABSURD (14)
-	Glaring_eye, Glaring_eye,		   // For E_GLARING (15)
+const byte *const g_R210_fullOverridePatternsData[]				   = {
+	BlinkOpen_eye, BlinkOpen_eye,	   // For E_BLINK_OPEN (1)
+	BlinkMid_eye, BlinkMid_eye,		   // For E_BLINK_MID (2)
+	BlinkClose_eye, BlinkClose_eye,	   // For E_BLINK_CLOSE (3)
+	Squint_eye, Squint_eye,			   // For E_SQUINT (8)
+	SquintTight_eye, SquintTight_eye,  // For E_SQUINT_TIGHT (9)
+	BlinkClose_eye, Neutral_eye,	   // For E_LEFT_WINK (10) - 왼감, 오뜸 (오른쪽 눈에 기존 Neutral 패턴 사용)
+	Neutral_eye, BlinkClose_eye,	   // For E_RIGHT_WINK (11) - 왼뜸, 오감 (왼쪽 눈에 기존 Neutral 패턴 사용)
+	Sleepy_eye, Sleepy_eye,			   // For E_SLEEPY (12)
+	Angry_eye, Angry_eye,			   // For E_ANGRY (13)
+	Absurd_eye, Absurd_eye,			   // For E_ABSURD (14)
+	Glaring_eye, Glaring_eye,		   // For E_GLARING (15)
 };
 
 // -----------------------------------------------------------------------
@@ -292,7 +292,7 @@ const int g_R210_CONFUSED_DART_SPEED_MS = 40; // 혼돈 애니메이션 중 눈�
 // p_pattern_data: 그릴 패턴 데이터 포인터
 // p_onColor: 켜짐 픽셀 색상
 // -----------------------------------------------------------------------
-void	  R210_drawFullPattern(int p_matrix_addr, const byte *p_pattern_data, CRGB p_onColor) {
+void	  R210_drawFullPattern(int p_matrix_addr, const byte *p_pattern_data, CRGB p_onColor) {
 	if (!p_pattern_data) return; // 유효성 검사
 
 	 for (int v_row = 0; v_row < g_R210_MATRIX_SIZE; v_row++) {
@@ -594,7 +594,7 @@ void R210_animateConfused() {
     delay(g_R210_LOOK_SPEED_MS); // Pause briefly
 
 	R210_showEmotion(E_CONFUSED); // Show Confused pattern (outline+pupil)
-	delay(g_R210_CONFUSED_SPEED_MS);  // Hold Confused
+	delay(g_R210_CONFUSED_SPEED_MS);  // Hold Confused
 
 	R210_showEmotion(E_NEUTRAL); // Return to Neutral
 	delay(random(100, 300)); // Short random delay after returning
