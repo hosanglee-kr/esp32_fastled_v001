@@ -1,4 +1,4 @@
-// main.cpp
+// C100_CarEyes_Main_002.h (main.cpp에서 사용예정)
 #include <Arduino.h>
 #include <Wire.h> // I2C 통신 라이브러리
 
