@@ -12,7 +12,7 @@
 // - 눈 깜빡임, 둘러보기 등 기본 애니메이션 제공
 // - 일부 표정(중립, 보기, 생각, 혼돈)은 큰 외곽선을 유지하며 눈동자만 움직이도록 구현
 // - 그 외 표정(깜빡임, 찡그림, 감정 표현 등)은 기존 정의된 패턴 그대로 표시
-// - **애니메이션 함수에 대각선 눈동자 위치를 활용한 중간 단계 추가 및 타이밍 개선**
+// - 애니메이션 함수에 대각선 눈동자 위치를 활용한 중간 단계 추가 및 타이밍 개선
 // - 눈동자 이동 범위 최대한 넓게 조정
 //
 // 하드웨어 설정:
@@ -212,10 +212,10 @@ PupilPos R110_getPupilPosForEmotion(int p_emotionIndex) {
         case 6: /* E_LOOK_UP */     return {2, 3}; // Extreme Up (limited by outline)
         case 7: /* E_LOOK_DOWN */   return {5, 3}; // Extreme Down
         case 16: /* E_THINKING */    return {2, 6}; // Extreme Up-Right (used in Thinking sequence)
-        case 18: /* E_LOOK_UP_LEFT */    return {2, 1}; // Extreme Up-Left <-- New diagonal
-        case 19: /* E_LOOK_UP_RIGHT */   return {2, 6}; // Extreme Up-Right <-- New diagonal (same as Thinking)
-        case 20: /* E_LOOK_DOWN_LEFT */  return {5, 1}; // Extreme Down-Left <-- New diagonal
-        case 21: /* E_LOOK_DOWN_RIGHT */ return {5, 6}; // Extreme Down-Right <-- New diagonal
+        case 18: /* E_LOOK_UP_LEFT */    return {2, 1}; // Extreme Up-Left
+        case 19: /* E_LOOK_UP_RIGHT */   return {2, 6}; // Extreme Up-Right (same as Thinking target)
+        case 20: /* E_LOOK_DOWN_LEFT */  return {5, 1}; // Extreme Down-Left
+        case 21: /* E_LOOK_DOWN_RIGHT */ return {5, 6}; // Extreme Down-Right
         default: return {-1, -1}; // 해당하지 않는 표정
     }
 }
@@ -714,6 +714,582 @@ void R110_run() {
 
 	Serial.println("Animation sequence finished.");
 }
+
+/*
+ * R110_RobotEyes_T20_003.h - Expected Matrix Output for R110_run() Animation Sequence
+ *
+ * WARNING: This comment block contains a detailed trace of the animation sequence
+ * and is very large. It is provided for reference of the visual output.
+ * For better code readability, you may prefer to refer to the separate text output.
+ *
+ * -- Animation Sequence Trace (based on R110_run() function) --
+ *
+ * Note: All "Outline + Pupil {r,c}" patterns use the BaseEyeOutline below.
+ * BaseEyeOutline:
+ * ........
+ * .######.
+ * #......#
+ * #......#
+ * #......#
+ * #......#
+ * .######.
+ * ........
+ *
+ * Initial State (after R110_init() completes):
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * #..##..#
+ * #..##..#
+ * #......#
+ * .######.
+ * ........
+ * (Ready state before R110_run starts)
+ *
+ * -- R110_run() Sequence Starts --
+ *
+ * 1. R110_animateBlink(1) Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as above)
+ * (random(500, 2000)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: BlinkOpen (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * ..####..
+ * .#....#.
+ * .#....#.
+ * ..####..
+ * ........
+ * ........
+ * (g_R110_BLINK_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: BlinkMid (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * ........
+ * ..####..
+ * ..####..
+ * ........
+ * ........
+ * ........
+ * (g_R110_BLINK_SPEED_MS ms delay)
+ *
+ * -- Step 4 --
+ * Emotion: BlinkClose (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * (g_R110_BLINK_SPEED_MS * 2 ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: BlinkMid (Full Pattern Override)
+ * Grid: (Same as Step 3)
+ * (g_R110_BLINK_SPEED_MS ms delay)
+ *
+ * -- Step 6 --
+ * Emotion: BlinkOpen (Full Pattern Override)
+ * Grid: (Same as Step 2)
+ * (g_R110_BLINK_SPEED_MS ms delay)
+ *
+ * -- Step 7 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 2. R110_animateLook(E_LOOK_LEFT) Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: LookUpLeft (Outline + Pupil {2,1})
+ * Grid:
+ * ........
+ * .######.
+ * #.##....
+ * #.##....
+ * #......#
+ * #......#
+ * .######.
+ * ........
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: LookLeft (Outline + Pupil {3,1}) - Final Position
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * #.##....
+ * #.##....
+ * #......#
+ * .######.
+ * ........
+ * (g_R110_LOOK_HOLD_MS ms delay - Hold)
+ *
+ * -- Step 4 --
+ * Emotion: LookDownLeft (Outline + Pupil {5,1})
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * #......#
+ * #.##....
+ * #.##....
+ * .######.
+ * ........
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 3. R110_animateLook(E_LOOK_RIGHT) Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: LookUpRight (Outline + Pupil {2,6})
+ * Grid:
+ * ........
+ * .######.
+ * ......##
+ * ......##
+ * #......#
+ * #......#
+ * .######.
+ * ........
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: LookRight (Outline + Pupil {3,6}) - Final Position
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * ......##
+ * ......##
+ * #......#
+ * .######.
+ * ........
+ * (g_R110_LOOK_HOLD_MS ms delay - Hold)
+ *
+ * -- Step 4 --
+ * Emotion: LookDownRight (Outline + Pupil {5,6})
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * #......#
+ * ......##
+ * ......##
+ * .#######
+ * ........
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 4. R110_animateLook(E_LOOK_UP) Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: LookUpLeft (Outline + Pupil {2,1})
+ * Grid: (Same as LookUpLeft grid in LookLeft sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: LookUp (Outline + Pupil {2,3}) - Final Position
+ * Grid:
+ * ........
+ * .######.
+ * #..##..#
+ * #..##..#
+ * #......#
+ * #......#
+ * .######.
+ * ........
+ * (g_R110_LOOK_HOLD_MS ms delay - Hold)
+ *
+ * -- Step 4 --
+ * Emotion: LookUpRight (Outline + Pupil {2,6})
+ * Grid: (Same as LookUpRight grid in LookRight sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 5. R110_animateLook(E_LOOK_DOWN) Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: LookDownLeft (Outline + Pupil {5,1})
+ * Grid: (Same as LookDownLeft grid in LookLeft sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: LookDown (Outline + Pupil {5,3}) - Final Position
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * #......#
+ * #..##..#
+ * #..##..#
+ * .######.
+ * ........
+ * (g_R110_LOOK_HOLD_MS ms delay - Hold)
+ *
+ * -- Step 4 --
+ * Emotion: LookDownRight (Outline + Pupil {5,6})
+ * Grid: (Same as LookDownRight grid in LookRight sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 6. R110_animateWink(0) [Left Wink] Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: Left Wink (Full Pattern Override - Asymmetric)
+ * Left Eye Grid: BlinkClose (all off)
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * Right Eye Grid: Original Neutral_eye pattern
+ * ........
+ * ..####..
+ * .#....#.
+ * .#.##.#.
+ * .#.##.#.
+ * .#....#.
+ * ..####..
+ * ........
+ * (g_R110_WINK_HOLD_MS ms delay - Hold)
+ *
+ * -- Step 3 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 7. R110_animateWink(1) [Right Wink] Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: Right Wink (Full Pattern Override - Asymmetric)
+ * Left Eye Grid: Original Neutral_eye pattern
+ * ........
+ * ..####..
+ * .#....#.
+ * .#.##.#.
+ * .#.##.#.
+ * .#....#.
+ * ..####..
+ * ........
+ * Right Eye Grid: BlinkClose (all off)
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * ........
+ * (g_R110_WINK_HOLD_MS ms delay - Hold)
+ *
+ * -- Step 3 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 8. R110_showEmotion(E_SQUINT) Sequence:
+ * -- Step 1 --
+ * Emotion: Squint (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * .######.
+ * .######.
+ * .######.
+ * .######.
+ * ........
+ * ........
+ * (1500ms delay from R110_run)
+ *
+ * 9. R110_showEmotion(E_SQUINT_TIGHT) Sequence:
+ * -- Step 1 --
+ * Emotion: SquintTight (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * ........
+ * .######.
+ * .######.
+ * ........
+ * ........
+ * ........
+ * (1500ms delay from R110_run)
+ *
+ * 10. R110_showEmotion(E_NEUTRAL) Sequence:
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (1000ms delay from R110_run)
+ *
+ * 11. R110_showEmotion(E_SLEEPY) Sequence:
+ * -- Step 1 --
+ * Emotion: Sleepy (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * ..####..
+ * .#....#.
+ * .#....#.
+ * ..####..
+ * ........
+ * ........
+ * (2000ms delay from R110_run)
+ *
+ * 12. R110_showEmotion(E_NEUTRAL) Sequence:
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (1000ms delay from R110_run)
+ *
+ * 13. R110_showEmotion(E_ANGRY) Sequence:
+ * -- Step 1 --
+ * Emotion: Angry (Full Pattern Override)
+ * Grid:
+ * ........
+ * ........
+ * .######.
+ * .#.##.#.
+ * .#.##.#.
+ * .######.
+ * ........
+ * ........
+ * (2000ms delay from R110_run)
+ *
+ * 14. R110_showEmotion(E_NEUTRAL) Sequence:
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (1000ms delay from R110_run)
+ *
+ * 15. R110_showEmotion(E_ABSURD) Sequence:
+ * -- Step 1 --
+ * Emotion: Absurd (Full Pattern Override)
+ * Grid:
+ * ........
+ * .######.
+ * #......#
+ * #.####.#
+ * #.####.#
+ * #......#
+ * .######.
+ * ........
+ * (2000ms delay from R110_run)
+ *
+ * 16. R110_showEmotion(E_NEUTRAL) Sequence:
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (1000ms delay from R110_run)
+ *
+ * 17. R110_showEmotion(E_GLARING) Sequence:
+ * -- Step 1 --
+ * Emotion: Glaring (Full Pattern Override)
+ * Grid:
+ * ........
+ * ..####..
+ * .#....#.
+ * .#....#.
+ * .#....#.
+ * #....#.#
+ * ..####..
+ * ........
+ * (2000ms delay from R110_run)
+ *
+ * 18. R110_showEmotion(E_NEUTRAL) Sequence:
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (1000ms delay from R110_run)
+ *
+ * 19. R110_animateLook(E_THINKING) Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 --
+ * Emotion: LookUpLeft (Outline + Pupil {2,1})
+ * Grid: (Same as grid in LookLeft sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: LookDownRight (Outline + Pupil {5,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 4 --
+ * Emotion: LookUpRight (Outline + Pupil {2,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: LookDownLeft (Outline + Pupil {5,1})
+ * Grid: (Same as grid in LookLeft sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 6 --
+ * Emotion: LookUp (Outline + Pupil {2,3})
+ * Grid: (Same as grid in LookUp sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 7 --
+ * Emotion: LookRight (Outline + Pupil {3,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 8 --
+ * Emotion: Thinking (Outline + Pupil {2,6}) - Final Position
+ * Grid: (Same as grid in LookUpRight sequence - pupil is at {2,6})
+ * (g_R110_LOOK_HOLD_MS * 1.5 ms delay - Hold)
+ *
+ * -- Step 9 --
+ * Emotion: LookRight (Outline + Pupil {3,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_LOOK_SPEED_MS / 2 ms delay)
+ *
+ * -- Step 10 --
+ * Emotion: LookUp (Outline + Pupil {2,3})
+ * Grid: (Same as grid in LookUp sequence)
+ * (g_R110_LOOK_SPEED_MS / 2 ms delay)
+ *
+ * -- Step 11 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * 20. R110_animateConfused() Sequence:
+ * (Short random delay before starting)
+ * -- Step 1 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (random(100, 300)ms delay)
+ *
+ * -- Step 2 -- (Darting Sequence using extreme positions)
+ * Emotion: LookUpLeft (Outline + Pupil {2,1})
+ * Grid: (Same as grid in LookLeft sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 3 --
+ * Emotion: LookDownRight (Outline + Pupil {5,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 4 --
+ * Emotion: LookUpRight (Outline + Pupil {2,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 5 --
+ * Emotion: LookDownLeft (Outline + Pupil {5,1})
+ * Grid: (Same as grid in LookLeft sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 6 --
+ * Emotion: LookUp (Outline + Pupil {2,3})
+ * Grid: (Same as grid in LookUp sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 7 --
+ * Emotion: LookDown (Outline + Pupil {5,3})
+ * Grid: (Same as grid in LookDown sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 8 --
+ * Emotion: LookLeft (Outline + Pupil {3,1})
+ * Grid: (Same as grid in LookLeft sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 9 --
+ * Emotion: LookRight (Outline + Pupil {3,6})
+ * Grid: (Same as grid in LookRight sequence)
+ * (g_R110_CONFUSED_DART_SPEED_MS ms delay)
+ *
+ * -- Step 10 -- (Brief pause)
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (g_R110_LOOK_SPEED_MS ms delay)
+ *
+ * -- Step 11 -- (Confused State)
+ * Emotion: Confused (Outline + Asymmetric Pupils)
+ * Left Eye Grid (Pupil {3,6}): (Same as LookRight grid)
+ * Right Eye Grid (Pupil {3,1}): (Same as LookLeft grid)
+ * (g_R110_CONFUSED_SPEED_MS ms delay - Hold)
+ *
+ * -- Step 12 --
+ * Emotion: Neutral (Outline + Pupil {3,3})
+ * Grid: (Same as Initial State)
+ * (Short random delay after completing)
+ *
+ * -- End of R110_run() Sequence --
+ *
+ * Note: The actual timing on the hardware may vary slightly based on FastLED.show() duration
+ * and processing time.
+ */
 
 // Note: setup() and loop() functions are expected in the main .ino or .cpp file
 // as shown in the example usage.
