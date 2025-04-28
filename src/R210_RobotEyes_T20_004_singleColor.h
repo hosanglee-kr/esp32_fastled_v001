@@ -279,13 +279,13 @@ const int g_R210_NUM_EMOTION_PATTERNS = 22; // 마지막 인덱스 + 1
 // -----------------------------------------------------------------------
 // 애니메이션 속도 조절 상수
 // -----------------------------------------------------------------------
-const int g_R210_BLINK_SPEED_MS = 50;
-const int g_R210_LOOK_SPEED_MS = 80; // 일반적인 룩 애니메이션 프레임 간 지연 (약간 빠르게 조정)
-const int g_R210_LOOK_HOLD_MS = 1000; // 보는 방향 유지 시간
-const int g_R210_WINK_SPEED_MS = 80;
+const int g_R210_BLINK_SPEED_MS = 400; //50;
+const int g_R210_LOOK_SPEED_MS = 400; 	//80; // 일반적인 룩 애니메이션 프레임 간 지연 (약간 빠르게 조정)
+const int g_R210_LOOK_HOLD_MS = 1000; 	// 보는 방향 유지 시간
+const int g_R210_WINK_SPEED_MS = 400; //80;
 const int g_R210_WINK_HOLD_MS = 1500;
 const int g_R210_CONFUSED_SPEED_MS = 150; // 혼돈 상태 유지 시간
-const int g_R210_CONFUSED_DART_SPEED_MS = 40; // 혼돈 애니메이션 중 눈동자 움직임 속도 (더 빠르게 조정)
+const int g_R210_CONFUSED_DART_SPEED_MS = 400; //40; // 혼돈 애니메이션 중 눈동자 움직임 속도 (더 빠르게 조정)
 
 // -----------------------------------------------------------------------
 // 헬퍼: 전체 8x8 패턴을 FastLED 배열에 그리기
@@ -612,7 +612,7 @@ void R210_init() {
 	FastLED.addLeds<g_R210_LED_TYPE, g_R210_DATA_PIN, g_R210_COLOR_ORDER>(g_R210_leds, g_R210_NUM_LEDS);
 
 	// 전체 밝기 설정 (0-255, 선택 사항)
-	FastLED.setBrightness(70);
+	FastLED.setBrightness(40);
 
 	// 시리얼 통신 초기화 (디버깅용)
 	Serial.println("R210 RobotEyes Library Init");
@@ -645,657 +645,198 @@ void R210_init() {
 // 이 함수는 main sketch의 loop() 함수에서 주기적으로 호출될 수 있습니다.
 // 또는 loop() 함수에서 원하는 애니메이션 함수들을 직접 호출해도 됩니다.
 // -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
+// 기본 애니메이션 루프
+// 기능: 다양한 애니메이션 패턴을 순차적으로 보여줌
+// 이 함수는 main sketch의 loop() 함수에서 주기적으로 호출될 수 있습니다.
+// 또는 loop() 함수에서 원하는 애니메이션 함수들을 직접 호출해도 됩니다.
+// -----------------------------------------------------------------------
 void R210_run() {
-	Serial.println("Starting RobotEyes Animation Sequence...");
+    Serial.println("========== R210 로봇 눈 애니메이션 시작 ==========");
 
-	// 초기화 완료 후 기본 상태인 중립 눈을 표시 (외곽선 + 눈동자 방식)
-	Serial.println("Setting initial state to Neutral (large outline).");
+    // 초기화 완료 후 기본 상태인 중립 눈을 표시 (외곽선 + 눈동자 방식)
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈)");
+    R210_showEmotion(E_NEUTRAL);
+    delay(2000); // 잠시 중립 상태 유지
 
-	for (int i=0; i<=g_R210_NUM_EMOTION_PATTERNS; i++){
-		R210_showEmotion(i);
-		//R210_showEmotion(E_NEUTRAL);
-		delay(1000);
-	}
-	
-	Serial.println("Animating Blink...");
-	R210_animateBlink(1); // 1번 깜빡이기
-	// animateBlink/Look/Wink/Confused 내부에 종료 후 짧은 랜덤 딜레이 포함됨
 
-	Serial.println("Animating Look Left...");
-	R210_animateLook(E_LOOK_LEFT);
+	Serial.println("-> 표정: E_SQUINT (찡그림)");
+    R210_showEmotion(E_SQUINT); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_SQUINT_TIGHT (더 찡그림)");
+    R210_showEmotion(E_SQUINT_TIGHT); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈으로 복귀)");
+    R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+    delay(2000);
 
-	Serial.println("Animating Look Right...");
-	R210_animateLook(E_LOOK_RIGHT);
 
-	Serial.println("Animating Look Up...");
-	R210_animateLook(E_LOOK_UP);
-
-	Serial.println("Animating Look Down...");
-	R210_animateLook(E_LOOK_DOWN);
-
-	Serial.println("Animating Wink Left...");
-	R210_animateWink(0); // 왼쪽 윙크
-
-	Serial.println("Animating Wink Right...");
-	R210_animateWink(1); // 오른쪽 윙크
-
-	Serial.println("Showing Squint...");
-	R210_showEmotion(E_SQUINT); // 전체 패턴 오버라이드
-	delay(1500);
-	Serial.println("Showing Squint Tight...");
-	R210_showEmotion(E_SQUINT_TIGHT); // 전체 패턴 오버라이드
-	delay(1500);
+    Serial.println("-> 표정: E_SLEEPY (졸린 눈)");
+    R210_showEmotion(E_SLEEPY); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈으로 복귀)");
 	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
-	delay(1000);
+    Serial.println("-> 표정: E_SLEEPY (졸린 눈)");
+    R210_showEmotion(E_SLEEPY); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈으로 복귀)");
+    R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+    delay(2000);
 
-	Serial.println("Showing Sleepy...");
-	R210_showEmotion(E_SLEEPY); // 전체 패턴 오버라이드
-	delay(2000);
-	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
-	delay(1000);
+    Serial.println("-> 표정: E_ANGRY (화난 눈)");
+    R210_showEmotion(E_ANGRY); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈으로 복귀)");
+    R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+    delay(2000);
 
-	Serial.println("Showing Angry...");
-	R210_showEmotion(E_ANGRY); // 전체 패턴 오버라이드
-	delay(2000);
-	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
-	delay(1000);
+    Serial.println("-> 표정: E_ABSURD (황당한 눈)");
+    R210_showEmotion(E_ABSURD); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈으로 복귀)");
+    R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+    delay(2000);
 
-	Serial.println("Showing Absurd...");
-	R210_showEmotion(E_ABSURD); // 전체 패턴 오버라이드
-	delay(2000);
-	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
-	delay(1000);
+    Serial.println("-> 표정: E_GLARING (째려보는 눈)");
+    R210_showEmotion(E_GLARING); // 전체 패턴 오버라이드
+    delay(1000);
+    Serial.println("-> 표정: E_NEUTRAL (중립 눈으로 복귀)");
+    R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+    delay(2000);
 
-	Serial.println("Showing Glaring...");
-	R210_showEmotion(E_GLARING); // 전체 패턴 오버라이드
-	delay(2000);
-	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
-	delay(1000);
 
-	Serial.println("Showing Thinking...");
-	R210_animateLook(E_THINKING); // Thinking은 R210_animateLook을 통해 애니메이션으로 보여줌
 
-	Serial.println("Animating Confused...");
-	R210_animateConfused(); // 혼돈은 애니메이션으로 보여줌
+    Serial.println("-> 애니메이션: R210_animateBlink (깜빡임)");
+    R210_animateBlink(1); // 1번 깜빡이기
+    delay(2000); // 애니메이션 후 대기
 
-	Serial.println("Animation sequence finished.");
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_LEFT) (왼쪽 보기)");
+    R210_animateLook(E_LOOK_LEFT);
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_RIGHT) (오른쪽 보기)");
+    R210_animateLook(E_LOOK_RIGHT);
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_UP) (위 보기)");
+    R210_animateLook(E_LOOK_UP);
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_DOWN) (아래 보기)");
+    R210_animateLook(E_LOOK_DOWN);
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_UP_LEFT) (왼쪽 위 보기)");
+    R210_animateLook(E_LOOK_UP_LEFT); // 추가된 대각선 보기
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_UP_RIGHT) (오른쪽 위 보기)");
+    R210_animateLook(E_LOOK_UP_RIGHT); // 추가된 대각선 보기
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_DOWN_LEFT) (왼쪽 아래 보기)");
+    R210_animateLook(E_LOOK_DOWN_LEFT); // 추가된 대각선 보기
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateLook(E_LOOK_DOWN_RIGHT) (오른쪽 아래 보기)");
+    R210_animateLook(E_LOOK_DOWN_RIGHT); // 추가된 대각선 보기
+    delay(2000);
+
+
+    Serial.println("-> 애니메이션: R210_animateWink(0) (왼쪽 윙크)");
+    R210_animateWink(0); // 왼쪽 윙크
+    delay(2000);
+
+    Serial.println("-> 애니메이션: R210_animateWink(1) (오른쪽 윙크)");
+    R210_animateWink(1); // 오른쪽 윙크
+    delay(2000);
+
+    
+    Serial.println("-> 애니메이션: R210_animateLook(E_THINKING) (생각하는 눈)");
+    R210_animateLook(E_THINKING); // Thinking은 R210_animateLook을 통해 애니메이션으로 보여줌
+    delay(2000); // 애니메이션 후 대기
+
+    Serial.println("-> 애니메이션: R210_animateConfused (혼돈스러운 눈)");
+    R210_animateConfused(); // 혼돈은 애니메이션으로 보여줌
+    delay(2000); // 애니메이션 후 대기
+
+
+    Serial.println("========== R210 로봇 눈 애니메이션 종료 ==========");
+    Serial.println(); // 줄바꿈 추가
 }
 
-/*
- * R210_RobotEyes_T20_003.h - Expected Matrix Output for R210_run() Animation Sequence
- *
- * WARNING: This comment block contains a detailed trace of the animation sequence
- * and is very large. It is provided for reference of the visual output.
- * For better code readability, you may prefer to refer to the separate text output.
- *
- * -- Animation Sequence Trace (based on R210_run() function) --
- *
- * Note: All "Outline + Pupil {r,c}" patterns use the BaseEyeOutline below.
- * BaseEyeOutline:
- * ........
- * .######.
- * #......#
- * #......#
- * #......#
- * #......#
- * .######.
- * ........
- *
- * Initial State (after R210_init() completes):
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid:
- * ........
- * .######.
- * #......#
- * #..##..#
- * #..##..#
- * #......#
- * .######.
- * ........
- * (Ready state before R210_run starts)
- *
- * -- R210_run() Sequence Starts --
- *
- * 1. R210_animateBlink(1) Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as above)
- * (random(500, 2000)ms delay)
- *
- * -- Step 2 --
- * Emotion: BlinkOpen (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * ..####..
- * .#....#.
- * .#....#.
- * ..####..
- * ........
- * ........
- * (g_R210_BLINK_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: BlinkMid (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * ........
- * ..####..
- * ..####..
- * ........
- * ........
- * ........
- * (g_R210_BLINK_SPEED_MS ms delay)
- *
- * -- Step 4 --
- * Emotion: BlinkClose (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * (g_R210_BLINK_SPEED_MS * 2 ms delay)
- *
- * -- Step 5 --
- * Emotion: BlinkMid (Full Pattern Override)
- * Grid: (Same as Step 3)
- * (g_R210_BLINK_SPEED_MS ms delay)
- *
- * -- Step 6 --
- * Emotion: BlinkOpen (Full Pattern Override)
- * Grid: (Same as Step 2)
- * (g_R210_BLINK_SPEED_MS ms delay)
- *
- * -- Step 7 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 2. R210_animateLook(E_LOOK_LEFT) Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: LookUpLeft (Outline + Pupil {2,1})
- * Grid:
- * ........
- * .######.
- * #.##....
- * #.##....
- * #......#
- * #......#
- * .######.
- * ........
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: LookLeft (Outline + Pupil {3,1}) - Final Position
- * Grid:
- * ........
- * .######.
- * #......#
- * #.##....
- * #.##....
- * #......#
- * .######.
- * ........
- * (g_R210_LOOK_HOLD_MS ms delay - Hold)
- *
- * -- Step 4 --
- * Emotion: LookDownLeft (Outline + Pupil {5,1})
- * Grid:
- * ........
- * .######.
- * #......#
- * #......#
- * #.##....
- * #.##....
- * .######.
- * ........
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 5 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 3. R210_animateLook(E_LOOK_RIGHT) Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: LookUpRight (Outline + Pupil {2,6})
- * Grid:
- * ........
- * .######.
- * ......##
- * ......##
- * #......#
- * #......#
- * .######.
- * ........
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: LookRight (Outline + Pupil {3,6}) - Final Position
- * Grid:
- * ........
- * .######.
- * #......#
- * ......##
- * ......##
- * #......#
- * .######.
- * ........
- * (g_R210_LOOK_HOLD_MS ms delay - Hold)
- *
- * -- Step 4 --
- * Emotion: LookDownRight (Outline + Pupil {5,6})
- * Grid:
- * ........
- * .######.
- * #......#
- * #......#
- * ......##
- * ......##
- * .#######
- * ........
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 5 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 4. R210_animateLook(E_LOOK_UP) Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: LookUpLeft (Outline + Pupil {2,1})
- * Grid: (Same as LookUpLeft grid in LookLeft sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: LookUp (Outline + Pupil {2,3}) - Final Position
- * Grid:
- * ........
- * .######.
- * #..##..#
- * #..##..#
- * #......#
- * #......#
- * .######.
- * ........
- * (g_R210_LOOK_HOLD_MS ms delay - Hold)
- *
- * -- Step 4 --
- * Emotion: LookUpRight (Outline + Pupil {2,6})
- * Grid: (Same as LookUpRight grid in LookRight sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 5 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 5. R210_animateLook(E_LOOK_DOWN) Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: LookDownLeft (Outline + Pupil {5,1})
- * Grid: (Same as LookDownLeft grid in LookLeft sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: LookDown (Outline + Pupil {5,3}) - Final Position
- * Grid:
- * ........
- * .######.
- * #......#
- * #......#
- * #..##..#
- * #..##..#
- * .######.
- * ........
- * (g_R210_LOOK_HOLD_MS ms delay - Hold)
- *
- * -- Step 4 --
- * Emotion: LookDownRight (Outline + Pupil {5,6})
- * Grid: (Same as LookDownRight grid in LookRight sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 5 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 6. R210_animateWink(0) [Left Wink] Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: Left Wink (Full Pattern Override - Asymmetric)
- * Left Eye Grid: BlinkClose (all off)
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * Right Eye Grid: Original Neutral_eye pattern
- * ........
- * ..####..
- * .#....#.
- * .#.##.#.
- * .#.##.#.
- * .#....#.
- * ..####..
- * ........
- * (g_R210_WINK_HOLD_MS ms delay - Hold)
- *
- * -- Step 3 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 7. R210_animateWink(1) [Right Wink] Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: Right Wink (Full Pattern Override - Asymmetric)
- * Left Eye Grid: Original Neutral_eye pattern
- * ........
- * ..####..
- * .#....#.
- * .#.##.#.
- * .#.##.#.
- * .#....#.
- * ..####..
- * ........
- * Right Eye Grid: BlinkClose (all off)
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * ........
- * (g_R210_WINK_HOLD_MS ms delay - Hold)
- *
- * -- Step 3 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 8. R210_showEmotion(E_SQUINT) Sequence:
- * -- Step 1 --
- * Emotion: Squint (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * .######.
- * .######.
- * .######.
- * .######.
- * ........
- * ........
- * (1500ms delay from R210_run)
- *
- * 9. R210_showEmotion(E_SQUINT_TIGHT) Sequence:
- * -- Step 1 --
- * Emotion: SquintTight (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * ........
- * .######.
- * .######.
- * ........
- * ........
- * ........
- * (1500ms delay from R210_run)
- *
- * 10. R210_showEmotion(E_NEUTRAL) Sequence:
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (1000ms delay from R210_run)
- *
- * 11. R210_showEmotion(E_SLEEPY) Sequence:
- * -- Step 1 --
- * Emotion: Sleepy (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * ..####..
- * .#....#.
- * .#....#.
- * ..####..
- * ........
- * ........
- * (2000ms delay from R210_run)
- *
- * 12. R210_showEmotion(E_NEUTRAL) Sequence:
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (1000ms delay from R210_run)
- *
- * 13. R210_showEmotion(E_ANGRY) Sequence:
- * -- Step 1 --
- * Emotion: Angry (Full Pattern Override)
- * Grid:
- * ........
- * ........
- * .######.
- * .#.##.#.
- * .#.##.#.
- * .######.
- * ........
- * ........
- * (2000ms delay from R210_run)
- *
- * 14. R210_showEmotion(E_NEUTRAL) Sequence:
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (1000ms delay from R210_run)
- *
- * 15. R210_showEmotion(E_ABSURD) Sequence:
- * -- Step 1 --
- * Emotion: Absurd (Full Pattern Override)
- * Grid:
- * ........
- * .######.
- * #......#
- * #.####.#
- * #.####.#
- * #......#
- * .######.
- * ........
- * (2000ms delay from R210_run)
- *
- * 16. R210_showEmotion(E_NEUTRAL) Sequence:
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (1000ms delay from R210_run)
- *
- * 17. R210_showEmotion(E_GLARING) Sequence:
- * -- Step 1 --
- * Emotion: Glaring (Full Pattern Override)
- * Grid:
- * ........
- * ..####..
- * .#....#.
- * .#....#.
- * .#....#.
- * #....#.#
- * ..####..
- * ........
- * (2000ms delay from R210_run)
- *
- * 18. R210_showEmotion(E_NEUTRAL) Sequence:
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (1000ms delay from R210_run)
- *
- * 19. R210_animateLook(E_THINKING) Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 --
- * Emotion: LookUpLeft (Outline + Pupil {2,1})
- * Grid: (Same as grid in LookLeft sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: LookDownRight (Outline + Pupil {5,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 4 --
- * Emotion: LookUpRight (Outline + Pupil {2,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 5 --
- * Emotion: LookDownLeft (Outline + Pupil {5,1})
- * Grid: (Same as grid in LookLeft sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 6 --
- * Emotion: LookUp (Outline + Pupil {2,3})
- * Grid: (Same as grid in LookUp sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 7 --
- * Emotion: LookRight (Outline + Pupil {3,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 8 --
- * Emotion: Thinking (Outline + Pupil {2,6}) - Final Position
- * Grid: (Same as grid in LookUpRight sequence - pupil is at {2,6})
- * (g_R210_LOOK_HOLD_MS * 1.5 ms delay - Hold)
- *
- * -- Step 9 --
- * Emotion: LookRight (Outline + Pupil {3,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_LOOK_SPEED_MS / 2 ms delay)
- *
- * -- Step 10 --
- * Emotion: LookUp (Outline + Pupil {2,3})
- * Grid: (Same as grid in LookUp sequence)
- * (g_R210_LOOK_SPEED_MS / 2 ms delay)
- *
- * -- Step 11 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * 20. R210_animateConfused() Sequence:
- * (Short random delay before starting)
- * -- Step 1 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (random(100, 300)ms delay)
- *
- * -- Step 2 -- (Darting Sequence using extreme positions)
- * Emotion: LookUpLeft (Outline + Pupil {2,1})
- * Grid: (Same as grid in LookLeft sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 3 --
- * Emotion: LookDownRight (Outline + Pupil {5,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 4 --
- * Emotion: LookUpRight (Outline + Pupil {2,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 5 --
- * Emotion: LookDownLeft (Outline + Pupil {5,1})
- * Grid: (Same as grid in LookLeft sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 6 --
- * Emotion: LookUp (Outline + Pupil {2,3})
- * Grid: (Same as grid in LookUp sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 7 --
- * Emotion: LookDown (Outline + Pupil {5,3})
- * Grid: (Same as grid in LookDown sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 8 --
- * Emotion: LookLeft (Outline + Pupil {3,1})
- * Grid: (Same as grid in LookLeft sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 9 --
- * Emotion: LookRight (Outline + Pupil {3,6})
- * Grid: (Same as grid in LookRight sequence)
- * (g_R210_CONFUSED_DART_SPEED_MS ms delay)
- *
- * -- Step 10 -- (Brief pause)
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (g_R210_LOOK_SPEED_MS ms delay)
- *
- * -- Step 11 -- (Confused State)
- * Emotion: Confused (Outline + Asymmetric Pupils)
- * Left Eye Grid (Pupil {3,6}): (Same as LookRight grid)
- * Right Eye Grid (Pupil {3,1}): (Same as LookLeft grid)
- * (g_R210_CONFUSED_SPEED_MS ms delay - Hold)
- *
- * -- Step 12 --
- * Emotion: Neutral (Outline + Pupil {3,3})
- * Grid: (Same as Initial State)
- * (Short random delay after completing)
- *
- * -- End of R210_run() Sequence --
- *
- * Note: The actual timing on the hardware may vary slightly based on FastLED.show() duration
- * and processing time.
- */
+// void R210_run() {
+// 	Serial.println("Starting RobotEyes Animation Sequence...");
 
-// Note: setup() and loop() functions are expected in the main .ino or .cpp file
-// as shown in the example usage.
+// 	// 초기화 완료 후 기본 상태인 중립 눈을 표시 (외곽선 + 눈동자 방식)
+// 	Serial.println("Setting initial state to Neutral (large outline).");
+
+// 	for (int i=0; i<=g_R210_NUM_EMOTION_PATTERNS; i++){
+// 		R210_showEmotion(i);
+// 		//R210_showEmotion(E_NEUTRAL);
+// 		delay(1000);
+// 	}
+	
+// 	Serial.println("Animating Blink...");
+// 	R210_animateBlink(1); // 1번 깜빡이기
+// 	// animateBlink/Look/Wink/Confused 내부에 종료 후 짧은 랜덤 딜레이 포함됨
+
+// 	Serial.println("Animating Look Left...");
+// 	R210_animateLook(E_LOOK_LEFT);
+
+// 	Serial.println("Animating Look Right...");
+// 	R210_animateLook(E_LOOK_RIGHT);
+
+// 	Serial.println("Animating Look Up...");
+// 	R210_animateLook(E_LOOK_UP);
+
+// 	Serial.println("Animating Look Down...");
+// 	R210_animateLook(E_LOOK_DOWN);
+
+// 	Serial.println("Animating Wink Left...");
+// 	R210_animateWink(0); // 왼쪽 윙크
+
+// 	Serial.println("Animating Wink Right...");
+// 	R210_animateWink(1); // 오른쪽 윙크
+
+// 	Serial.println("Showing Squint...");
+// 	R210_showEmotion(E_SQUINT); // 전체 패턴 오버라이드
+// 	delay(1500);
+// 	Serial.println("Showing Squint Tight...");
+// 	R210_showEmotion(E_SQUINT_TIGHT); // 전체 패턴 오버라이드
+// 	delay(1500);
+// 	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+// 	delay(1000);
+
+// 	Serial.println("Showing Sleepy...");
+// 	R210_showEmotion(E_SLEEPY); // 전체 패턴 오버라이드
+// 	delay(2000);
+// 	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+// 	delay(1000);
+
+// 	Serial.println("Showing Angry...");
+// 	R210_showEmotion(E_ANGRY); // 전체 패턴 오버라이드
+// 	delay(2000);
+// 	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+// 	delay(1000);
+
+// 	Serial.println("Showing Absurd...");
+// 	R210_showEmotion(E_ABSURD); // 전체 패턴 오버라이드
+// 	delay(2000);
+// 	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+// 	delay(1000);
+
+// 	Serial.println("Showing Glaring...");
+// 	R210_showEmotion(E_GLARING); // 전체 패턴 오버라이드
+// 	delay(2000);
+// 	R210_showEmotion(E_NEUTRAL); // 외곽선+눈동자 사용
+// 	delay(1000);
+
+// 	Serial.println("Showing Thinking...");
+// 	R210_animateLook(E_THINKING); // Thinking은 R210_animateLook을 통해 애니메이션으로 보여줌
+
+// 	Serial.println("Animating Confused...");
+// 	R210_animateConfused(); // 혼돈은 애니메이션으로 보여줌
+
+// 	Serial.println("Animation sequence finished.");
+// }
