@@ -4,15 +4,15 @@
 #include "config_001.h" // 상수 정의 포함
 #include "data_001.h"   // 전역 변수 정의 포함
 #include <Adafruit_MPU6050.h> // MPU 라이브러리 포함
-#include <Wire.h>			// I2C 통신 포함
-#include <math.h>			// 수학 함수 포함
-#include <Arduino.h>        // Serial 등 포함
+#include <Wire.h> // I2C 통신 포함
+#include <math.h> // 수학 함수 포함
+#include <Arduino.h> // Serial 등 포함
 
 // --- IMU 관련 함수 (C110) ---
 
 // MPU6050 센서 데이터 읽기 함수
 void C110_readMPUData() {
-	g_C110_mpu.getEvent(&g_C110_a, &g_C110_g, &g_C110_temp);  // 가속도, 자이로, 온도 최신 값 읽기
+	g_C110_mpu.getEvent(&g_C110_a, &g_C110_g, &g_C110_temp); // 가속도, 자이로, 온도 최신 값 읽기
 
 	// 시리얼 모니터로 Raw 데이터 확인 (디버깅 시 유용)
 	/*
@@ -26,12 +26,12 @@ void C110_readMPUData() {
 void C110_applyFiltering() {
 	// 1차 LPF 적용 (가속도 및 자이로 각 축)
     // MPU 내부 필터 설정에 따라 이 LPF의 alpha 값을 튜닝하거나 사용 중단 고려
-	g_C110_filtered_ax		= g_C110_alpha * g_C110_a.acceleration.x + (1.0 - g_C110_alpha) * g_C110_filtered_ax;
-	g_C110_filtered_ay		= g_C110_alpha * g_C110_a.acceleration.y + (1.0 - g_C110_alpha) * g_C110_filtered_ay;
-	g_C110_filtered_az		= g_C110_alpha * g_C110_a.acceleration.z + (1.0 - g_C110_alpha) * g_C110_filtered_az;
-	g_C110_filtered_gx		= g_C110_alpha * g_C110_g.gyro.x + (1.0 - g_C110_alpha) * g_C110_filtered_gx;
-	g_C110_filtered_gy		= g_C110_alpha * g_C110_g.gyro.y + (1.0 - g_C110_alpha) * g_C110_filtered_gy;
-	g_C110_filtered_gz		= g_C110_alpha * g_C110_g.gyro.z + (1.0 - g_C110_alpha) * g_C110_filtered_gz;
+	g_C110_filtered_ax = g_C110_alpha * g_C110_a.acceleration.x + (1.0 - g_C110_alpha) * g_C110_filtered_ax;
+	g_C110_filtered_ay = g_C110_alpha * g_C110_a.acceleration.y + (1.0 - g_C110_alpha) * g_C110_filtered_ay;
+	g_C110_filtered_az = g_C110_alpha * g_C110_a.acceleration.z + (1.0 - g_C110_alpha) * g_C110_filtered_az;
+	g_C110_filtered_gx = g_C110_alpha * g_C110_g.gyro.x + (1.0 - g_C110_alpha) * g_C110_filtered_gx;
+	g_C110_filtered_gy = g_C110_alpha * g_C110_g.gyro.y + (1.0 - g_C110_alpha) * g_C110_filtered_gy;
+	g_C110_filtered_gz = g_C110_alpha * g_C110_g.gyro.z + (1.0 - g_C110_alpha) * g_C110_filtered_gz;
 
 	// 시리얼 모니터로 필터링된 데이터 확인 (튜닝 시 필수)
 	Serial.print("Filtered Accel (m/s^2): "); Serial.print(g_C110_filtered_ax); Serial.print(", "); Serial.print(g_C110_filtered_ay); Serial.print(", "); Serial.println(g_C110_filtered_az);
@@ -41,7 +41,7 @@ void C110_applyFiltering() {
 	// 정지 상태 판단을 위한 가속도/자이로 벡터 크기 계산
 	// 가속도 크기는 중력가속도(약 9.8) 근처여야 함
 	float v_accel_magnitude = sqrt(g_C110_filtered_ax * g_C110_filtered_ax + g_C110_filtered_ay * g_C110_filtered_ay + g_C110_filtered_az * g_C110_filtered_az);
-	float v_gyro_magnitude	= sqrt(g_C110_filtered_gx * g_C110_filtered_gx + g_C110_filtered_gy * g_C110_filtered_gy + g_C110_filtered_gz * g_C110_filtered_gz);
+	float v_gyro_magnitude = sqrt(g_C110_filtered_gx * g_C110_filtered_gx + g_C110_filtered_gy * g_C110_filtered_gy + g_C110_filtered_gz * g_C110_filtered_gz);
 
 	// 시리얼 모니터로 필터링된 크기 확인 (튜닝 시 필수)
 	Serial.print("Accel Mag: "); Serial.print(v_accel_magnitude); Serial.print(", Gyro Mag: "); Serial.println(v_gyro_magnitude);
@@ -72,8 +72,8 @@ void C110_applyFiltering() {
 		g_C100_currentCarState == G_C100_STATE_TILTED || g_C100_previousCarState == G_C100_STATE_TILTED) {
 
 		// Roll: X축 기준 회전. Y-Z 평면의 기울기. atan2(Ay, Az) 사용.
-		g_C110_accel_roll  = atan2(g_C110_filtered_ay, v_denominator_roll) * 180.0 / PI;
-		// Pitch: Y축 기준 회전. X-Z 평면의 기울기. atan2(-Ax, sqrt(Ay*Ay + Az*Az)) 사용. (X축 방향 반전 필요시 -g_C110_filtered_ax)
+		g_C110_accel_roll = atan2(g_C110_filtered_ay, v_denominator_roll) * 180.0 / PI;
+		// Pitch: Y축 기준 회전. X-Z 평면의 기울기. atan2(-g_C110_filtered_ax, sqrt(g_C110_filtered_ay*g_C110_filtered_ay + g_C110_filtered_az*g_C110_filtered_az)) 사용. (X축 방향 반전 필요시 -g_C110_filtered_ax)
 		// v_denominator_pitch가 0에 가까우면 atan2 결과가 불안정할 수 있으므로 조건 처리 필요
 		if (v_denominator_pitch > 0.001) { // 안정적인 경우에만 계산
 			g_C110_accel_pitch = atan2(-g_C110_filtered_ax, v_denominator_pitch) * 180.0 / PI;
@@ -121,6 +121,5 @@ void C110_complementaryFilter(float p_ax, float p_ay, float p_az, float p_gx, fl
 	// g_C110_comp_yaw = g_C110_comp_yaw + v_gyro_yaw_change; // Yaw는 자이로만 누적 (드리프트 발생)
 }
 */
-
 
 #endif // _IMU_H_
