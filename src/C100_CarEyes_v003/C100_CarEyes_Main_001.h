@@ -531,10 +531,8 @@ void C100_drawCurrentEyeState() {
 }
 
 // --- 설정 (Setup) 함수 ---
-void C100_inot() { // Arduino 스케치 기본 setup 함수
+void C100_init() { // Arduino 스케치 기본 setup 함수
 
-	Serial.begin(115200); // 시리얼 통신 속도 설정 (디버깅 출력 확인용)
-	while (!Serial && millis() < 5000); // 시리얼 포트 열릴 때까지 대기 (선택 사항)
 	Serial.println("Starting C100 Robot Eye Project...");
 
 	Wire.begin(G_C110_MPU_I2C_SDA, G_C110_MPU_I2C_SCL);	 // MPU I2C 통신 시작
