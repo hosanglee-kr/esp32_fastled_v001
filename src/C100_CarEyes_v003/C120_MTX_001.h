@@ -1,8 +1,8 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
-#include "config.h" // 상수 정의 포함
-#include "data.h"   // 전역 변수 정의 포함
+#include "config_001.h" // 상수 정의 포함
+#include "data_001.h"   // 전역 변수 정의 포함
 #include <FastLED.h> // FastLED 라이브러리 포함
 #include <Arduino.h> // constrain, map 등 Arduino 함수 포함
 
