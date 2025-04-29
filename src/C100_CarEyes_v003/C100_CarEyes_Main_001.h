@@ -1,4 +1,3 @@
-
 //====================================================
 // 자동차 후방 로봇 눈 프로젝트 - Refactoring 및 전체 구현
 // ESP32 + MPU6050 + FastLED (2x 8x8 WS2812B Matrix, 직렬 연결)
@@ -534,6 +533,8 @@ void C100_drawCurrentEyeState() {
 // --- 설정 (Setup) 함수 ---
 void C100_inot() { // Arduino 스케치 기본 setup 함수
 
+	Serial.begin(115200); // 시리얼 통신 속도 설정 (디버깅 출력 확인용)
+	while (!Serial && millis() < 5000); // 시리얼 포트 열릴 때까지 대기 (선택 사항)
 	Serial.println("Starting C100 Robot Eye Project...");
 
 	Wire.begin(G_C110_MPU_I2C_SDA, G_C110_MPU_I2C_SCL);	 // MPU I2C 통신 시작
@@ -541,22 +542,22 @@ void C100_inot() { // Arduino 스케치 기본 setup 함수
 	// MPU6050 초기화
 	if (!g_C110_mpu.begin()) {
 		Serial.println("MPU6050 센서 초기화 실패! 배선 및 전원을 확인하세요.");
-		while (1) delay(10);  // 센서 초기화 실패 시 무한 대기
+		while (1) delay(10); // 센서 초기화 실패 시 무한 대기
 	}
 	Serial.println("MPU6050 센서 초기화 완료.");
 
 	// MPU6050 설정 (측정 범위 및 필터 대역폭 설정)
 	// 설정에 따라 임계값 (Threshold) 튜닝 필수!
     // 내부 디지털 필터 활성화 및 대역폭 설정 (센서 데이터 자체 필터링)
-	g_C110_mpu.setAccelerometerRange(MPU6050_RANGE_8_G);  // 가속도 범위 설정 (예: +/- 8g)
-	g_C110_mpu.setGyroRange(MPU6050_RANGE_500_DEG);		  // 자이로 범위 설정 (예: +/- 500 deg/s)
-	g_C110_mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);	  // 디지털 저역 통과 필터 설정
+	g_C110_mpu.setAccelerometerRange(MPU6050_RANGE_8_G); // 가속도 범위 설정 (예: +/- 8g)
+	g_C110_mpu.setGyroRange(MPU6050_RANGE_500_DEG);		 // 자이로 범위 설정 (예: +/- 500 deg/s)
+	g_C110_mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);	 // 디지털 저역 통과 필터 설정
 	// MPU6050_BAND_260_HZ (필터링 약함) ~ MPU6050_BAND_5_HZ (필터링 강함)
     Serial.print("MPU6050 Filter Bandwidth set to 21 Hz.");
 
 	// FastLED 초기화
-	FastLED.addLeds<G_C120_LED_TYPE, G_C120_LED_DATA_PIN, G_C120_COLOR_ORDER>(g_C120_leds, G_C120_TOTAL_NUM_LEDS).setCorrection(TypicalLEDStrip);  // LED 설정
-	FastLED.setBrightness(80);																													   // 전체 밝기 설정 (0-255), 너무 밝으면 눈부심 및 전력 소모 증가
+	FastLED.addLeds<G_C120_LED_TYPE, G_C120_LED_DATA_PIN, G_C120_COLOR_ORDER>(g_C120_leds, G_C120_TOTAL_NUM_LEDS).setCorrection(TypicalLEDStrip); // LED 설정
+	FastLED.setBrightness(80); // 전체 밝기 설정 (0-255), 너무 밝으면 눈부심 및 전력 소모 증가
 
 	// 초기 필터 값 설정 (첫 센서 값으로 초기화)
 	C110_readMPUData();	 // 초기 값 한번 읽기 (내부 필터가 적용된 값)
