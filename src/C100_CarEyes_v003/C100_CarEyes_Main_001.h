@@ -1,6 +1,4 @@
 
-
-
 //====================================================
 // 자동차 후방 로봇 눈 프로젝트 - Refactoring 및 전체 구현
 // ESP32 + MPU6050 + FastLED (2x 8x8 WS2812B Matrix, 직렬 연결)
@@ -28,7 +26,7 @@
 
 // --- 디버깅 헬퍼 함수 (String 반환 버전) ---
 String C100_currentStateToString(CarState p_state) {
-  switch (p_state) {
+ switch (p_state) {
 	case G_C100_STATE_UNKNOWN: return "UNKNOWN";
 	case G_C100_STATE_STOPPED: return "STOPPED";
 	case G_C100_STATE_MOVING_NORMAL: return "MOVING_NORMAL";
@@ -40,11 +38,11 @@ String C100_currentStateToString(CarState p_state) {
 	case G_C100_STATE_TILTED: return "TILTED";
 	// G_C100_STATE_REVERSING는 현재 미사용
 	default: return "INVALID";
-  }
+ }
 }
 
 String C100_eyeStateToString(EyeState p_state) {
-  switch (p_state) {
+ switch (p_state) {
 	case G_C100_E_NEUTRAL: return "NEUTRAL";
 	case G_C100_E_BLINK: return "BLINK";
 	case G_C100_E_LOOK_LEFT: return "LOOK_LEFT";
@@ -59,9 +57,8 @@ String C100_eyeStateToString(EyeState p_state) {
 	case G_C100_E_SLEEPY: return "SLEEPY";
 	case G_C100_E_CONFUSED: return "CONFUSED";
 	default: return "INVALID";
-  }
+ }
 }
-
 
 // --- 핵심 로직 함수 (CarState 및 EyeState 관리: C100) ---
 
@@ -139,7 +136,6 @@ void C100_inferCarState() {
 		}
 	}
 
-
 	// 3. 회전 감지 (정지/충격 감지 로직 이후에 수행)
 	// Z축 자이로 값이 특정 임계값 이상일 때 (부호로 방향 구분)
 	// 현재 상태가 정지, 기울어짐, 충격 상태가 아닐 때만 회전 판단
@@ -195,7 +191,6 @@ void C100_inferCarState() {
 			}
 		}
 	}
-
 
 	// 시리얼 모니터로 차량 상태 변화 확인 (디버깅 시 유용)
 	if (v_nextCarState != g_C100_currentCarState) {
@@ -536,11 +531,9 @@ void C100_drawCurrentEyeState() {
 	// ... 기타 차량 상태별 추가 표현 ...
 }
 
-
 // --- 설정 (Setup) 함수 ---
-void C100_init() { // Arduino 스케치 기본 setup 함수
+void C100_inot() { // Arduino 스케치 기본 setup 함수
 
-	
 	Serial.println("Starting C100 Robot Eye Project...");
 
 	Wire.begin(G_C110_MPU_I2C_SDA, G_C110_MPU_I2C_SCL);	 // MPU I2C 통신 시작
@@ -561,7 +554,6 @@ void C100_init() { // Arduino 스케치 기본 setup 함수
 	// MPU6050_BAND_260_HZ (필터링 약함) ~ MPU6050_BAND_5_HZ (필터링 강함)
     Serial.print("MPU6050 Filter Bandwidth set to 21 Hz.");
 
-
 	// FastLED 초기화
 	FastLED.addLeds<G_C120_LED_TYPE, G_C120_LED_DATA_PIN, G_C120_COLOR_ORDER>(g_C120_leds, G_C120_TOTAL_NUM_LEDS).setCorrection(TypicalLEDStrip);  // LED 설정
 	FastLED.setBrightness(80);																													   // 전체 밝기 설정 (0-255), 너무 밝으면 눈부심 및 전력 소모 증가
@@ -575,7 +567,6 @@ void C100_init() { // Arduino 스케치 기본 setup 함수
 	g_C110_filtered_gy		= g_C110_g.gyro.y;
 	g_C110_filtered_gz		= g_C110_g.gyro.z;
 	// g_C110_last_filter_time = millis(); // 상보 필터 사용 시 초기화
-
 
 	g_C100_currentCarState	= G_C100_STATE_UNKNOWN;	 // 초기 차량 상태
 	g_C100_previousCarState = G_C100_STATE_UNKNOWN;
@@ -604,7 +595,6 @@ void C100_run() { // Arduino 스케치 기본 loop 함수
     // C110_complementaryFilter(g_C110_a.acceleration.x, g_C110_a.acceleration.y, g_C110_a.acceleration.z,
     //                          g_C110_g.gyro.x, g_C110_g.gyro.y, g_C110_g.gyro.z, v_dt);
     // g_C110_last_filter_time = v_currentTime; // 시간 업데이트
-
 
 	// 3. 차량 상태 추론
 	C100_inferCarState();
