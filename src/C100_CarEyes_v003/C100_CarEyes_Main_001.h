@@ -1,3 +1,6 @@
+
+
+
 //====================================================
 // 자동차 후방 로봇 눈 프로젝트 - Refactoring 및 전체 구현
 // ESP32 + MPU6050 + FastLED (2x 8x8 WS2812B Matrix, 직렬 연결)
@@ -537,7 +540,7 @@ void C100_drawCurrentEyeState() {
 // --- 설정 (Setup) 함수 ---
 void C100_init() { // Arduino 스케치 기본 setup 함수
 
-
+	
 	Serial.println("Starting C100 Robot Eye Project...");
 
 	Wire.begin(G_C110_MPU_I2C_SDA, G_C110_MPU_I2C_SCL);	 // MPU I2C 통신 시작
