@@ -91,7 +91,6 @@ void C110_applyFiltering() {
 }
 
 // 상보 필터 구현 예시 (필요 시 사용, 현재는 가속도 기반 기울기 사용)
-/*
 void C110_complementaryFilter(float p_ax, float p_ay, float p_az, float p_gx, float p_gy, float p_gz, float p_dt) {
 	// 자이로 데이터로 각도 변화 계산 (라디안)
 	float v_gyro_roll_change_rad = p_gx * p_dt * PI / 180.0; // deg/s 를 rad/s 로 변환
@@ -120,6 +119,5 @@ void C110_complementaryFilter(float p_ax, float p_ay, float p_az, float p_gx, fl
 
 	// g_C110_comp_yaw = g_C110_comp_yaw + v_gyro_yaw_change; // Yaw는 자이로만 누적 (드리프트 발생)
 }
-*/
 
 #endif // _IMU_H_
