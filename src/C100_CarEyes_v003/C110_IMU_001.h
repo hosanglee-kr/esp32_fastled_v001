@@ -1,8 +1,8 @@
 #ifndef _IMU_H_
 #define _IMU_H_
 
-#include "config.h" // 상수 정의 포함
-#include "data.h"   // 전역 변수 정의 포함
+#include "config_001.h" // 상수 정의 포함
+#include "data_001.h"   // 전역 변수 정의 포함
 #include <Adafruit_MPU6050.h> // MPU 라이브러리 포함
 #include <Wire.h>			// I2C 통신 포함
 #include <math.h>			// 수학 함수 포함
