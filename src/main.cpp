@@ -42,6 +42,11 @@
 	#include "R220_RobotEyes_T20_004_multiColor.h"
 #endif
 
+#ifdef C100
+    #include "C100_CarEyes_v003/C100_CarEyes_Main_001.h"
+	//#include "C100_CarEyes_001.h"
+#endif
+
 void setup() {
 
 	Serial.begin(115200);
@@ -81,6 +86,10 @@ void setup() {
 
 	#ifdef R220
 		R220_init();
+	#endif
+
+	#ifdef C100
+		C100_init();
 	#endif
 
 
@@ -125,4 +134,8 @@ void loop() {
 		R220_run();
 	#endif
 
+	
+	#ifdef C100
+		C100_run();
+	#endif
 }

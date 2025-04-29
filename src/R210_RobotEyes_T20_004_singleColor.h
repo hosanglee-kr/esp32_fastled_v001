@@ -34,7 +34,32 @@
 // -----------------------------------------------------------------------
 // 하드웨어 설정 상수
 // -----------------------------------------------------------------------
-#define g_R210_DATA_PIN			   13		// WS2812B 데이터 핀 번호
+
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+    // ESP32-C3 보드의 경우 FastLED RMT에 적합한 핀 (예: GPIO2, 8, 10)
+    // 일반적으로 GPIO2가 흔히 사용되며, RMT 채널 사용에 제약이 적습니다.
+    #define g_R210_DATA_PIN             10  //2      // ESP32-C3 데이터 핀 번호 (GPIO2)
+    #warning "Compiling for ESP32-C3, using DATA_PIN 2, 8, 10 for FastLED RMT" // 컴파일 시 확인 메시지
+#elif defined(CONFIG_IDF_TARGET_ESP32)
+    // 일반 ESP32 보드 (ESP32-WROOM, ESP32-DevKitC 등)의 경우
+    // FastLED RMT에 적합한 핀 (예: GPIO13, 14, 27 등)
+    // GPIO13은 흔히 사용되며, RMT 채널 사용에 제약이 적은 편입니다.
+    #define g_R210_DATA_PIN             13     // 일반 ESP32 데이터 핀 번호 (GPIO13)
+    #warning "Compiling for standard ESP32, using DATA_PIN 13 for FastLED RMT" // 컴파일 시 확인 메시지
+#else
+    // 다른 ESP32 칩 (ESP32-S2, ESP32-S3, ESP32-H2 등) 의 경우
+    // 필요 시 여기에 #elif ... 를 추가하여 칩별 설정을 합니다.
+    // 현재는 기본값으로 설정하며, 해당 핀이 FastLED RMT와 호환되는지 확인 필요
+    #define g_R210_DATA_PIN             13     // 기본 데이터 핀 번호 (확인 필요)
+    #warning "Unknown ESP32 target, using default DATA_PIN 13. Please check if this pin is RMT capable and supported by FastLED for your specific chip."
+#endif
+
+// #ifdef 
+//     #define g_R210_DATA_PIN			   GPIO10		// WS2812B 데이터 핀 번호
+// #else    
+//     #define g_R210_DATA_PIN			   13		// WS2812B 데이터 핀 번호
+// #endif 
+
 #define g_R210_LED_TYPE			   WS2812B	// 사용하는 LED 칩 타입
 #define g_R210_COLOR_ORDER		   GRB		// LED 색상 순서 (모듈에 맞게 변경)
 
@@ -609,6 +634,7 @@ void R210_animateConfused() {
 // -----------------------------------------------------------------------
 void R210_init() {
 	// FastLED 라이브러리 초기화 (ESP32용)
+    
 	FastLED.addLeds<g_R210_LED_TYPE, g_R210_DATA_PIN, g_R210_COLOR_ORDER>(g_R210_leds, g_R210_NUM_LEDS);
 
 	// 전체 밝기 설정 (0-255, 선택 사항)
