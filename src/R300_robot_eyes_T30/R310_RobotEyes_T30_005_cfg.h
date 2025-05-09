@@ -1,3 +1,5 @@
+// R310_RobotEyes_T30_005_cfg.h
+
 // --- WS2812b (FastLED) 하드웨어 설정 ---
 // WS2812b LED 스트립/매트릭스가 연결된 데이터 핀 번호
 #define NEOPIXEL_PIN 13
