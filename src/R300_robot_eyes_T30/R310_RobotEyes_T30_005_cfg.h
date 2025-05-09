@@ -1,3 +1,4 @@
+#pragma once 
 // R310_RobotEyes_T30_005_cfg.h
 
 // --- WS2812b (FastLED) 하드웨어 설정 ---
