@@ -3,6 +3,7 @@
 #include <string.h>  // 문자열 함수 사용 (strcmp, strncpy, strlen)
 #include <stdlib.h>  // 동적 메모리 할당/해제 함수 사용 (free는 사용하지 않음)
 
+#include "R310_RobotEyes_T30_005_cfg.h"
 
 
 // --- 글로벌 함수 ---
@@ -393,10 +394,8 @@ bool runAnimation(void) {
 // --- Arduino Setup 및 Loop 함수 ---
 
 // Arduino 보드 시작 시 한 번 실행되는 설정 함수
-void setup() {
-    Serial.begin(115200); // 시리얼 통신 속도 설정 및 시작
-    Serial.println("FastLED Persona Example"); // 시리얼 모니터에 시작 메시지 출력
-
+void R300_init() {
+    
     // FastLED 라이브러리 초기화 및 LED 스트립/매트릭스 설정
     // 지정된 LED 타입, 데이터 핀, 색상 순서, LED 개수로 FastLED를 설정하고 LED 버퍼(leds 배열)를 연결합니다.
     FastLED.addLeds<LED_TYPE, NEOPIXEL_PIN, COLOR_ORDER>(leds, NEOPIXEL_NUM_LEDS).setCorrection(TypicalLEDStrip);
@@ -424,7 +423,7 @@ void setup() {
 }
 
 // 설정 함수 실행 후 계속 반복 실행되는 메인 루프 함수
-void loop() {
+void R300_run() {
     // Persona 애니메이션/표시 로직을 실행합니다. 이 함수 내부에서 상태 머신이 작동하며 LED 업데이트를 처리합니다.
     runAnimation();
 
