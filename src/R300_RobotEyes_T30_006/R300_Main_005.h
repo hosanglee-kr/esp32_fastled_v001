@@ -408,9 +408,7 @@ bool R300_runAnimation(void) {
 
 // 초기화 함수 (Arduino setup 대체)
 void R300_init() {
-    Serial.begin(115200); // 시리얼 통신 시작
-    Serial.println("FastLED Persona Example"); // 시작 메시지 출력
-
+    
     // FastLED 초기화 및 LED 설정
     FastLED.addLeds<G_R300_LED_TYPE, G_R300_NEOPIXEL_PIN, G_R300_COLOR_ORDER>(g_R300_leds, G_R300_NEOPIXEL_NUM_LEDS).setCorrection(TypicalLEDStrip);
     g_R300_leds_ptr = g_R300_leds; // CRGB 배열 주소 포인터에 할당
