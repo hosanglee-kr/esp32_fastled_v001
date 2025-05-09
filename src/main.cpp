@@ -43,7 +43,7 @@
 #endif
 
 #ifdef R300
-    #include "R300_Main_005.h"
+    #include "R300_RobotEyes_T30_006/R300_Main_005.h"
 #endif
 
 #ifdef C100
