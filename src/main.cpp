@@ -42,6 +42,10 @@
 	#include "R220_RobotEyes_T20_004_multiColor.h"
 #endif
 
+#ifdef R300
+    #include "R300_RobotEyes_T30_006/R300_Main_005.h"
+#endif
+
 #ifdef C100
     #include "C100_CarEyes_v003/C100_CarEyes_Main_001.h"
 	//#include "C100_CarEyes_001.h"
@@ -86,6 +90,10 @@ void setup() {
 
 	#ifdef R220
 		R220_init();
+	#endif
+
+	#ifdef R300
+	    R300_init();
 	#endif
 
 	#ifdef C100
@@ -134,6 +142,9 @@ void loop() {
 		R220_run();
 	#endif
 
+	#ifdef R300
+	    R300_run();
+	#endif
 	
 	#ifdef C100
 		C100_run();
