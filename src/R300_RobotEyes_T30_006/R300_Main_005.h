@@ -5,7 +5,7 @@
 // 기본 타입 및 설정 헤더 파일 포함
 #include "R300_types_config_006.h"
 // 정적 데이터 테이블 헤더 파일 포함
-#include "R300_data_006.h"
+#include "R300_data_007.h"
 
 
 // --- 글로벌 변수 정의 (g_R300_ 로 시작) ---
