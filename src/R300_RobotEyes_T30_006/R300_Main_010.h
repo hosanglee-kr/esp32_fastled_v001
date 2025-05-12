@@ -4,7 +4,7 @@
 // 이 파일은 필요한 데이터 및 타입 헤더 파일을 포함하고 main.cpp에서 사용됩니다.
 
 // 기본 타입 및 설정 헤더 파일 포함
-#include "R300_types_config_005.h"
+#include "R300_types_config_006.h"
 // 정적 데이터 테이블 헤더 파일 포함
 #include "R300_data_010.h"
 
