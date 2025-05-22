@@ -1013,3 +1013,19 @@ const T_R300_SimpleFontChar g_R300_RobotEyes_Font[] PROGMEM = {
 
     // 68부터는 사용되지 않으며, 필요시 이곳에 새로운 눈 모양 비트맵 데이터를 추가할 수 있습니다.
 };
+
+
+
+
+const T_R300_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
+    {8, {
+        0b00111100, 
+        0b01000010, 
+        0b01000010, 
+        0b01000010, 
+        0b01111110, 
+        0b01111110, 
+        0b01000010, 
+        0b00111100  
+    }}, // 0   - 기본 눈 모양
+}
