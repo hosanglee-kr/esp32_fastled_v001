@@ -37,7 +37,7 @@
 
 // --- 기타 정의 (전역 상수: G_R300_ 로 시작) ---
 // 배열 요소 개수 계산 매크로
-#define G_R300_ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#define G_R310_ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 // 눈 폰트 데이터 열 개수 (8x8 비트맵)
 #define G_R300_EYE_COL_SIZE 8
 
