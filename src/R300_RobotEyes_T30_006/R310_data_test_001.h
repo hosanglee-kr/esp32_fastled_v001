@@ -1,3 +1,18 @@
+
+const T_R300_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
+    {8, {
+        0b00111100, // 행 7 (MSB)
+        0b01000010, // 행 6
+        0b01000010, // 행 5
+        0b01000010, // 행 4
+        0b01111110, // 행 3
+        0b01111110, // 행 2
+        0b01000010, // 행 1
+        0b00111100  // 행 0 (LSB)
+    }}, // 0   - 'Rest Position' (기본 눈 모양)
+}
+
+
 const uint8_t IMAGES[][8] = {
 {
   0b00111100,
