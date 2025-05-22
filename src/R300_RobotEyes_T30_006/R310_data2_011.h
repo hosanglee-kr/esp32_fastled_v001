@@ -282,7 +282,7 @@ typedef enum {
     E_R310_NONE,          // 애니메이션 없음
     E_R310_NEUTRAL,       // 일반적인 눈 모양
     E_R310_BLINK,         // 깜빡임
-    E_WINK,          // 윙크
+    E_R31p_WINK,          // 윙크
     E_LOOK_L,        // 왼쪽 보기
     E_LOOK_R,        // 오른쪽 보기
     E_LOOK_U,        // 위 보기
@@ -351,8 +351,9 @@ const T_R310_animFrame_t g_R310_seqWink[] PROGMEM = {
 };
 
 const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
-    {E_NEUTRAL, g_R310_seqBlink, 1},  // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
-    {E_BLINK, g_R310_seqBlink, G_R300_ARRAY_SIZE(g_R310_seqBlink)},         // 깜빡임
+    {E_R310_NEUTRAL, g_R310_seqBlink, 1},  // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
+    {E_R310_BLINK, g_R310_seqBlink, G_R310_ARRAY_SIZE(g_R310_seqBlink)},         // 깜빡임
+    {E_R310_WINK, g_R310_seqWink, G_R310_ARRAY_SIZE(g_R310_seqWink)},
 }
 
 typedef struct {
