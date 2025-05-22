@@ -1,17 +1,4 @@
 
-const T_R300_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
-    {8, {
-        0b00111100, 
-        0b01000010, 
-        0b01000010, 
-        0b01000010, 
-        0b01111110, 
-        0b01111110, 
-        0b01000010, 
-        0b00111100  
-    }}, // 0   - 기본 눈 모양
-}
-
 
 const uint8_t IMAGES[][8] = {
 {
