@@ -42,7 +42,7 @@
 #define G_R300_EYE_COL_SIZE 8
 
 // 애니메이션 프레임 기본 표시 시간 (밀리초)
-#define G_R300_FRAME_TIME 100
+#define G_R310_FRAME_TIME 100
 
 // 표시할 텍스트 최대 길이 (고정 버퍼 크기)
 #define G_R300_MAX_TEXT_LENGTH 31 // 최대 31자 + 널 종료 문자
