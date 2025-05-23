@@ -9,6 +9,7 @@
 
 <a href="https://github.com/hosanglee-kr/esp32_fastled_v001/releases"><img src="https://img.shields.io/github/release/hosanglee-kr/esp32_fastled_v001.svg?style=flat-square"></a>
 
+[![GitHub release](https://img.shields.io/github/release/hosanglee-kr/esp32_fastled_v001.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/releases)
 
 
 https://github.com/hosanglee-kr/esp32_fastled_v001
