@@ -7,6 +7,9 @@
 [![Firmware Release](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml)
 
 
+<a href="https://github.com/hosanglee-kr/esp32_fastled_v001/releases"><img src="https://img.shields.io/github/release/github.com/hosanglee-kr/esp32_fastled_v001.svg?style=flat-square"></a>
+
+
 https://github.com/hosanglee-kr/esp32_fastled_v001
 
 .github/workflows/ci_002.yml
