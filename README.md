@@ -5,6 +5,9 @@
 
 [![PlatformIO CI]([https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml)
 
+[![Firmware Release 2](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml)
+
+
 https://github.com/hosanglee-kr/esp32_fastled_v001
 
 .github/workflows/ci_002.yml
