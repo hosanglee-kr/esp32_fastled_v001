@@ -343,11 +343,11 @@ const T_R310_animFrame_t g_R310_seqBlink[] PROGMEM = {
 // 윙크 애니메이션 시퀀스 데이터 (원본 데이터 기준 오른쪽 눈 윙크)
 const T_R310_animFrame_t g_R310_seqWink[] PROGMEM = {
     {{0, 0}, G_R310_FRAME_TIME / 2}, // 프레임 0: 기본 눈 모양
-    {{1, 0}, G_R310_FRAME_TIME / 2}, // 프레임 1: 오른쪽 눈 살짝 감김
-    {{2, 0}, G_R310_FRAME_TIME / 2}, // 프레임 2: 오른쪽 눈 더 감김
-    {{3, 0}, G_R310_FRAME_TIME / 2}, // 프레임 3: 오른쪽 눈 거의 감김
-    {{4, 0}, G_R310_FRAME_TIME / 2}, // 프레임 4: 오른쪽 눈 거의 완전히 감김
-    {{5, 0}, G_R310_FRAME_TIME * 2}, // 프레임 5: 오른쪽 눈 완전히 감김 (최대 시간 유지)
+    {{17, 0}, G_R310_FRAME_TIME / 2}, // 프레임 1: 오른쪽 눈 살짝 감김
+    {{18, 0}, G_R310_FRAME_TIME / 2}, // 프레임 2: 오른쪽 눈 더 감김
+    {{19, 0}, G_R310_FRAME_TIME / 2}, // 프레임 3: 오른쪽 눈 거의 감김
+    {{20, 0}, G_R310_FRAME_TIME / 2}, // 프레임 4: 오른쪽 눈 거의 완전히 감김
+    {{21, 0}, G_R310_FRAME_TIME * 2}, // 프레임 5: 오른쪽 눈 완전히 감김 (최대 시간 유지)
 };
 
 const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
