@@ -428,25 +428,26 @@ void R310_init() {
     FastLED.show();  // LED 표시 (초기에는 모든 LED 꺼짐)
 
     // 로봇 상태 관련 변수 초기화
-    g_R310_state = AWAKE; // 초기 상태: 깨어있음
-    g_R310_animState = S_IDLE; // 초기 애니메이션 상태: 유휴
-    g_R310_autoBlink = true; // 자동 깜빡임 활성화
-    g_R310_timeBlinkMinimum = 5000; // 자동 깜빡임 최소 대기 시간 (5초)
-    g_R310_timeLastAnimation = millis(); // 타이머 기준 시간 초기화
+    g_R310_state                = AWAKE;    // 초기 상태: 깨어있음
+    g_R310_animState            = S_IDLE;   // 초기 애니메이션 상태: 유휴
+    g_R310_autoBlink            = true;     // 자동 깜빡임 활성화
+    g_R310_timeBlinkMinimum     = 5000;     // 자동 깜빡임 최소 대기 시간 (5초)
+    g_R310_timeLastAnimation    = millis(); // 타이머 기준 시간 초기화
 
     // 텍스트 버퍼 초기화 및 포인터 연결
-    g_R310_textBuffer[0] = '\0'; // 버퍼 비우기
-    g_R310_pText = g_R310_textBuffer; // 포인터가 버퍼 시작 주소 가리키도록 설정
+    g_R310_textBuffer[0]        = '\0';              // 버퍼 비우기
+    g_R310_pText                = g_R310_textBuffer; // 포인터가 버퍼 시작 주소 가리키도록 설정
 
     // 로봇 상태 관리를 위한 마지막 활동 시간 기록 변수를 현재 시간으로 초기화합니다.
-    g_R310_lastCommandTime = millis();
+    g_R310_lastCommandTime      = millis();
 
     // 시작 시 중립 애니메이션 설정 (runAnimation에서 처리되도록)
     R310_setAnimation(E_R310_NEUTRAL, false, false, true); // 중립 애니메이션 설정 (강제 시작)
 }
 
-// 메인 실행 루프 (Arduino loop 대체)
+// 메인 실행 루프
 void R310_run() {
+
     R310_runAnimation(); // 애니메이션/표시 로직 실행
 
     // 비활성 시간 기준 로봇 상태 변경 로직 예제
