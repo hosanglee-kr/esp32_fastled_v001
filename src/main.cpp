@@ -46,6 +46,12 @@
     #include "R300_RobotEyes_T30_006/R300_Main_010.h"
 #endif
 
+
+#ifdef R310
+    #include "R300_RobotEyes_T30_006/R310_Main_011_data2.h"
+#endif
+
+
 #ifdef C100
     #include "C100_CarEyes_v003/C100_CarEyes_Main_001.h"
 	//#include "C100_CarEyes_001.h"
@@ -96,6 +102,10 @@ void setup() {
 	    R300_init();
 	#endif
 
+	#ifdef R310
+	    R310_init();
+	#endif
+
 	#ifdef C100
 		C100_init();
 	#endif
@@ -144,6 +154,10 @@ void loop() {
 
 	#ifdef R300
 	    R300_run();
+	#endif
+
+	#ifdef R310
+	    R310_run();
 	#endif
 	
 	#ifdef C100
