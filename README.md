@@ -1,9 +1,10 @@
-[![PR](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml)
+[![PR CI](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml)
+
+[![ReleaseState](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml)
+
+[![ReleaseVer](https://img.shields.io/github/release/hosanglee-kr/esp32_fastled_v001.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/releases)
 
 
-[![GitHub release](https://img.shields.io/github/release/hosanglee-kr/esp32_fastled_v001.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/releases)
-
-[![Firmware Release](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml)
 
 # ESP32 FastLed & CarEyes
 
