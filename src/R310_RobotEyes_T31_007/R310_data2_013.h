@@ -31,7 +31,7 @@ typedef struct {
 typedef enum {
     EYE_RIGHT = 0,
     EYE_LEFT  = 1
-} T_R310_Eye_Idx;
+} T_R310_EyeSide_Idx_t;
 
 // --- 로봇 눈 모양 폰트 인덱스를 위한 열거형 정의 ---
 // 각 폰트 인덱스는 특정 눈 모양에 대한 의미 있는 이름을 가집니다.
