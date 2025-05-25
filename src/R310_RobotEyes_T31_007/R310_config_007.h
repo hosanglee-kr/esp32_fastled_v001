@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define G_R310_ONBOARD_WS2812_PIN   21
+
+
 // --- WS2812b (FastLED) 하드웨어 설정 (전역 상수: G_R310_ 로 시작) ---
 // WS2812b LED 데이터 핀 번호
 #define G_R310_NEOPIXEL_PIN			 13
@@ -26,12 +29,11 @@
 // 전체 디스플레이 너비 (픽셀)
 // #define G_R310_DISPLAY_WIDTH 16
 
-// 전체 디스플레이 높이 (픽셀)
-#define G_R310_DISPLAY_HEIGHT		 8
-// 오른쪽 눈 시작 픽셀 인덱스 (하드웨어 배선에 맞게 수정 필요)
-#define G_R310_RIGHT_EYE_START_PIXEL 0
-// 왼쪽 눈 시작 픽셀 인덱스 (하드웨어 배선에 맞게 수정 필요)
-#define G_R310_LEFT_EYE_START_PIXEL	 64
+
+#define G_R310_DISPLAY_HEIGHT		 8          // 전체 디스플레이 높이 (픽셀)
+
+#define G_R310_RIGHT_EYE_START_PIXEL 0          // 오른쪽 눈 시작 픽셀 인덱스 (하드웨어 배선에 맞게 수정 필요)
+#define G_R310_LEFT_EYE_START_PIXEL	 64         // 왼쪽 눈 시작 픽셀 인덱스 (하드웨어 배선에 맞게 수정 필요)
 
 // 눈 하나당 픽셀 개수 (8x8)
 // #define G_R310_EYE_MATRIX_SIZE 64

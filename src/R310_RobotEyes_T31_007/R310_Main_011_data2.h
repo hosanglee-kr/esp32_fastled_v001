@@ -1,58 +1,60 @@
 
 #pragma once
 
+
+//#define R310_DEB
+#define R310_PROGRESS_1
+
+
 // R310_variables_and_funcs_005.h - 로봇 눈 애니메이션 및 상태 관리의 변수 및 함수 구현 파일
 // 이 파일은 필요한 데이터 및 타입 헤더 파일을 포함하고 main.cpp에서 사용됩니다.
 
 // 기본 타입 및 설정 헤더 파일 포함
-#include "R310_types_config_007.h"
+#include "R310_config_007.h"
 // 정적 데이터 테이블 헤더 파일 포함
-#include "R310_data2_011.h"
+#include "R310_data2_012.h"
 
 // --- 글로벌 변수 정의 (g_R310_ 로 시작) ---
-// FastLED CRGB 배열
-CRGB			   g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];
-// CRGB 배열 포인터
-CRGB*			   g_R310_leds_ptr			= nullptr;	// setup()에서 실제 배열 주소 할당
 
-// 현재 로봇 상태
-T_R310_State	   g_R310_state				= AWAKE;
+CRGB			   g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];       // FastLED CRGB 배열
+
+CRGB*			   g_R310_leds_ptr			= nullptr;	        // CRGB 배열 포인터
+
+
+T_R310_State	   g_R310_state				= AWAKE;            // 현재 로봇 상태
 
 // 애니메이션 실행 및 시간 관리 변수
 // 현재 애니메이션 프레임 표시 시작 시간
 /// uint32_t g_R310_timeStartPause = 0;
 
-// 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
-uint32_t		   g_R310_timeLastAnimation = 0;
-// 자동 깜빡임 최소 대기 시간 (밀리초)
-uint16_t		   g_R310_timeBlinkMinimum	= 5000;	 // 기본값 5초
 
-// 애니메이션 상태 머신 현재 상태
-T_R310_animState_t g_R310_animState			= S_IDLE;
+uint32_t		   g_R310_timeLastAnimation = 0;                        // 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
 
-// 애니메이션 제어 및 플래그
-// 자동 깜빡임 기능 활성화 여부
+uint16_t		   g_R310_timeBlinkMinimum	= 5000;	 // 기본값 5초      // 자동 깜빡임 최소 대기 시간 (밀리초)
+
+T_R310_animState_t g_R310_animState			= S_IDLE;               // 애니메이션 상태 머신 현재 상태
+
+//bool			   g_R310_autoBlink			= false;                // 자동 깜빡임 기능 활성화 여부
 bool			   g_R310_autoBlink			= true;
-// 현재 실행 중인 애니메이션 시퀀스 정보
-T_R310_animTable_t g_R310_animEntry;
-// 현재 시퀀스 내 프레임 인덱스
-int8_t			   g_R310_animIndex		 = 0;
-// 애니메이션 시퀀스 역방향 재생 여부
-bool			   g_R310_animReverse	 = false;
-// 시퀀스 완료 후 자동 역방향 재생 여부
-bool			   g_R310_autoReverse	 = false;
-// 다음에 재생할 애니메이션 감정 종류
-T_R310_emotion_t   g_R310_nextEmotion	 = E_R310_NONE;
-// 현재 화면에 표시되는 애니메이션 감정 종류
-T_R310_emotion_t   g_R310_currentEmotion = E_R310_NONE;
 
-// 표시할 텍스트 문자열 고정 크기 버퍼
-char			   g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];
-// 표시할 텍스트 문자열 포인터 (g_R310_textBuffer 시작 주소)
-char*			   g_R310_pText			  = nullptr;
+T_R310_animTable_t g_R310_animEntry;                                // 현재 실행 중인 애니메이션 시퀀스 정보
 
-// 로봇 상태 관리를 위한 마지막 활동 시간 기록
-unsigned long	   g_R310_lastCommandTime = 0;
+int8_t			   g_R310_animIndex		 = 0;                       // 현재 시퀀스 내 프레임 인덱스
+
+bool			   g_R310_animReverse	 = false;                   // 애니메이션 시퀀스 역방향 재생 여부
+
+bool			   g_R310_autoReverse	 = false;                   // 시퀀스 완료 후 자동 역방향 재생 여부
+
+T_R310_emotion_t   g_R310_nextEmotion	 = E_R310_NONE;             // 다음에 재생할 애니메이션 감정 종류
+
+T_R310_emotion_t   g_R310_currentEmotion = E_R310_NONE;             // 현재 화면에 표시되는 애니메이션 감정 종류
+
+char			   g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];   // 표시할 텍스트 문자열 고정 크기 버퍼
+
+char*			   g_R310_pText			  = nullptr;                // 표시할 텍스트 문자열 포인터 (g_R310_textBuffer 시작 주소)
+
+
+unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상태 관리를 위한 마지막 활동 시간 기록
 
 // --- 글로벌 함수 정의 (R310_ 로 시작) ---
 
@@ -101,7 +103,8 @@ void R310_drawEye(uint8_t p_eye_index, uint8_t p_ch) {
     // 읽어온 행 우선(Row Major) 비트맵 데이터 기반 픽셀 설정
     // v_charData.data[row]는 해당 행의 8개 픽셀 비트맵을 나타냅니다.
     // 각 바이트의 비트는 MSB(왼쪽)부터 LSB(오른쪽) 순서로 열(Col 0 ~ Col 7)을 나타냅니다.
-    for (uint8_t v_row = 0; v_row < G_R310_DISPLAY_HEIGHT / 2; v_row++) { // 각 행(0-7)을 반복합니다.
+    for (uint8_t v_row = 0; v_row < G_R310_DISPLAY_HEIGHT; v_row++) { // 각 행(0-7)을 반복합니다.
+    /////for (uint8_t v_row = 0; v_row < G_R310_DISPLAY_HEIGHT / 2; v_row++) { // 각 행(0-7)을 반복합니다.
         // 현재 행에 해당하는 8열의 비트맵 데이터(1바이트)를 읽어옵니다.
         uint8_t v_row_byte = pgm_read_byte(&v_charData.data[v_row]); // 이제 data[row]가 행 데이터입니다.
 
@@ -137,6 +140,7 @@ void R310_drawEyes(uint8_t p_R, uint8_t p_L) {
 // @return 시퀀스 프레임 개수. 찾지 못하면 1 반환 (기본값 중립).
 uint8_t R310_loadSequence(T_R310_emotion_t p_e) {
     bool v_found = false;
+
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_lookupTable); v_i++) {
         T_R310_animTable_t v_entry;
         memcpy_P(&v_entry, &g_R310_lookupTable[v_i], sizeof(T_R310_animTable_t));
@@ -224,6 +228,7 @@ void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
         g_R310_nextEmotion = p_e;     // 다음에 재생할 감정 설정
         g_R310_autoReverse = p_r;     // 자동 역재생 여부 설정
         g_R310_animReverse = p_b;     // 시작 방향 설정
+
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
         if (p_force || g_R310_animState == S_IDLE) {
              g_R310_animState = S_RESTART;
@@ -261,6 +266,25 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(E_R310_NEUTRAL, true, false, true);
     } else if (strcmp(p_command, "blink") == 0) {
         R310_setAnimation(E_R310_BLINK, true, false, true);
+    
+    } else if (strcmp(p_command, "neutral") == 0) {
+        R310_setAnimation(E_R310_WINK, true, false, true);
+
+    } else if (strcmp(p_command, "left") == 0) {
+        R310_setAnimation(E_R310_LOOK_L, true, false, true);
+    } else if (strcmp(p_command, "right") == 0) {
+        R310_setAnimation(E_R310_LOOK_R, true, false, true);
+    } else if (strcmp(p_command, "up") == 0) {
+        R310_setAnimation(E_R310_LOOK_U, true, false, true);
+    } else if (strcmp(p_command, "down") == 0) {
+        R310_setAnimation(E_R310_LOOK_D, true, false, true);
+    
+    } else if (strcmp(p_command, "updown") == 0) {
+        R310_setAnimation(E_R310_SCAN_UD, true, false, true);
+    } else if (strcmp(p_command, "leftright") == 0) {
+        R310_setAnimation(E_R310_SCAN_LR, true, false, true);
+    
+
     } else if (strcmp(p_command, "angry") == 0) {
         R310_setAnimation(E_R310_ANGRY, true, false, true);
     } else if (strcmp(p_command, "sad") == 0) {
@@ -298,8 +322,8 @@ void R310_processCommand(const char* p_command) {
 // 로봇이 IDLE 상태이면 true 반환
 // @return 현재 로봇 눈 상태가 S_IDLE이면 true, 아니면 false
 bool R310_runAnimation(void) {
-    static T_R310_animFrame_t v_thisFrame; // 현재 프레임 데이터
-    static uint32_t v_timeOfLastFrame = 0; // 현재 프레임 표시 시작 시간
+    static T_R310_animFrame_t   v_thisFrame;            // 현재 프레임 데이터
+    static uint32_t             v_timeOfLastFrame = 0;  // 현재 프레임 표시 시작 시간
 
     // 현재 애니메이션 상태에 따라 동작 수행
     switch (g_R310_animState) {
@@ -323,6 +347,7 @@ bool R310_runAnimation(void) {
                  // 최소 대기 시간 경과 후 무작위 확률(예: 30% 확률)로 깜빡임을 트리거합니다.
                  if (random(1000) > 700) {
                     if (g_R310_state == SLEEPING) {
+                        //R310_setAnimation(E_R310_BLINK, true, false, true); 
                         R310_setAnimation(E_R310_SQUINT_BLINK, true, false, true); // 잠자는 상태: 찡그림 깜빡임
                     } else if (g_R310_state == AWAKE) {
                         R310_setAnimation(E_R310_BLINK, true, false, true); // 깨어있는 상태: 일반 깜빡임
@@ -340,10 +365,14 @@ bool R310_runAnimation(void) {
 
             // 다음에 재생할 애니메이션 확인
             if (g_R310_nextEmotion != E_R310_NONE) {
+
                 R310_loadSequence(g_R310_nextEmotion); // 시퀀스 로드
+
                 g_R310_currentEmotion = g_R310_nextEmotion; // 현재 감정 업데이트
                 g_R310_nextEmotion = E_R310_NONE; // 큐 비우기
+
                 g_R310_animState = S_ANIMATE; // 애니메이션 실행 상태로 전환
+
             } else {
                  g_R310_animState = S_IDLE; // 오류 또는 논리적 문제 시 유휴 상태 복귀
             }
@@ -419,7 +448,12 @@ bool R310_runAnimation(void) {
 
 // 초기화 함수 (Arduino setup 대체)
 void R310_init() {
-    
+    #ifdef R310_DEB
+        Serial.println("R310_init - 100");
+    #endif
+
+    FastLED.setBrightness(20);
+
     // FastLED 초기화 및 LED 설정
     FastLED.addLeds<G_R310_LED_TYPE, G_R310_NEOPIXEL_PIN, G_R310_COLOR_ORDER>(g_R310_leds, G_R310_NEOPIXEL_NUM_LEDS).setCorrection(TypicalLEDStrip);
     g_R310_leds_ptr = g_R310_leds; // CRGB 배열 주소 포인터에 할당
@@ -427,12 +461,19 @@ void R310_init() {
     FastLED.clear(); // LED 버퍼 초기화 (검은색)
     FastLED.show();  // LED 표시 (초기에는 모든 LED 꺼짐)
 
+    #ifdef R310_DEB
+        Serial.println("R310_init - 110");
+    #endif
+
+
     // 로봇 상태 관련 변수 초기화
     g_R310_state                = AWAKE;    // 초기 상태: 깨어있음
     g_R310_animState            = S_IDLE;   // 초기 애니메이션 상태: 유휴
-    g_R310_autoBlink            = true;     // 자동 깜빡임 활성화
+    // g_R310_autoBlink            = true;     // 자동 깜빡임 활성화
     g_R310_timeBlinkMinimum     = 5000;     // 자동 깜빡임 최소 대기 시간 (5초)
     g_R310_timeLastAnimation    = millis(); // 타이머 기준 시간 초기화
+
+
 
     // 텍스트 버퍼 초기화 및 포인터 연결
     g_R310_textBuffer[0]        = '\0';              // 버퍼 비우기
@@ -441,14 +482,33 @@ void R310_init() {
     // 로봇 상태 관리를 위한 마지막 활동 시간 기록 변수를 현재 시간으로 초기화합니다.
     g_R310_lastCommandTime      = millis();
 
+    #ifdef R310_DEB
+        Serial.println("R310_init - 120");
+    #endif
+    
+
     // 시작 시 중립 애니메이션 설정 (runAnimation에서 처리되도록)
     R310_setAnimation(E_R310_NEUTRAL, false, false, true); // 중립 애니메이션 설정 (강제 시작)
+
+    #ifdef R310_DEB
+        Serial.println("R310_init - 140");
+    #endif
+
+    
 }
 
 // 메인 실행 루프
 void R310_run() {
 
+    #ifdef R310_DEB
+        Serial.println("R310_run - 100");
+    #endif
+
     R310_runAnimation(); // 애니메이션/표시 로직 실행
+
+    #ifdef R310_DEB
+        Serial.println("R310_run - 110");
+    #endif
 
     // 비활성 시간 기준 로봇 상태 변경 로직 예제
     // SLEEPING 상태가 아니고 비활성 시간 경과 시
@@ -471,6 +531,11 @@ void R310_run() {
         g_R310_lastCommandTime = millis(); // 활동 시간 업데이트
     }
 
-    // 루프 속도 조절 (필요시)
-    // delay(1);
+    #ifdef R310_DEB
+        Serial.println("R310_run - 120");
+    #endif 
+        // 루프 속도 조절 (필요시)
+    //delay(1);
+
+    delay(1);
 }

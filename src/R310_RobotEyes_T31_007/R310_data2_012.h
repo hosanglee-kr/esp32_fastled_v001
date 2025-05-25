@@ -6,7 +6,7 @@
 
 // 기본 타입 및 설정 헤더 파일 포함
 // 이 헤더 파일은 T_R310_로 시작하는 구조체 및 열거형과 G_R310_로 시작하는 상수를 정의합니다.
-#include "R310_types_config_007.h" // G_R310_FRAME_TIME 및 G_R310_ARRAY_SIZE 정의를 포함해야 합니다.
+#include "R310_config_007.h" // G_R310_FRAME_TIME 및 G_R310_ARRAY_SIZE 정의를 포함해야 합니다.
 
 
 // --- 전역 상수 정의 (G_R310_ 로 시작) ---
@@ -32,23 +32,24 @@ typedef struct {
 typedef enum {
     // 기본 눈 모양 (인덱스 0-4)
     EYE_NEUTRAL = 0,            // 중립/행복한 눈
-    EYE_LOOK_DOWN_FAR,          // 아래쪽 먼 곳을 보는 눈
-    EYE_LOOK_DOWN_CENTER,       // 아래쪽 중앙을 보는 눈
-    EYE_LOOK_UP_CENTER,         // 위쪽 중앙을 보는 눈
-    EYE_LOOK_UP_FAR,            // 위쪽 먼 곳을 보는 눈
+    EYE_LOOK_DOWN_2,          // 아래쪽 먼 곳을 보는 눈
+    EYE_LOOK_DOWN_1,       // 아래쪽 중앙을 보는 눈
+    EYE_LOOK_UP_1,         // 위쪽 중앙을 보는 눈
+    EYE_LOOK_UP_2,            // 위쪽 먼 곳을 보는 눈
 
     // 좌우 시선 이동 눈 모양 (인덱스 5-8)
-    EYE_LOOK_LEFT_SMALL_PUPIL,  // 왼쪽을 보는 눈 (작은 눈동자)
-    EYE_LOOK_RIGHT_SMALL_PUPIL, // 오른쪽을 보는 눈 (작은 눈동자)
-    EYE_LOOK_LEFT_ASYMMETRIC,   // 왼쪽을 보는 눈 (비대칭)
-    EYE_LOOK_RIGHT_ASYMMETRIC,  // 오른쪽을 보는 눈 (비대칭)
+    EYE_LOOK_LEFT_2,  // 왼쪽을 보는 눈 (작은 눈동자)
+    EYE_LOOK_LEFT_1, // 오른쪽을 보는 눈 (작은 눈동자)
+    EYE_LOOK_RIGHT_1,   // 왼쪽을 보는 눈 (비대칭)
+    EYE_LOOK_RIGHT_2,  // 오른쪽을 보는 눈 (비대칭)
 
     // 감기거나 찡그린 눈 모양 (인덱스 9-15)
-    EYE_LID_HALF_CLOSED,        // 눈꺼풀이 절반 감긴 눈
-    EYE_LID_MORE_CLOSED,        // 눈꺼풀이 더 감긴 눈
-    EYE_LID_ALMOST_CLOSED,      // 눈꺼풀이 거의 감긴 눈
-    EYE_LID_PUPIL_ONLY,         // 눈동자만 보이는 눈
-    EYE_LID_MIN_PUPIL,          // 매우 작은 눈동자만 보이는 눈
+    EYE_CLOSE_1,        // 눈꺼풀이 절반 감긴 눈
+    EYE_CLOSE_2,        // 눈꺼풀이 더 감긴 눈
+    EYE_CLOSE_3,      // 눈꺼풀이 거의 감긴 눈
+    EYE_CLOSE_4,         // 눈동자만 보이는 눈
+    EYE_CLOSE_5,          // 매우 작은 눈동자만 보이는 눈
+
     EYE_X_SHAPE_1,              // X자 눈 모양 1
     EYE_X_SHAPE_2,              // X자 눈 모양 2
 
@@ -92,6 +93,8 @@ typedef enum {
     EYE_SLEEP_STAGE4,           // 잠자는 눈 모양 4
     EYE_SLEEP_STAGE5,           // 잠자는 눈 모양 5
     EYE_SLEEP_STAGE6,           // 잠자는 눈 모양 6 (완전히 감김/패턴)
+
+    EYE_SLEEP,
 } T_R310_EyeFontIndex_t;
 
 
@@ -103,6 +106,7 @@ typedef enum {
 
 // 로봇 눈 감정 애니메이션 종류
 typedef enum {
+
     E_R310_NONE,          // 애니메이션 없음
     E_R310_NEUTRAL,       // 일반적인 눈 모양
     E_R310_BLINK,         // 깜빡임
@@ -112,15 +116,17 @@ typedef enum {
     E_R310_LOOK_U,        // 위 보기
     E_R310_LOOK_D,        // 아래 보기
 
+	E_R310_SCAN_UD,       // 상하 스캔
+    E_R310_SCAN_LR,       // 좌우 스캔
+
+	E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
+
     E_R310_ANGRY,         // 화남
     E_R310_SAD,           // 슬픔
     E_R310_EVIL,          // 사악함
     E_R310_EVIL2,         // 사악함 2 (찡그림 기반)
     E_R310_SQUINT,        // 찡그림
     E_R310_DEAD,          // 죽은 눈
-    E_R310_SCAN_UD,       // 상하 스캔
-    E_R310_SCAN_LR,       // 좌우 스캔
-    E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
     E_R310_IDLE,          // 대기 상태 (찡그린 눈 고정)
     E_R310_HEART,         // 하트
     E_R310_SLEEP,         // 잠자는 눈
@@ -156,50 +162,50 @@ typedef enum {
 
 // 깜빡임 애니메이션 시퀀스 데이터
 const T_R310_animFrame_t g_R310_seqBlink[] PROGMEM = {
-    {{ EYE_NEUTRAL,           EYE_NEUTRAL           }, G_R310_FRAME_TIME / 2}, // 프레임 0: 기본 눈 모양
-    {{ EYE_LID_HALF_CLOSED,   EYE_LID_HALF_CLOSED   }, G_R310_FRAME_TIME / 2}, // 프레임 1: 살짝 감김
-    {{ EYE_LID_MORE_CLOSED,   EYE_LID_MORE_CLOSED   }, G_R310_FRAME_TIME / 2}, // 프레임 2: 더 감김
-    {{ EYE_LID_ALMOST_CLOSED, EYE_LID_ALMOST_CLOSED }, G_R310_FRAME_TIME / 2}, // 프레임 3: 거의 감김
-    {{ EYE_LID_PUPIL_ONLY,    EYE_LID_PUPIL_ONLY    }, G_R310_FRAME_TIME / 2}, // 프레임 4: 거의 완전히 감김
-    {{ EYE_LID_MIN_PUPIL,     EYE_LID_MIN_PUPIL     }, G_R310_FRAME_TIME},     // 프레임 5: 완전히 감김 (최대 시간 유지)
+    {{ EYE_NEUTRAL	, EYE_NEUTRAL	}, G_R310_FRAME_TIME / 2}, // 프레임 0: 기본 눈 모양
+    {{ EYE_CLOSE_1	, EYE_CLOSE_1   }, G_R310_FRAME_TIME / 2}, // 프레임 1: 살짝 감김
+    {{ EYE_CLOSE_2	, EYE_CLOSE_2   }, G_R310_FRAME_TIME / 2}, // 프레임 2: 더 감김
+    {{ EYE_CLOSE_3	, EYE_CLOSE_3	}, G_R310_FRAME_TIME / 2}, // 프레임 3: 거의 감김
+    {{ EYE_CLOSE_4	, EYE_CLOSE_4   }, G_R310_FRAME_TIME / 2}, // 프레임 4: 거의 완전히 감김
+    {{ EYE_CLOSE_5	, EYE_CLOSE_5   }, G_R310_FRAME_TIME},     // 프레임 5: 완전히 감김 (최대 시간 유지)
 };
 
 // 윙크 애니메이션 시퀀스 데이터 (오른쪽 눈 윙크 기준)
 const T_R310_animFrame_t g_R310_seqWink[] PROGMEM = {
-    {{ EYE_NEUTRAL,           EYE_NEUTRAL           }, G_R310_FRAME_TIME / 2}, // 프레임 0: 기본 눈 모양
-    {{ EYE_LID_HALF_CLOSED,   EYE_NEUTRAL           }, G_R310_FRAME_TIME / 2}, // 프레임 1: 오른쪽 눈 살짝 감김
-    {{ EYE_LID_MORE_CLOSED,   EYE_NEUTRAL           }, G_R310_FRAME_TIME / 2}, // 프레임 2: 오른쪽 눈 더 감김
-    {{ EYE_LID_ALMOST_CLOSED, EYE_NEUTRAL           }, G_R310_FRAME_TIME / 2}, // 프레임 3: 오른쪽 눈 거의 감김
-    {{ EYE_LID_PUPIL_ONLY,    EYE_NEUTRAL           }, G_R310_FRAME_TIME / 2}, // 프레임 4: 오른쪽 눈 거의 완전히 감김
-    {{ EYE_LID_MIN_PUPIL,     EYE_NEUTRAL           }, G_R310_FRAME_TIME * 2}, // 프레임 5: 오른쪽 눈 완전히 감김 (최대 시간 유지)
+    {{ EYE_NEUTRAL	, EYE_NEUTRAL	}, G_R310_FRAME_TIME / 2}, // 프레임 0: 기본 눈 모양
+    {{ EYE_CLOSE_1	, EYE_NEUTRAL	}, G_R310_FRAME_TIME / 2}, // 프레임 1: 오른쪽 눈 살짝 감김
+    {{ EYE_CLOSE_2	, EYE_NEUTRAL	}, G_R310_FRAME_TIME / 2}, // 프레임 2: 오른쪽 눈 더 감김
+    {{ EYE_CLOSE_3	, EYE_NEUTRAL	}, G_R310_FRAME_TIME / 2}, // 프레임 3: 오른쪽 눈 거의 감김
+    {{ EYE_CLOSE_4	, EYE_NEUTRAL	}, G_R310_FRAME_TIME / 2}, // 프레임 4: 오른쪽 눈 거의 완전히 감김
+    {{ EYE_CLOSE_5	, EYE_NEUTRAL	}, G_R310_FRAME_TIME * 2}, // 프레임 5: 오른쪽 눈 완전히 감김 (최대 시간 유지)
 };
 
 // 오른쪽 보기 애니메이션 시퀀스 데이터
 const T_R310_animFrame_t g_R310_seqRight[] PROGMEM = {
-    {{ EYE_NEUTRAL,            EYE_NEUTRAL           }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
-    {{ EYE_LOOK_RIGHT_ASYMMETRIC, EYE_LOOK_RIGHT_ASYMMETRIC }, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 오른쪽 이동 시작
-    {{ EYE_LOOK_RIGHT_SMALL_PUPIL, EYE_LOOK_RIGHT_SMALL_PUPIL}, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 오른쪽 끝 (최대 시간 유지)
+    {{ EYE_NEUTRAL		, EYE_NEUTRAL       }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
+    {{ EYE_LOOK_RIGHT_1	, EYE_LOOK_RIGHT_1 	}, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 오른쪽 이동 시작
+    {{ EYE_LOOK_RIGHT_2	, EYE_LOOK_RIGHT_1	}, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 오른쪽 끝 (최대 시간 유지)
 };
 
 // 왼쪽 보기 애니메이션 시퀀스 데이터
 const T_R310_animFrame_t g_R310_seqLeft[] PROGMEM = {
-    {{ EYE_NEUTRAL,             EYE_NEUTRAL           }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
-    {{ EYE_LOOK_LEFT_ASYMMETRIC, EYE_LOOK_LEFT_ASYMMETRIC }, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 왼쪽 이동 시작
-    {{ EYE_LOOK_LEFT_SMALL_PUPIL, EYE_LOOK_LEFT_SMALL_PUPIL}, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 왼쪽 끝 (최대 시간 유지)
+    {{ EYE_NEUTRAL      , EYE_NEUTRAL       }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
+    {{ EYE_LOOK_LEFT_1  , EYE_LOOK_LEFT_1   }, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 왼쪽 이동 시작
+    {{ EYE_LOOK_LEFT_2  , EYE_LOOK_LEFT_2   }, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 왼쪽 끝 (최대 시간 유지)
 };
 
 // 위 보기 애니메이션 시퀀스 데이터
 const T_R310_animFrame_t g_R310_seqUp[] PROGMEM = {
-    {{ EYE_NEUTRAL,          EYE_NEUTRAL         }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
-    {{ EYE_LOOK_UP_CENTER,   EYE_LOOK_UP_CENTER  }, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 위 이동 시작
-    {{ EYE_LOOK_UP_FAR,      EYE_LOOK_UP_FAR     }, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 더 위로
+    {{ EYE_NEUTRAL      , EYE_NEUTRAL   }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
+    {{ EYE_LOOK_UP_1    , EYE_LOOK_UP_1 }, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 위 이동 시작
+    {{ EYE_LOOK_UP_2    , EYE_LOOK_UP_2 }, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 더 위로
 };
 
 // 아래 보기 애니메이션 시퀀스 데이터
 const T_R310_animFrame_t g_R310_seqDown[] PROGMEM = {
-    {{ EYE_NEUTRAL,         EYE_NEUTRAL        }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
-    {{ EYE_LOOK_DOWN_CENTER, EYE_LOOK_DOWN_CENTER}, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 아래 이동 시작
-    {{ EYE_LOOK_DOWN_FAR,    EYE_LOOK_DOWN_FAR   }, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 더 아래로
+    {{ EYE_NEUTRAL      , EYE_NEUTRAL       }, G_R310_FRAME_TIME    }, // 프레임 0: 기본 눈 모양
+    {{ EYE_LOOK_DOWN_1  , EYE_LOOK_DOWN_1   }, G_R310_FRAME_TIME    }, // 프레임 1: 눈동자 아래 이동 시작
+    {{ EYE_LOOK_DOWN_2  , EYE_LOOK_DOWN_2   }, G_R310_FRAME_TIME * 5}, // 프레임 2: 눈동자 더 아래로
 };
 
 // 화남 애니메이션 시퀀스 데이터 (좌우 눈 모양 인덱스 다름)
@@ -228,10 +234,10 @@ const T_R310_animFrame_t g_R310_seqEvil[] PROGMEM = {
 // 사악함 2 애니메이션 시퀀스 데이터 (좌우 눈 모양 인덱스 다름) - 찡그린 눈 기반
 const T_R310_animFrame_t g_R310_seqEvil2[] PROGMEM = {
     {{ EYE_NEUTRAL,           EYE_NEUTRAL           }, G_R310_FRAME_TIME},     // 프레임 0: 기본 눈 모양
-    {{ EYE_SQUINTED,          EYE_LID_HALF_CLOSED   }, G_R310_FRAME_TIME},   // 프레임 1: 좌우 비대칭 눈 모양 시작
-    {{ EYE_SQUINTED,          EYE_LID_MORE_CLOSED   }, G_R310_FRAME_TIME},   // 프레임 2: 좌우 비대칭 진행
-    {{ EYE_SQUINTED,          EYE_LID_ALMOST_CLOSED }, G_R310_FRAME_TIME},   // 프레임 3: 좌우 비대칭 진행
-    {{ EYE_SQUINTED,          EYE_LID_PUPIL_ONLY    }, 2000},                // 프레임 4: 좌우 비대칭 최종 상태 (2초 유지)
+    {{ EYE_SQUINTED,          EYE_CLOSE_1   }, G_R310_FRAME_TIME},   // 프레임 1: 좌우 비대칭 눈 모양 시작
+    {{ EYE_SQUINTED,          EYE_CLOSE_2   }, G_R310_FRAME_TIME},   // 프레임 2: 좌우 비대칭 진행
+    {{ EYE_SQUINTED,          EYE_CLOSE_3 }, G_R310_FRAME_TIME},   // 프레임 3: 좌우 비대칭 진행
+    {{ EYE_SQUINTED,          EYE_CLOSE_4    }, 2000},                // 프레임 4: 좌우 비대칭 최종 상태 (2초 유지)
 };
 
 // 찡그림 애니메이션 시퀀스 데이터 (좌우 눈 동일 모양)
@@ -252,26 +258,27 @@ const T_R310_animFrame_t g_R310_seqDead[] PROGMEM = {
 
 // 좌우 스캔 애니메이션 시퀀스 데이터 (좌우 눈 동일 모양)
 const T_R310_animFrame_t g_R310_seqScanLeftRight[] PROGMEM = {
-    {{ EYE_SCAN_LR_1, EYE_SCAN_LR_1 }, G_R310_FRAME_TIME * 2},// 프레임 0: 눈동자 왼쪽 끝 (200ms 유지)
-    {{ EYE_SCAN_LR_2, EYE_SCAN_LR_2 }, G_R310_FRAME_TIME},   // 프레임 1: 눈동자 이동
-    {{ EYE_SCAN_LR_3, EYE_SCAN_LR_3 }, G_R310_FRAME_TIME},   // 프레임 2: 눈동자 이동
-    {{ EYE_LOOK_RIGHT_SMALL_PUPIL, EYE_LOOK_RIGHT_SMALL_PUPIL }, G_R310_FRAME_TIME},   // 프레임 3: 눈동자 오른쪽 끝 (원래 폰트 인덱스로 변경)
+    {{ EYE_LOOK_LEFT_2  , EYE_LOOK_LEFT_2   }, G_R310_FRAME_TIME * 2},// 프레임 0: 눈동자 왼쪽 끝 (200ms 유지)
+    {{ EYE_LOOK_LEFT_1  , EYE_LOOK_LEFT_1   }, G_R310_FRAME_TIME},   // 프레임 1: 눈동자 이동
+    {{ EYE_LOOK_RIGHT_1 , EYE_LOOK_RIGHT_1  }, G_R310_FRAME_TIME},   // 프레임 2: 눈동자 이동
+    {{ EYE_LOOK_RIGHT_2 , EYE_LOOK_RIGHT_2  }, G_R310_FRAME_TIME},   // 프레임 3: 눈동자 오른쪽 끝 (원래 폰트 인덱스로 변경)
 };
 
 // 상하 스캔 애니메이션 시퀀스 데이터 (좌우 눈 동일 모양)
 const T_R310_animFrame_t g_R310_seqScanUpDown[] PROGMEM = {
-    {{ EYE_SCAN_UD_1, EYE_SCAN_UD_1 }, G_R310_FRAME_TIME * 2},// 프레임 0: 눈동자 위쪽 중간 (200ms 유지)
-    {{ EYE_SCAN_UD_2, EYE_SCAN_UD_2 }, G_R310_FRAME_TIME},   // 프레임 1: 눈동자 이동
-    {{ EYE_SCAN_UD_3, EYE_SCAN_UD_3 }, G_R310_FRAME_TIME},   // 프레임 2: 눈동자 이동
-    {{ EYE_LOOK_DOWN_FAR, EYE_LOOK_DOWN_FAR }, G_R310_FRAME_TIME},   // 프레임 3: 눈동자 아래 끝 (원래 폰트 인덱스로 변경)
-    {{ EYE_LOOK_UP_FAR, EYE_LOOK_UP_FAR }, G_R310_FRAME_TIME}, // 프레임 4: 눈동자 위쪽 끝
-    {{ EYE_LOOK_UP_CENTER, EYE_LOOK_UP_CENTER }, G_R310_FRAME_TIME}, // 프레임 5: 눈동자 위쪽 중간 (원래 폰트 인덱스로 변경)
+    {{ EYE_LOOK_UP_1    , EYE_LOOK_UP_1     }, G_R310_FRAME_TIME * 2},// 프레임 0: 눈동자 위쪽 중간 (200ms 유지)
+    {{ EYE_LOOK_UP_2    , EYE_LOOK_UP_2     }, G_R310_FRAME_TIME},   // 프레임 1: 눈동자 이동
+    {{ EYE_LOOK_UP_1    , EYE_LOOK_UP_1     }, G_R310_FRAME_TIME},   // 프레임 2: 눈동자 이동
+    {{ EYE_NEUTRAL      , EYE_NEUTRAL       }, G_R310_FRAME_TIME},   // 프레임 3: 눈동자 아래 끝 (원래 폰트 인덱스로 변경)
+    {{ EYE_LOOK_DOWN_1  , EYE_LOOK_DOWN_1   }, G_R310_FRAME_TIME}, // 프레임 4: 눈동자 위쪽 끝
+    {{ EYE_LOOK_DOWN_2  , EYE_LOOK_DOWN_2   }, G_R310_FRAME_TIME}, // 프레임 5: 눈동자 위쪽 중간 (원래 폰트 인덱스로 변경)
 };
 
 // 찡그림 깜빡임 애니메이션 시퀀스 데이터 (좌우 눈 동일 모양)
 const T_R310_animFrame_t g_R310_seqSquintBlink[] PROGMEM = {
-    {{ EYE_SQUINTED, EYE_SQUINTED }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
-    {{ EYE_LID_MIN_PUPIL, EYE_LID_MIN_PUPIL }, G_R310_FRAME_TIME},     // 프레임 1: 완전히 감긴 모양
+    {{ EYE_CLOSE_4         	, EYE_CLOSE_4      }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
+    {{ EYE_CLOSE_5         	, EYE_CLOSE_5      }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
+    {{ EYE_SLEEP            , EYE_SLEEP        }, G_R310_FRAME_TIME},   // 프레임 1: 완전히 감긴 모양
 };
 
 // 대기 상태 눈 모양 시퀀스 데이터 (정적 표시)
@@ -301,23 +308,28 @@ const T_R310_animFrame_t g_R310_seqSleep[] PROGMEM = {
 // 감정 애니메이션 조회 테이블
 const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
     {E_R310_NEUTRAL      , g_R310_seqBlink        , 1                                  }, // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
-    {E_R310_BLINK        , g_R310_seqBlink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
+    
+	{E_R310_BLINK        , g_R310_seqBlink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
     {E_R310_WINK         , g_R310_seqWink         , G_R310_ARRAY_SIZE(g_R310_seqWink)  }, // 윙크
-    {E_R310_LOOK_L       , g_R310_seqLeft         , G_R310_ARRAY_SIZE(g_R310_seqLeft)  }, // 왼쪽 보기
+    
+	{E_R310_LOOK_L       , g_R310_seqLeft         , G_R310_ARRAY_SIZE(g_R310_seqLeft)  }, // 왼쪽 보기
     {E_R310_LOOK_R       , g_R310_seqRight        , G_R310_ARRAY_SIZE(g_R310_seqRight) }, // 오른쪽 보기
-    {E_R310_LOOK_U       , g_R310_seqUp           , G_R310_ARRAY_SIZE(g_R310_seqUp)    }, // 위 보기
+ 
+	{E_R310_LOOK_U       , g_R310_seqUp           , G_R310_ARRAY_SIZE(g_R310_seqUp)    }, // 위 보기
     {E_R310_LOOK_D       , g_R310_seqDown         , G_R310_ARRAY_SIZE(g_R310_seqDown)  }, // 아래 보기
+
+	{E_R310_SCAN_LR      , g_R310_seqScanLeftRight, G_R310_ARRAY_SIZE(g_R310_seqScanLeftRight)}, // 좌우 스캔
+    {E_R310_SCAN_UD      , g_R310_seqScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
+
+	{E_R310_SQUINT_BLINK , g_R310_seqSquintBlink  , G_R310_ARRAY_SIZE(g_R310_seqSquintBlink)}, // 찡그림 깜빡임
 
     {E_R310_ANGRY        , g_R310_seqAngry        , G_R310_ARRAY_SIZE(g_R310_seqAngry) }, // 화남
     {E_R310_SAD          , g_R310_seqSad          , G_R310_ARRAY_SIZE(g_R310_seqSad)   }, // 슬픔
     {E_R310_EVIL         , g_R310_seqEvil         , G_R310_ARRAY_SIZE(g_R310_seqEvil)  }, // 사악함
     {E_R310_EVIL2        , g_R310_seqEvil2        , G_R310_ARRAY_SIZE(g_R310_seqEvil2) }, // 사악함 2
     {E_R310_DEAD         , g_R310_seqDead         , G_R310_ARRAY_SIZE(g_R310_seqDead)  }, // 죽은 눈
-    {E_R310_SCAN_LR      , g_R310_seqScanLeftRight, G_R310_ARRAY_SIZE(g_R310_seqScanLeftRight)}, // 좌우 스캔
-    {E_R310_SCAN_UD      , g_R310_seqScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
     {E_R310_IDLE         , g_R310_seqIdle         , G_R310_ARRAY_SIZE(g_R310_seqIdle)  }, // 대기 상태
     {E_R310_SQUINT       , g_R310_seqSquint       , G_R310_ARRAY_SIZE(g_R310_seqSquint)}, // 찡그림
-    {E_R310_SQUINT_BLINK, g_R310_seqSquintBlink  , G_R310_ARRAY_SIZE(g_R310_seqSquintBlink)}, // 찡그림 깜빡임
     {E_R310_HEART        , g_R310_seqHeart        , G_R310_ARRAY_SIZE(g_R310_seqHeart) }, // 하트
     {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
 };
@@ -338,7 +350,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 1: EYE_LOOK_DOWN_FAR (아래쪽 먼 곳을 보는 눈)
+
+    // 인덱스 1: EYE_LOOK_DOWN_2 (아래쪽 먼 곳을 보는 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00000000, //  . . . . . . . .
@@ -349,7 +362,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b01100110, //  . # # . . # # .
         0b00111100  //  . . # # # # . .
     }},
-    // 인덱스 2: EYE_LOOK_DOWN_CENTER (아래쪽 중앙을 보는 눈)
+    
+    // 인덱스 2: EYE_LOOK_DOWN_1 (아래쪽 중앙을 보는 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00111100, //  . . # # # # . .
@@ -360,7 +374,9 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 3: EYE_LOOK_UP_CENTER (위쪽 중앙을 보는 눈)
+
+
+    // 인덱스 3: EYE_LOOK_UP_1 (위쪽 중앙을 보는 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00111100, //  . . # # # # . .
@@ -371,7 +387,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 4: EYE_LOOK_UP_FAR (위쪽 먼 곳을 보는 눈)
+
+    // 인덱스 4: EYE_LOOK_UP_2 (위쪽 먼 곳을 보는 눈)
     {8, {
         0b00111100, //  . . # # # # . .
         0b01100110, //  . # # . . # # .
@@ -382,7 +399,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00000000, //  . . . . . . . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 5: EYE_LOOK_LEFT_SMALL_PUPIL (왼쪽을 보는 눈, 작은 눈동자)
+    
+    // 인덱스 5: EYE_LOOK_LEFT_2 (왼쪽을 보는 눈, 작은 눈동자)
     {8, {
         0b00000000, //  . . . . . . . .
         0b01111000, //  . # # # # . . .
@@ -393,7 +411,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b01111000, //  . # # # # . . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 6: EYE_LOOK_RIGHT_SMALL_PUPIL (오른쪽을 보는 눈, 작은 눈동자)
+
+    // 인덱스 6: EYE_LOOK_LEFT_1 (오른쪽을 보는 눈, 작은 눈동자)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00111100, //  . . # # # # . .
@@ -404,18 +423,20 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 7: EYE_LOOK_LEFT_ASYMMETRIC (왼쪽을 보는 눈, 비대칭)
+    
+    // 인덱스 7: EYE_LOOK_RIGHT_1 (왼쪽을 보는 눈, 비대칭)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00111100, //  . . # # # # . .
-        0b01110010, //  . # # # . . # .
-        0b01110010, //  . # # # . . # .
         0b01111110, //  . # # # # # # .
+        0b01110010, //  . # # # . . # .
+        0b01110010, //  . # # # . . # .
         0b01111110, //  . # # # # # # .
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 8: EYE_LOOK_RIGHT_ASYMMETRIC (오른쪽을 보는 눈, 비대칭)
+
+    // 인덱스 8: EYE_LOOK_RIGHT_2 (오른쪽을 보는 눈, 비대칭)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00011110, //  . . . # # # # .
@@ -426,7 +447,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00011110, //  . . . # # # # .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 9: EYE_LID_HALF_CLOSED (눈꺼풀이 절반 감긴 눈)
+
+    // 인덱스 9: EYE_CLOSE_1 (눈꺼풀이 절반 감긴 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00000000, //  . . . . . . . .
@@ -437,7 +459,7 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 10: EYE_LID_MORE_CLOSED (눈꺼풀이 더 감긴 눈)
+    // 인덱스 10: EYE_CLOSE_2 (눈꺼풀이 더 감긴 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00000000, //  . . . . . . . .
@@ -448,7 +470,7 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 11: EYE_LID_ALMOST_CLOSED (눈꺼풀이 거의 감긴 눈)
+    // 인덱스 11: EYE_CLOSE_3 (눈꺼풀이 거의 감긴 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00000000, //  . . . . . . . .
@@ -459,7 +481,7 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 12: EYE_LID_PUPIL_ONLY (눈동자만 보이는 눈)
+    // 인덱스 12: EYE_CLOSE_4 (눈동자만 보이는 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00000000, //  . . . . . . . .
@@ -470,7 +492,7 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
-    // 인덱스 13: EYE_LID_MIN_PUPIL (매우 작은 눈동자만 보이는 눈)
+    // 인덱스 13: EYE_CLOSE_5 (매우 작은 눈동자만 보이는 눈)
     {8, {
         0b00000000, //  . . . . . . . .
         0b00000000, //  . . . . . . . .
@@ -481,6 +503,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
+
+
     // 인덱스 14: EYE_X_SHAPE_1 (X자 눈 모양 1)
     {8, {
         0b00111100, //  . . # # # # . .
@@ -503,6 +527,7 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00000000, //  . . . . . . . .
         0b00000000  //  . . . . . . . .
     }},
+
     // 인덱스 16: EYE_ANGRY_RIGHT_1 (화난 오른쪽 눈 1 - 눈썹 찡그림 시작)
     {8, {
         0b00100100, //  . . # . . # . .
@@ -569,6 +594,7 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b11100111, //  # # # . . # # #
         0b11111111  //  # # # # # # # #
     }},
+
     // 인덱스 22: EYE_SAD_RIGHT_1 (슬픈 오른쪽 눈 1 - 눈꼬리 처짐 시작)
     {8, {
         0b00000000, //  . . . . . . . .
@@ -635,6 +661,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111000, //  . . # # # . . .
         0b00000000  //  . . . . . . . .
     }},
+
+
     // 인덱스 28: EYE_EVIL_RIGHT_1 (사악한 오른쪽 눈 1 - 눈썹 치켜올림 시작)
     {8, {
         0b00000000, //  . . . . . . . .
@@ -679,6 +707,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b11100111, //  # # # . . # # #
         0b11111111  //  # # # # # # # #
     }},
+
+
     // 인덱스 32: EYE_SCAN_LR_1 (좌우 스캔 눈동자 1 - 왼쪽 끝)
     {8, {
         0b00000000, //  . . . . . . . .
@@ -745,6 +775,8 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00111100, //  . . # # # # . .
         0b00000000  //  . . . . . . . .
     }},
+
+
     // 인덱스 38: EYE_SQUINTED (찡그린 눈 - 최대로 찡그린)
     {8, {
         0b00000000, //  . . . . . . . .
@@ -844,6 +876,20 @@ const T_R310_SimpleFontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b01111110, //  . # # # # # # .
         0b00111100  //  . . # # # # . .
     }},
+
+
+    // 인덱스 47: EYE_SLEEP (잠자는 눈)
+    {8, {
+        0b00000000, //  . . . . . . . .
+        0b00000000, //  . . . . . . . .
+        0b00000000, //  . . . . . . . .
+        0b00000000, //  . . . . . . . .
+        0b00000000, //  . . . . . . . .
+        0b00000000, //  . . . . . . . .
+        0b00000000, //  . . . . . . . .
+        0b00000000  //  . . . . . . . .
+    }},
+
 };
 
 // 폰트 데이터 배열의 길이 (T_R310_SimpleFontChar 개수)
