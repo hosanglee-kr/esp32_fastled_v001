@@ -92,7 +92,7 @@ uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uin
 // @param p_eye_font_idx 폰트 문자 인덱스
 void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) {
     // 폰트 문자 인덱스 유효 범위 확인
-    if (p_ch >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font)) {
+    if (p_eye_font_idx >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font)) {
         Serial.print("Error: Invalid Eye Font index: ");
         Serial.println(p_eye_font_idx);
         return;
@@ -209,11 +209,11 @@ void R310_showText(bool p_bInit) {
     FastLED.clear(); // 버퍼 초기화
 
     // 첫 번째 문자를 오른쪽 눈에 표시 (ASCII 값을 폰트 인덱스로 사용)
-    R310_drawEye(0, (uint8_t)g_R310_pText[0]);
+    R310_drawEye(EYE_RIGHT, (uint8_t)g_R310_pText[0]);
 
     // 두 번째 문자가 있으면 왼쪽 눈에 표시 (ASCII 값을 폰트 인덱스로 사용)
     if (g_R310_pText[1] != '\0') {
-        R310_drawEye(1, (uint8_t)g_R310_pText[1]);
+        R310_drawEye(EYE_LEFT, (uint8_t)g_R310_pText[1]);
     }
 
     FastLED.show(); // LED에 표시
