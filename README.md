@@ -1,8 +1,8 @@
 [![PR CI](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/ci_002.yml)
 
-[![ReleaseState](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.yml)
+[![Rel State](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.1.yml/badge.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/actions/workflows/release_v2.1.yml)
 
-[![ReleaseVer](https://img.shields.io/github/release/hosanglee-kr/esp32_fastled_v001.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/releases)
+[![Rel Ver](https://img.shields.io/github/release/hosanglee-kr/esp32_fastled_v001.svg)](https://github.com/hosanglee-kr/esp32_fastled_v001/releases)
 
 
 
