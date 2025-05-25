@@ -63,8 +63,10 @@ unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상�
 // @param p_row 매트릭스 내 행 (0-7)
 // @param p_col 매트릭스 내 열 (0-7)
 // @return 해당 픽셀의 FastLED CRGB 배열 내 선형 인덱스. 범위 벗어날 시 0 반환.
-uint16_t R310_mapEyePixel(uint8_t p_eye_index, uint8_t p_row, uint8_t p_col) {
-    uint16_t v_base_pixel = (p_eye_index == 0) ? G_R310_RIGHT_EYE_START_PIXEL : G_R310_LEFT_EYE_START_PIXEL;
+//T_R310_Eye_Idx
+uint16_t R310_mapEyePixel(T_R310_Eye_Idx p_eye_index, uint8_t p_row, uint8_t p_col) {
+//uint16_t R310_mapEyePixel(uint8_t p_eye_index, uint8_t p_row, uint8_t p_col) {
+    uint16_t v_base_pixel = (p_eye_index == EYE_RIGHT) ? G_R310_RIGHT_EYE_START_PIXEL : G_R310_LEFT_EYE_START_PIXEL;
     uint16_t v_pixel_index;
 
     // 행 우선 지그재그(serpentine) 방식 가정
