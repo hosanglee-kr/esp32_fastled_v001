@@ -86,19 +86,19 @@ uint16_t R310_mapEyePixel(uint8_t p_eye_index, uint8_t p_row, uint8_t p_col) {
 
 // 단일 눈 모양 비트맵 데이터(폰트 문자 인덱스)를 LED 버퍼에 그리기
 // 데이터는 행 우선(Row Major) 형식으로 저장됨을 가정하고 읽습니다.
-// @param p_eye_index 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
-// @param p_ch 폰트 문자 인덱스
-void R310_drawEye(uint8_t p_eye_index, uint8_t p_ch) {
+// @param p_eye_leftright_index 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
+// @param p_eye_font_idx 폰트 문자 인덱스
+void R310_drawEye(uint8_t p_eye_leftright_index, uint8_t p_eye_font_idx) {
     // 폰트 문자 인덱스 유효 범위 확인
     if (p_ch >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font)) {
-        Serial.print("Error: Invalid character index: ");
-        Serial.println(p_ch);
+        Serial.print("Error: Invalid Eye Font index: ");
+        Serial.println(p_eye_font_idx);
         return;
     }
 
     // PROGMEM에서 비트맵 데이터 읽어오기
     T_R310_SimpleFontChar v_charData;
-    memcpy_P(&v_charData, &g_R310_RobotEyes_Font[p_ch], sizeof(T_R310_SimpleFontChar));
+    memcpy_P(&v_charData, &g_R310_RobotEyes_Font[p_eye_font_idx], sizeof(T_R310_SimpleFontChar));
 
     // 읽어온 행 우선(Row Major) 비트맵 데이터 기반 픽셀 설정
     // v_charData.data[row]는 해당 행의 8개 픽셀 비트맵을 나타냅니다.
@@ -113,7 +113,7 @@ void R310_drawEye(uint8_t p_eye_index, uint8_t p_ch) {
             // 비트 순서는 MSB(Col 0) -> LSB(Col 7) 이므로, v_col에 해당하는 비트는 (7 - v_col) 위치에 있습니다.
             if ((v_row_byte >> (7 - v_col)) & 0x01) {
                 // 만약 비트가 1이면 (픽셀을 켜야 하면), 해당 픽셀의 (눈 인덱스, 행, 열) 좌표를 선형 픽셀 인덱스로 변환합니다.
-                uint16_t v_pixel_idx = R310_mapEyePixel(p_eye_index, v_row, v_col);
+                uint16_t v_pixel_idx = R310_mapEyePixel(p_eye_leftright_index, v_row, v_col);
                 // 계산된 픽셀 인덱스(g_R310_leds 배열의 위치)에 미리 정의된 눈 색상(G_R310_EYE_COLOR)을 설정합니다.
                 g_R310_leds[v_pixel_idx] = G_R310_EYE_COLOR; // 정의된 눈 색상으로 설정
             }
@@ -124,13 +124,13 @@ void R310_drawEye(uint8_t p_eye_index, uint8_t p_ch) {
 
 
 // 오른쪽 눈(R)과 왼쪽 눈(L)에 사용할 폰트 문자 인덱스를 받아, 해당 눈 모양을 CRGB 버퍼에 그리고 FastLED.show()로 표시합니다.
-// @param p_R 오른쪽 눈에 사용할 폰트 문자 인덱스.
-// @param p_L 왼쪽 눈에 사용할 폰트 문자 인덱스.
-void R310_drawEyes(uint8_t p_R, uint8_t p_L) {
+// @param p_eye_font_idx_Right 오른쪽 눈에 사용할 폰트 문자 인덱스.
+// @param p_eye_font_idx_Left 왼쪽 눈에 사용할 폰트 문자 인덱스.
+void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
     FastLED.clear(); // 전체 LED 픽셀 버퍼를 검은색으로 초기화합니다.
 
-    R310_drawEye(0, p_R); // 오른쪽 눈 그리기
-    R310_drawEye(1, p_L); // 왼쪽 눈 그리기
+    R310_drawEye(0, p_eye_font_idx_Right); // 오른쪽 눈 그리기
+    R310_drawEye(1, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
 
     FastLED.show(); // LED에 표시
 }
