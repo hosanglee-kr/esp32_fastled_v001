@@ -6,7 +6,7 @@
 
 // 기본 타입 및 설정 헤더 파일 포함
 // 이 헤더 파일은 T_R310_로 시작하는 구조체 및 열거형과 G_R310_로 시작하는 상수를 정의합니다.
-#include "R310_config_007.h" // G_R310_FRAME_TIME 및 G_R310_ARRAY_SIZE 정의를 포함해야 합니다.
+#include "R310_config_008.h" // G_R310_FRAME_TIME 및 G_R310_ARRAY_SIZE 정의를 포함해야 합니다.
 
 
 // --- 전역 상수 정의 (G_R310_ 로 시작) ---
