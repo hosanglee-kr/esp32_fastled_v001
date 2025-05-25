@@ -59,14 +59,14 @@ unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상�
 // --- 글로벌 함수 정의 (R310_ 로 시작) ---
 
 // (눈 인덱스, 행, 열) 좌표를 FastLED CRGB 배열의 선형 픽셀 인덱스로 변환
-// @param p_eye_index 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
+// @param p_eyeSide_idx 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
 // @param p_row 매트릭스 내 행 (0-7)
 // @param p_col 매트릭스 내 열 (0-7)
 // @return 해당 픽셀의 FastLED CRGB 배열 내 선형 인덱스. 범위 벗어날 시 0 반환.
 //T_R310_Eye_Idx
-uint16_t R310_mapEyePixel(T_R310_Eye_Idx p_eye_index, uint8_t p_row, uint8_t p_col) {
+uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uint8_t p_col) {
 //uint16_t R310_mapEyePixel(uint8_t p_eye_index, uint8_t p_row, uint8_t p_col) {
-    uint16_t v_base_pixel = (p_eye_index == EYE_RIGHT) ? G_R310_RIGHT_EYE_START_PIXEL : G_R310_LEFT_EYE_START_PIXEL;
+    uint16_t v_base_pixel = (p_eyeSide_idx == EYE_RIGHT) ? G_R310_RIGHT_EYE_START_PIXEL : G_R310_LEFT_EYE_START_PIXEL;
     uint16_t v_pixel_index;
 
     // 행 우선 지그재그(serpentine) 방식 가정
@@ -88,9 +88,9 @@ uint16_t R310_mapEyePixel(T_R310_Eye_Idx p_eye_index, uint8_t p_row, uint8_t p_c
 
 // 단일 눈 모양 비트맵 데이터(폰트 문자 인덱스)를 LED 버퍼에 그리기
 // 데이터는 행 우선(Row Major) 형식으로 저장됨을 가정하고 읽습니다.
-// @param p_eye_leftright_index 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
+// @param p_eyeSide_idx 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
 // @param p_eye_font_idx 폰트 문자 인덱스
-void R310_drawEye(uint8_t p_eye_leftright_index, uint8_t p_eye_font_idx) {
+void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) {
     // 폰트 문자 인덱스 유효 범위 확인
     if (p_ch >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font)) {
         Serial.print("Error: Invalid Eye Font index: ");
@@ -115,7 +115,7 @@ void R310_drawEye(uint8_t p_eye_leftright_index, uint8_t p_eye_font_idx) {
             // 비트 순서는 MSB(Col 0) -> LSB(Col 7) 이므로, v_col에 해당하는 비트는 (7 - v_col) 위치에 있습니다.
             if ((v_row_byte >> (7 - v_col)) & 0x01) {
                 // 만약 비트가 1이면 (픽셀을 켜야 하면), 해당 픽셀의 (눈 인덱스, 행, 열) 좌표를 선형 픽셀 인덱스로 변환합니다.
-                uint16_t v_pixel_idx = R310_mapEyePixel(p_eye_leftright_index, v_row, v_col);
+                uint16_t v_pixel_idx = R310_mapEyePixel(p_eyeSide_idx, v_row, v_col);
                 // 계산된 픽셀 인덱스(g_R310_leds 배열의 위치)에 미리 정의된 눈 색상(G_R310_EYE_COLOR)을 설정합니다.
                 g_R310_leds[v_pixel_idx] = G_R310_EYE_COLOR; // 정의된 눈 색상으로 설정
             }
@@ -131,22 +131,25 @@ void R310_drawEye(uint8_t p_eye_leftright_index, uint8_t p_eye_font_idx) {
 void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
     FastLED.clear(); // 전체 LED 픽셀 버퍼를 검은색으로 초기화합니다.
 
-    R310_drawEye(0, p_eye_font_idx_Right); // 오른쪽 눈 그리기
-    R310_drawEye(1, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
+    R310_drawEye(EYE_RIGHT, p_eye_font_idx_Right); // 오른쪽 눈 그리기
+    R310_drawEye(EYE_LEFT, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
+
+	// R310_drawEye(0, p_eye_font_idx_Right); // 오른쪽 눈 그리기
+    // R310_drawEye(1, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
 
     FastLED.show(); // LED에 표시
 }
 
 // 지정된 감정에 해당하는 애니메이션 시퀀스 로드
-// @param p_e 로드할 감정 종류
+// @param p_eyeEmotion_idx 로드할 감정 종류
 // @return 시퀀스 프레임 개수. 찾지 못하면 1 반환 (기본값 중립).
-uint8_t R310_loadSequence(T_R310_emotion_t p_e) {
+uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
     bool v_found = false;
 
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_lookupTable); v_i++) {
         T_R310_animTable_t v_entry;
         memcpy_P(&v_entry, &g_R310_lookupTable[v_i], sizeof(T_R310_animTable_t));
-        if (v_entry.e == p_e) {
+        if (v_entry.e == p_eyeEmotion_idx) {
             g_R310_animEntry = v_entry;
             v_found = true;
             break;
@@ -156,7 +159,7 @@ uint8_t R310_loadSequence(T_R310_emotion_t p_e) {
     // 시퀀스 찾지 못함
     if (!v_found) {
         Serial.print("Warning: Animation sequence not found for emotion: ");
-        Serial.println(p_e);
+        Serial.println(p_eyeEmotion_idx);
         g_R310_animEntry = {E_R310_NEUTRAL, g_R310_seqBlink, 1}; // 중립 시퀀스 기본값 설정
     }
 
@@ -222,6 +225,7 @@ void R310_showText(bool p_bInit) {
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
 void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
+//void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
     // 텍스트 표시 중이고 강제 시작 아니면 무시
     if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_force) return;
 
