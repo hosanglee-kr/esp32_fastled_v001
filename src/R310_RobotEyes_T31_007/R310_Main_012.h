@@ -183,7 +183,7 @@ uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
     }
 
     // 애니메이션 시작 인덱스 설정 (정방향 또는 역방향)
-    if (g_R310_animReverse)
+    if (g_R310_animReverse == EMT_PLY_DIR_LAST)
         g_R310_animIndex = g_R310_animEntry.size - 1;
     else
         g_R310_animIndex = 0;
@@ -474,7 +474,14 @@ bool R310_runAnimation(void) {
                 // 시퀀스 완료
                 if (g_R310_autoReverse) {
                     // 자동 역재생: 동일 시퀀스를 반대 방향으로 다시 시작 준비
-                    R310_setAnimation(g_R310_animEntry.e, EMT_AUTO_REVERSE_OFF, !g_R310_animReverse, EMT_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
+					EMT_PlyDirect_t   v_emt_ply_dir;
+					if( g_R310_animReverse == EMT_PLY_DIR_LAST){
+                       v_emt_ply_dir  = EMT_PLY_DIR_FIRST;
+					} else {
+						v_emt_ply_dir  = EMT_PLY_DIR_LAST;
+					}
+                    R310_setAnimation(g_R310_animEntry.e, EMT_AUTO_REVERSE_OFF, v_emt_ply_dir, EMT_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
+                    //R310_setAnimation(g_R310_animEntry.e, EMT_AUTO_REVERSE_OFF, !g_R310_animReverse, EMT_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
                 } else {
                     // 완료: 유휴 상태 복귀
                     g_R310_animState = S_IDLE;
