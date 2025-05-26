@@ -41,9 +41,20 @@ T_R310_animTable_t g_R310_animEntry;                                // 현재 �
 
 int8_t			   g_R310_animIndex		 = 0;                       // 현재 시퀀스 내 프레임 인덱스
 
-bool			   g_R310_animReverse	 = false;                   // 애니메이션 시퀀스 역방향 재생 여부
+/*  
+    EYE_EMOTN_AUTO_REVERSE_OFF = 0,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
+    EYE_EMOTN_AUTO_REVERSE_ON,   
+} T_R310_EYE_EMOTN_AUTO_REVERSE_t;
 
-bool			   g_R310_autoReverse	 = false;                   // 시퀀스 완료 후 자동 역방향 재생 여부
+    EYE_EMOTN_PLY_DIRECT_FIRST =0,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
+    EYE_EMOTN_PLY_DIRECT_LAST,
+} T_R310_EYE_EMOTN_PLY_DIRECT_t;
+*/
+T_R310_EYE_EMOTN_PLY_DIRECT_t	 g_R310_animReverse	 = EYE_EMOTN_PLY_DIRECT_FIRST;                   // 애니메이션 시퀀스 역방향 재생 여부
+T_R310_EYE_EMOTN_AUTO_REVERSE_t	 g_R310_autoReverse	 = EYE_EMOTN_AUTO_REVERSE_OFF;                   // 시퀀스 완료 후 자동 역방향 재생 여부
+
+//bool			   g_R310_animReverse	 = false;                   // 애니메이션 시퀀스 역방향 재생 여부
+//bool			   g_R310_autoReverse	 = false;                   // 시퀀스 완료 후 자동 역방향 재생 여부
 
 T_R310_emotion_t   g_R310_nextEmotion	 = E_R310_NONE;             // 다음에 재생할 애니메이션 감정 종류
 
@@ -224,7 +235,22 @@ void R310_showText(bool p_bInit) {
 // @param p_r 시퀀스 완료 후 자동 역재생 여부
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
+/*
+typedef enum {
+    EYE_EMOTN_AUTO_REVERSE_ON,   // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
+    EYE_EMOTN_AUTO_REVERSE_OFF,
+} T_R310_EYE_EMOTN_AUTO_REVERSE_t;
 
+typedef enum {
+    EYE_EMOTN_PLY_DIRECT_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
+    EYE_EMOTN_PLY_DIRECT_LAST,
+} T_R310_EYE_EMOTN_PLY_DIRECT_t;
+
+typedef enum {
+    EYE_EMOTN_FORCE_PLY_ON,     // p_force 현재 상태에 관계없이 즉시 시작 여부
+    EYE_EMOTN_FORCE_PLY_OFF,
+} T_R310_EYE_EMOTN_FORCE_PLY_t;
+*/
 
 void R310_setAnimation(T_R310_emotion_t p_e, uint8_t p_r, uint8_t p_b, uint8_t p_force) {
 //void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
