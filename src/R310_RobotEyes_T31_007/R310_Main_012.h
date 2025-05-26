@@ -245,22 +245,22 @@ void R310_showText(bool p_bInit) {
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
 /*
 typedef enum {
-    EYE_EMOTN_AUTO_REVERSE_ON,   // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
-    EYE_EMOTN_AUTO_REVERSE_OFF,
-} T_R310_EYE_EMOTN_AUTO_REVERSE_t;
+    EMT_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
+    EMT_AUTO_REVERSE_ON,
+} EMT_AutoReverse_t;
 
 typedef enum {
-    EYE_EMOTN_PLY_DIRECT_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
-    EYE_EMOTN_PLY_DIRECT_LAST,
-} T_R310_EYE_EMOTN_PLY_DIRECT_t;
+    EMT_PLY_DIR_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
+    EMT_PLY_DIR_LAST,
+} EMT_PlyDirect_t;
 
 typedef enum {
-    EYE_EMOTN_FORCE_PLY_ON,     // p_force 현재 상태에 관계없이 즉시 시작 여부
-    EYE_EMOTN_FORCE_PLY_OFF,
-} T_R310_EYE_EMOTN_FORCE_PLY_t;
+    EMT_FORCE_PLY_OFF,     // p_force 현재 상태에 관계없이 즉시 시작 여부
+    EMT_FORCE_PLY_ON,
+} EMT_ForcePly_t;
 */
 
-void R310_setAnimation(T_R310_emotion_t p_e, uint8_t p_r, uint8_t p_b, uint8_t p_force) {
+void R310_setAnimation(T_R310_emotion_t p_e, EMT_AutoReverse_t p_r, EMT_PlyDirect_t p_b, EMT_ForcePly_t p_force) {
 //void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
 //void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
     // 텍스트 표시 중이고 강제 시작 아니면 무시
