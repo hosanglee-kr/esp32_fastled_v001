@@ -21,7 +21,7 @@ CRGB			   g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];       // FastLED CRGB 배열
 CRGB*			   g_R310_leds_ptr			= nullptr;	        // CRGB 배열 포인터
 
 
-T_R310_State	   g_R310_state				= AWAKE;            // 현재 로봇 상태
+T_R310_RobotState_t	   g_R310_state				= AWAKE;            // 현재 로봇 상태
 
 // 애니메이션 실행 및 시간 관리 변수
 // 현재 애니메이션 프레임 표시 시작 시간
@@ -245,19 +245,19 @@ void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
 // 로봇 상태 (AWAKE/SLEEPING) 설정
 // 상태 변경 시 해당 애니메이션 자동 트리거
 // @param p_s 설정할 새로운 상태
-void R310_setState(T_R310_State p_s) {
+void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
     // 현재 상태와 다를 경우에만 처리
-    if (p_s != g_R310_state) {
-        if (p_s == SLEEPING && g_R310_state == AWAKE) {
+    if (p_robotState != g_R310_state) {
+        if (p_robotState == SLEEPING && g_R310_state == AWAKE) {
             // AWAKE -> SLEEPING: 잠자는 애니메이션 시작
             R310_setAnimation(E_R310_SLEEP, false, false, true);
-        } else if (p_s == AWAKE && g_R310_state == SLEEPING) {
+        } else if (p_robotState == AWAKE && g_R310_state == SLEEPING) {
             // SLEEPING -> AWAKE: 잠 깨는 애니메이션 시작 (역방향)
             R310_setAnimation(E_R310_SLEEP, false, true, true);
         }
-        g_R310_state = p_s; // 상태 업데이트
+        g_R310_state = p_robotState; // 상태 업데이트
         // Serial.print("State changed to: "); // 상태 변경 시리얼 출력 (옵션)
-        // Serial.println(p_s == AWAKE ? "AWAKE" : "SLEEPING");
+        // Serial.println(p_robotState == AWAKE ? "AWAKE" : "SLEEPING");
     }
 }
 
@@ -310,9 +310,9 @@ void R310_processCommand(const char* p_command) {
     }
     // 로봇 상태 직접 변경 명령
     else if (strcmp(p_command, "awake") == 0) {
-        R310_setState(AWAKE);
+        R310_set_RobotState(AWAKE);
     } else if (strcmp(p_command, "sleeping") == 0) {
-        R310_setState(SLEEPING);
+        R310_set_RobotState(SLEEPING);
     }
     // 위 명령들에 해당하지 않으면 텍스트 표시 명령으로 간주
     else {
@@ -519,11 +519,11 @@ void R310_run() {
     // 비활성 시간 기준 로봇 상태 변경 로직 예제
     // SLEEPING 상태가 아니고 비활성 시간 경과 시
     if (g_R310_state != SLEEPING && millis() - g_R310_lastCommandTime >= G_R310_TIME_TO_SLEEP_EXAMPLE) {
-        R310_setState(SLEEPING); // SLEEPING 상태로 변경 (잠자는 애니메이션 트리거)
+        R310_set_RobotState(SLEEPING); // SLEEPING 상태로 변경 (잠자는 애니메이션 트리거)
     }
     // SLEEPING 상태인데 활동 감지 시
     else if (g_R310_state == SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP_EXAMPLE) {
-         R310_setState(AWAKE); // AWAKE 상태로 변경 (잠 깨는 애니메이션 트리거)
+         R310_set_RobotState(AWAKE); // AWAKE 상태로 변경 (잠 깨는 애니메이션 트리거)
     }
 
     // 시리얼 입력 처리 (옵션: 명령 수신 테스트)
