@@ -109,7 +109,8 @@ typedef enum {
 typedef enum {
     AWAKE,   // 깨어있는 상태
     SLEEPING // 잠자는 상태
-} T_R310_State;
+} T_R310_RobotState_t;
+//} T_R310_State;
 
 // 로봇 눈 감정 애니메이션 종류
 typedef enum {
@@ -126,6 +127,8 @@ typedef enum {
 	E_R310_SCAN_UD,       // 상하 스캔
     E_R310_SCAN_LR,       // 좌우 스캔
 
+    E_R310_SLEEP,         // 잠자는 눈
+
 	E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
 
     E_R310_ANGRY,         // 화남
@@ -136,7 +139,6 @@ typedef enum {
     E_R310_DEAD,          // 죽은 눈
     E_R310_IDLE,          // 대기 상태 (찡그린 눈 고정)
     E_R310_HEART,         // 하트
-    E_R310_SLEEP,         // 잠자는 눈
 } T_R310_emotion_t;
 
 // 애니메이션 시퀀스 단일 프레임
@@ -310,13 +312,13 @@ const T_R310_animFrame_t g_R310_seqHeart[] PROGMEM = {
 
 // 잠자는 눈 애니메이션 시퀀스 데이터 (좌우 눈 동일 모양)
 const T_R310_animFrame_t g_R310_seqSleep[] PROGMEM = {
-    {{ EYE_NEUTRAL,      EYE_NEUTRAL      }, G_R310_FRAME_TIME},     // 프레임 0: 기본 눈 모양
-    {{ EYE_SLEEP_STAGE1, EYE_SLEEP_STAGE1 }, G_R310_FRAME_TIME},   // 프레임 1: 감기기 시작
-    {{ EYE_SLEEP_STAGE2, EYE_SLEEP_STAGE2 }, G_R310_FRAME_TIME},   // 프레임 2: 더 감김
-    {{ EYE_SLEEP_STAGE3, EYE_SLEEP_STAGE3 }, G_R310_FRAME_TIME},   // 프레임 3: 더 감김
-    {{ EYE_SLEEP_STAGE4, EYE_SLEEP_STAGE4 }, G_R310_FRAME_TIME},   // 프레임 4: 더 감김
-    {{ EYE_SLEEP_STAGE5, EYE_SLEEP_STAGE5 }, G_R310_FRAME_TIME},   // 프레임 5: 더 감김
-    {{ EYE_SLEEP_STAGE6, EYE_SLEEP_STAGE6 }, G_R310_FRAME_TIME},   // 프레임 6: 완전히 감긴 모양 또는 패턴 등
+    {{ EYE_NEUTRAL, EYE_NEUTRAL }, G_R310_FRAME_TIME},     // 프레임 0: 기본 눈 모양
+    {{ EYE_CLOSE_1, EYE_CLOSE_1 }, G_R310_FRAME_TIME},   // 프레임 1: 감기기 시작
+    {{ EYE_CLOSE_2, EYE_CLOSE_2 }, G_R310_FRAME_TIME},   // 프레임 2: 더 감김
+    {{ EYE_CLOSE_3, EYE_CLOSE_3 }, G_R310_FRAME_TIME},   // 프레임 3: 더 감김
+    {{ EYE_CLOSE_4, EYE_CLOSE_4 }, G_R310_FRAME_TIME},   // 프레임 4: 더 감김
+    {{ EYE_CLOSE_5, EYE_CLOSE_5 }, G_R310_FRAME_TIME},   // 프레임 5: 더 감김
+  //{{ EYE_ALL_OFF, EYE_ALL_OFF }, G_R310_FRAME_TIME},   // 프레임 6: 완전히 감긴 모양 또는 패턴 등
 };
 
 
@@ -336,6 +338,8 @@ const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
 	{E_R310_SCAN_LR      , g_R310_seqScanLeftRight, G_R310_ARRAY_SIZE(g_R310_seqScanLeftRight)}, // 좌우 스캔
     {E_R310_SCAN_UD      , g_R310_seqScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
 
+    {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
+
 	{E_R310_SQUINT_BLINK , g_R310_seqSquintBlink  , G_R310_ARRAY_SIZE(g_R310_seqSquintBlink)}, // 찡그림 깜빡임
 
     {E_R310_ANGRY        , g_R310_seqAngry        , G_R310_ARRAY_SIZE(g_R310_seqAngry) }, // 화남
@@ -346,7 +350,6 @@ const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
     {E_R310_IDLE         , g_R310_seqIdle         , G_R310_ARRAY_SIZE(g_R310_seqIdle)  }, // 대기 상태
     {E_R310_SQUINT       , g_R310_seqSquint       , G_R310_ARRAY_SIZE(g_R310_seqSquint)}, // 찡그림
     {E_R310_HEART        , g_R310_seqHeart        , G_R310_ARRAY_SIZE(g_R310_seqHeart) }, // 하트
-    {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
 };
 
 
