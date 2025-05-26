@@ -560,7 +560,7 @@ void R310_init() {
     
 
     // 시작 시 중립 애니메이션 설정 (runAnimation에서 처리되도록)
-    R310_setAnimation(E_R310_NEUTRAL, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 중립 애니메이션 설정 (강제 시작)
+    R310_setAnimation(E_R310_NEUTRAL, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 중립 애니메이션 설정 (강제 시작)
 
     #ifdef R310_DEB
         Serial.println("R310_init - 140");
