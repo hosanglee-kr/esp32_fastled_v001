@@ -273,7 +273,7 @@ void R310_setAnimation(T_R310_emotion_t p_e, EMT_AutoReverse_t p_r, EMT_PlyDirec
         g_R310_animReverse = p_b;     // 시작 방향 설정
 
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
-        if (p_force || g_R310_animState == S_IDLE) {
+        if (p_force == EMT_FORCE_PLY_ON || g_R310_animState == S_IDLE) {
              g_R310_animState = S_RESTART;
         }
     }
