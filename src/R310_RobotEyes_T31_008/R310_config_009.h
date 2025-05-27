@@ -1,7 +1,7 @@
 
 #pragma once
 
-// R310_types_config_007.h - 로봇 눈 애니메이션 및 상태 관리의 기본 타입 및 설정 파일
+// R310_config_009.h - 로봇 눈 애니메이션 및 상태 관리의 기본 타입 및 설정 파일
 
 // 필요한 표준 라이브러리 헤더 포함
 #include <Arduino.h>
