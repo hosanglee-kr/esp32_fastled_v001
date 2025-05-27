@@ -584,11 +584,11 @@ void R310_run() {
 
     // 비활성 시간 기준 로봇 상태 변경 로직 예제
     // R_STATE_SLEEPING 상태가 아니고 비활성 시간 경과 시
-    if (g_R310_robotState != R_STATE_SLEEPING && millis() - g_R310_lastCommandTime >= G_R310_TIME_TO_SLEEP_EXAMPLE) {
+    if (g_R310_robotState != R_STATE_SLEEPING && millis() - g_R310_lastCommandTime >= G_R310_TIME_TO_SLEEP) {
         R310_set_RobotState(R_STATE_SLEEPING); // R_STATE_SLEEPING 상태로 변경 (잠자는 애니메이션 트리거)
     }
     // R_STATE_SLEEPING 상태인데 활동 감지 시
-    else if (g_R310_robotState == R_STATE_SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP_EXAMPLE) {
+    else if (g_R310_robotState == R_STATE_SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP) {
          R310_set_RobotState(R_STATE_AWAKE); // R_STATE_AWAKE 상태로 변경 (잠 깨는 애니메이션 트리거)
     }
 
