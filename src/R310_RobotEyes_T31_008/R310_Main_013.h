@@ -1,13 +1,14 @@
 
 #pragma once
 
+// R310_Main_013.h - 로봇 눈 애니메이션 및 상태 관리의 변수 및 함수 구현 파일
+// 이 파일은 필요한 데이터 및 타입 헤더 파일을 포함하고 main.cpp에서 사용됩니다.
 
 //#define R310_DEB
 #define R310_PROGRESS_1
 
 
-// R310_variables_and_funcs_005.h - 로봇 눈 애니메이션 및 상태 관리의 변수 및 함수 구현 파일
-// 이 파일은 필요한 데이터 및 타입 헤더 파일을 포함하고 main.cpp에서 사용됩니다.
+
 
 // 기본 타입 및 설정 헤더 파일 포함
 #include "R310_config_009.h"
