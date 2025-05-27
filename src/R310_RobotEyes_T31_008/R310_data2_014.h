@@ -120,7 +120,7 @@ typedef enum {
 
 // 로봇 상태 관리를 위한 열거형
 typedef enum {
-    R_STATE_R_STATE_AWAKE,   // 깨어있는 상태
+    R_STATE_AWAKE,   // 깨어있는 상태
     R_STATE_SLEEPING // 잠자는 상태
 } T_R310_RobotState_t;
 
