@@ -526,6 +526,12 @@ void R310_init() {
 
     FastLED.setBrightness(20);
 
+	   // limit my draw to 1A at 5v of power draw
+    FastLED.setMaxPowerInVoltsAndMilliamps(5,1000); 
+   
+	// limit my draw to 5W로 전력제한
+    // FastLED.setMaxPowerInMilliWatts(5000);
+
     // FastLED 초기화 및 LED 설정
     FastLED.addLeds<G_R310_LED_TYPE, G_R310_NEOPIXEL_PIN, G_R310_COLOR_ORDER>(g_R310_leds, G_R310_NEOPIXEL_NUM_LEDS).setCorrection(TypicalLEDStrip);
     g_R310_leds_ptr = g_R310_leds; // CRGB 배열 주소 포인터에 할당
