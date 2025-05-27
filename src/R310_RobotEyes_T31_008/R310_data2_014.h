@@ -12,7 +12,7 @@
 // --- 전역 상수 정의 (G_R310_ 로 시작) ---
 // 로봇 상태 관리를 위한 비활성 시간 기준 정의
 // 예제: 로봇이 일정 시간(10초) 동안 명령을 받지 않으면 R_STATE_SLEEPING 상태로 전환됩니다.
-const unsigned long G_R310_TIME_TO_SLEEP_EXAMPLE = 10000; // 밀리초 단위 (10초)
+const unsigned long G_R310_TIME_TO_SLEEP = 10000; // 밀리초 단위 (10초)
 
 
 ///////////////////////////////////
