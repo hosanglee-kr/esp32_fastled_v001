@@ -51,4 +51,4 @@
 #define G_R310_MAX_TEXT_LENGTH		 31	 // 최대 31자 + 널 종료 문자
 
 // 로봇 상태 관리를 위한 비활성 시간 기준 선언
-extern const unsigned long G_R310_TIME_TO_SLEEP_EXAMPLE;
+//extern const unsigned long G_R310_TIME_TO_SLEEP;
