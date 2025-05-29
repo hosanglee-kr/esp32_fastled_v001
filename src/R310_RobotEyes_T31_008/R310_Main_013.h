@@ -8,8 +8,6 @@
 #define R310_PROGRESS_1
 
 
-
-
 // 기본 타입 및 설정 헤더 파일 포함
 #include "R310_config_009.h"
 // 정적 데이터 테이블 헤더 파일 포함
@@ -349,8 +347,17 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(E_R310_SCAN_UD, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     } else if (strcmp(p_command, "leftright") == 0) {
         R310_setAnimation(E_R310_SCAN_LR, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-    
 
+	} else if (strcmp(p_command, "sleep_anim") == 0) { // 잠자는 애니메이션 명시적 실행
+        R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
+    }
+    // 로봇 상태 직접 변경 명령
+    else if (strcmp(p_command, "awake") == 0) {
+        R310_set_RobotState(R_STATE_AWAKE);
+    } else if (strcmp(p_command, "sleeping") == 0) {
+        R310_set_RobotState(R_STATE_SLEEPING);
+    }
+/*
     } else if (strcmp(p_command, "angry") == 0) {
         R310_setAnimation(E_R310_ANGRY, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     } else if (strcmp(p_command, "sad") == 0) {
@@ -365,15 +372,10 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(E_R310_DEAD, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     } else if (strcmp(p_command, "core") == 0) { // "core" 명령은 E_HEART
         R310_setAnimation(E_R310_HEART, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "sleep_anim") == 0) { // 잠자는 애니메이션 명시적 실행
-        R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-    }
-    // 로봇 상태 직접 변경 명령
-    else if (strcmp(p_command, "awake") == 0) {
-        R310_set_RobotState(R_STATE_AWAKE);
-    } else if (strcmp(p_command, "sleeping") == 0) {
-        R310_set_RobotState(R_STATE_SLEEPING);
-    }
+    
+*/
+
+	
     // 위 명령들에 해당하지 않으면 텍스트 표시 명령으로 간주
     else {
         // 명령 문자열을 고정 버퍼로 복사 (최대 길이 제한 및 널 종료 보장)
