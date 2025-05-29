@@ -37,6 +37,7 @@ typedef enum {
 typedef enum {
     // 기본 눈 모양 (인덱스 0-4)
     EYE_NEUTRAL = 0,           // 중립/행복한 눈
+
     EYE_LOOK_DOWN_2,           // 아래쪽 먼 곳을 보는 눈
     EYE_LOOK_DOWN_1,           // 아래쪽 중앙을 보는 눈
     EYE_LOOK_UP_1,             // 위쪽 중앙을 보는 눈
