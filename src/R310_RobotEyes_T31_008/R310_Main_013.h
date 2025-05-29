@@ -42,9 +42,6 @@ int8_t			   g_R310_animIndex		 = 0;                       // 현재 시퀀스 �
 EMT_PlyDirect_t	     g_R310_animReverse	 = EMT_PLY_DIR_FIRST;                   // 애니메이션 시퀀스 역방향 재생 여부
 EMT_AutoReverse_t	 g_R310_autoReverse	 = EMT_AUTO_REVERSE_OFF;                   // 시퀀스 완료 후 자동 역방향 재생 여부
 
-//bool			   g_R310_animReverse	 = false;                   // 애니메이션 시퀀스 역방향 재생 여부
-//bool			   g_R310_autoReverse	 = false;                   // 시퀀스 완료 후 자동 역방향 재생 여부
-
 T_R310_emotion_t   g_R310_nextEmotion	 = EMT_NONE;             // 다음에 재생할 애니메이션 감정 종류
 
 T_R310_emotion_t   g_R310_currentEmotion = EMT_NONE;             // 현재 화면에 표시되는 애니메이션 감정 종류
@@ -65,7 +62,6 @@ unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상�
 // @return 해당 픽셀의 FastLED CRGB 배열 내 선형 인덱스. 범위 벗어날 시 0 반환.
 //T_R310_Eye_Idx
 uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uint8_t p_col) {
-//uint16_t R310_mapEyePixel(uint8_t p_eye_index, uint8_t p_row, uint8_t p_col) {
     uint16_t v_base_pixel = (p_eyeSide_idx == EYE_RIGHT) ? G_R310_RIGHT_EYE_START_PIXEL : G_R310_LEFT_EYE_START_PIXEL;
     uint16_t v_pixel_index;
 
@@ -133,9 +129,6 @@ void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
 
     R310_drawEye(EYE_RIGHT, p_eye_font_idx_Right); // 오른쪽 눈 그리기
     R310_drawEye(EYE_LEFT, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
-
-	// R310_drawEye(0, p_eye_font_idx_Right); // 오른쪽 눈 그리기
-    // R310_drawEye(1, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
 
     FastLED.show(); // LED에 표시
 }
@@ -224,11 +217,7 @@ void R310_showText(bool p_bInit) {
 // @param p_r 시퀀스 완료 후 자동 역재생 여부
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
-
-
 void R310_setAnimation(T_R310_emotion_t p_e, EMT_AutoReverse_t p_r, EMT_PlyDirect_t p_b, EMT_ForcePly_t p_force) {
-//void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
-//void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
     // 텍스트 표시 중이고 강제 시작 아니면 무시
     if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_force) return;
 
@@ -254,11 +243,9 @@ void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
         if (p_robotState == R_STATE_SLEEPING && g_R310_robotState == R_STATE_AWAKE) {
             // R_STATE_AWAKE -> R_STATE_SLEEPING: 잠자는 애니메이션 시작
             R310_setAnimation(EMT_SLEEP_BLINK, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-			//R310_setAnimation(EMT_SLEEP, false, false, true);
         } else if (p_robotState == R_STATE_AWAKE && g_R310_robotState == R_STATE_SLEEPING) {
             // R_STATE_SLEEPING -> R_STATE_AWAKE: 잠 깨는 애니메이션 시작 (역방향)
             R310_setAnimation(EMT_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON);
-			//R310_setAnimation(EMT_SLEEP, false, true, true);
         }
         g_R310_robotState = p_robotState; // 상태 업데이트
         // Serial.print("State changed to: "); // 상태 변경 시리얼 출력 (옵션)
