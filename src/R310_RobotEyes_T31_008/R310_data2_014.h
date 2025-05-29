@@ -161,6 +161,7 @@ typedef enum {
     E_E310_SMILE,
 	
     E_R310_SLEEP,         // 잠자는 눈
+    E_E310_SLEEP_BLINK,
 /*
 	E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
 
@@ -305,7 +306,13 @@ const T_R310_animFrame_t g_R310_seqSleep[] PROGMEM = {
     {{ EYE_CLOSE_3, EYE_CLOSE_3 }, G_R310_FRAME_TIME},   // 프레임 3: 더 감김
     {{ EYE_CLOSE_4, EYE_CLOSE_4 }, G_R310_FRAME_TIME},   // 프레임 4: 더 감김
     {{ EYE_CLOSE_5, EYE_CLOSE_5 }, G_R310_FRAME_TIME},   // 프레임 5: 더 감김
-  //{{ EYE_ALL_OFF,6 EYE_ALL_OFF }, G_R310_FRAME_TIME},   // 프레임 6: 완전히 감긴 모양 또는 패턴 등
+    {{ EYE_ALL_OFF, EYE_ALL_OFF }, G_R310_FRAME_TIME * 2},   // 프레임 6: 완전히 감긴 모양 또는 패턴 등
+};
+
+const T_R310_animFrame_t g_R310_seqSleepBlink[] PROGMEM = {
+    {{ EYE_CLOSE_4         	, EYE_CLOSE_4      }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
+    {{ EYE_CLOSE_5         	, EYE_CLOSE_5      }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
+    {{ EYE_ALL_OFF          , EYE_ALL_OFF      }, G_R310_FRAME_TIME},   // 프레임 1: 완전히 감긴 모양
 };
 
 /*
@@ -403,6 +410,7 @@ const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
     {E_E310_SMILE        , g_R310_seqSmile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
 
     {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
+    {E_R310_SLEEP_BLINK  , g_R310_seqSleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
 
     //////////////////
 /*
