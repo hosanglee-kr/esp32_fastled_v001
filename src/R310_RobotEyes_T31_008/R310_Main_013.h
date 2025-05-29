@@ -286,11 +286,11 @@ void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
         if (p_robotState == R_STATE_SLEEPING && g_R310_robotState == R_STATE_AWAKE) {
             // R_STATE_AWAKE -> R_STATE_SLEEPING: 잠자는 애니메이션 시작
             R310_setAnimation(E_E310_SLEEP_BLINK, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-			//R310_setAnimation(E_R310_SLEEP, false, false, true);
+			//R310_setAnimation(E_E310_SLEEP, false, false, true);
         } else if (p_robotState == R_STATE_AWAKE && g_R310_robotState == R_STATE_SLEEPING) {
             // R_STATE_SLEEPING -> R_STATE_AWAKE: 잠 깨는 애니메이션 시작 (역방향)
             R310_setAnimation(E_E310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON);
-			//R310_setAnimation(E_R310_SLEEP, false, true, true);
+			//R310_setAnimation(E_E310_SLEEP, false, true, true);
         }
         g_R310_robotState = p_robotState; // 상태 업데이트
         // Serial.print("State changed to: "); // 상태 변경 시리얼 출력 (옵션)
