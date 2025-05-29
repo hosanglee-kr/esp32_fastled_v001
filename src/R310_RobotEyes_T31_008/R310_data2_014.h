@@ -146,33 +146,34 @@ typedef enum {
 // 로봇 눈 감정 애니메이션 종류
 typedef enum {
 
-    E_R310_NONE,          // 애니메이션 없음
-    E_R310_NEUTRAL,       // 일반적인 눈 모양
-    E_R310_BLINK,         // 깜빡임
-    E_R310_WINK,          // 윙크
-    E_R310_LOOK_L,        // 왼쪽 보기
-    E_R310_LOOK_R,        // 오른쪽 보기
-    E_R310_LOOK_U,        // 위 보기
-    E_R310_LOOK_D,        // 아래 보기
-    E_R310_SCAN_UD,       // 상하 스캔
-    E_R310_SCAN_LR,       // 좌우 스캔
+    EMT_NONE,          // 애니메이션 없음
+    EMT_NEUTRAL,       // 일반적인 눈 모양
+    EMT_BLINK,         // 깜빡임
+    EMT_WINK,          // 윙크
 
-    E_R310_ANGRY2,
-    E_R310_SMILE,
+    EMT_LOOK_L,        // 왼쪽 보기
+    EMT_LOOK_R,        // 오른쪽 보기
+    EMT_LOOK_U,        // 위 보기
+    EMT_LOOK_D,        // 아래 보기
+    EMT_SCAN_UD,       // 상하 스캔
+    EMT_SCAN_LR,       // 좌우 스캔
+
+    EMT_ANGRY2,
+    EMT_SMILE,
 	
-    E_R310_SLEEP,         // 잠자는 눈
-    E_R310_SLEEP_BLINK,
+    EMT_SLEEP,         // 잠자는 눈
+    EMT_SLEEP_BLINK,
 /*
-	E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
+	EMT_SQUINT_BLINK,  // 찡그림 깜빡임
 
-    E_R310_ANGRY,         // 화남
-    E_R310_SAD,           // 슬픔
-    E_R310_EVIL,          // 사악함
-    E_R310_EVIL2,         // 사악함 2 (찡그림 기반)
-    E_R310_SQUINT,        // 찡그림
-    E_R310_DEAD,          // 죽은 눈
-    E_R310_IDLE,          // 대기 상태 (찡그린 눈 고정)
-    E_R310_HEART,         // 하트
+    EMT_ANGRY,         // 화남
+    EMT_SAD,           // 슬픔
+    EMT_EVIL,          // 사악함
+    EMT_EVIL2,         // 사악함 2 (찡그림 기반)
+    EMT_SQUINT,        // 찡그림
+    EMT_DEAD,          // 죽은 눈
+    EMT_IDLE,          // 대기 상태 (찡그린 눈 고정)
+    EMT_HEART,         // 하트
 */
 } T_R310_emotion_t;
 
@@ -392,38 +393,38 @@ const T_R310_animFrame_t g_R310_seqHeart[] PROGMEM = {
 
 // 감정 애니메이션 조회 테이블
 const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
-    {E_R310_NEUTRAL      , g_R310_seqBlink        , 1                                  }, // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
+    {EMT_NEUTRAL      , g_R310_seqBlink        , 1                                  }, // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
     
-	{E_R310_BLINK        , g_R310_seqBlink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
-    {E_R310_WINK         , g_R310_seqWink         , G_R310_ARRAY_SIZE(g_R310_seqWink)  }, // 윙크
+	{EMT_BLINK        , g_R310_seqBlink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
+    {EMT_WINK         , g_R310_seqWink         , G_R310_ARRAY_SIZE(g_R310_seqWink)  }, // 윙크
     
-	{E_R310_LOOK_L       , g_R310_seqLeft         , G_R310_ARRAY_SIZE(g_R310_seqLeft)  }, // 왼쪽 보기
-    {E_R310_LOOK_R       , g_R310_seqRight        , G_R310_ARRAY_SIZE(g_R310_seqRight) }, // 오른쪽 보기
+	{EMT_LOOK_L       , g_R310_seqLeft         , G_R310_ARRAY_SIZE(g_R310_seqLeft)  }, // 왼쪽 보기
+    {EMT_LOOK_R       , g_R310_seqRight        , G_R310_ARRAY_SIZE(g_R310_seqRight) }, // 오른쪽 보기
  
-	{E_R310_LOOK_U       , g_R310_seqUp           , G_R310_ARRAY_SIZE(g_R310_seqUp)    }, // 위 보기
-    {E_R310_LOOK_D       , g_R310_seqDown         , G_R310_ARRAY_SIZE(g_R310_seqDown)  }, // 아래 보기
+	{EMT_LOOK_U       , g_R310_seqUp           , G_R310_ARRAY_SIZE(g_R310_seqUp)    }, // 위 보기
+    {EMT_LOOK_D       , g_R310_seqDown         , G_R310_ARRAY_SIZE(g_R310_seqDown)  }, // 아래 보기
 
-	{E_R310_SCAN_LR      , g_R310_seqScanLeftRight, G_R310_ARRAY_SIZE(g_R310_seqScanLeftRight)}, // 좌우 스캔
-    {E_R310_SCAN_UD      , g_R310_seqScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
+	{EMT_SCAN_LR      , g_R310_seqScanLeftRight, G_R310_ARRAY_SIZE(g_R310_seqScanLeftRight)}, // 좌우 스캔
+    {EMT_SCAN_UD      , g_R310_seqScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
 
-    {E_R310_ANGRY2       , g_R310_seqAngry2       , G_R310_ARRAY_SIZE(g_R310_seqAngry2)}, // 좌우 스캔
-    {E_R310_SMILE        , g_R310_seqSmile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
+    {EMT_ANGRY2       , g_R310_seqAngry2       , G_R310_ARRAY_SIZE(g_R310_seqAngry2)}, // 좌우 스캔
+    {EMT_SMILE        , g_R310_seqSmile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
 
-    {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
-    {E_R310_SLEEP_BLINK  , g_R310_seqSleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
+    {EMT_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
+    {EMT_SLEEP_BLINK  , g_R310_seqSleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
 
     //////////////////
 /*
-	{E_R310_SQUINT_BLINK , g_R310_seqSquintBlink  , G_R310_ARRAY_SIZE(g_R310_seqSquintBlink)}, // 찡그림 깜빡임
+	{EMT_SQUINT_BLINK , g_R310_seqSquintBlink  , G_R310_ARRAY_SIZE(g_R310_seqSquintBlink)}, // 찡그림 깜빡임
 
-    {E_R310_ANGRY        , g_R310_seqAngry        , G_R310_ARRAY_SIZE(g_R310_seqAngry) }, // 화남
-    {E_R310_SAD          , g_R310_seqSad          , G_R310_ARRAY_SIZE(g_R310_seqSad)   }, // 슬픔
-    {E_R310_EVIL         , g_R310_seqEvil         , G_R310_ARRAY_SIZE(g_R310_seqEvil)  }, // 사악함
-    {E_R310_EVIL2        , g_R310_seqEvil2        , G_R310_ARRAY_SIZE(g_R310_seqEvil2) }, // 사악함 2
-    {E_R310_DEAD         , g_R310_seqDead         , G_R310_ARRAY_SIZE(g_R310_seqDead)  }, // 죽은 눈
-    {E_R310_IDLE         , g_R310_seqIdle         , G_R310_ARRAY_SIZE(g_R310_seqIdle)  }, // 대기 상태
-    {E_R310_SQUINT       , g_R310_seqSquint       , G_R310_ARRAY_SIZE(g_R310_seqSquint)}, // 찡그림
-    {E_R310_HEART        , g_R310_seqHeart        , G_R310_ARRAY_SIZE(g_R310_seqHeart) }, // 하트
+    {EMT_ANGRY        , g_R310_seqAngry        , G_R310_ARRAY_SIZE(g_R310_seqAngry) }, // 화남
+    {EMT_SAD          , g_R310_seqSad          , G_R310_ARRAY_SIZE(g_R310_seqSad)   }, // 슬픔
+    {EMT_EVIL         , g_R310_seqEvil         , G_R310_ARRAY_SIZE(g_R310_seqEvil)  }, // 사악함
+    {EMT_EVIL2        , g_R310_seqEvil2        , G_R310_ARRAY_SIZE(g_R310_seqEvil2) }, // 사악함 2
+    {EMT_DEAD         , g_R310_seqDead         , G_R310_ARRAY_SIZE(g_R310_seqDead)  }, // 죽은 눈
+    {EMT_IDLE         , g_R310_seqIdle         , G_R310_ARRAY_SIZE(g_R310_seqIdle)  }, // 대기 상태
+    {EMT_SQUINT       , g_R310_seqSquint       , G_R310_ARRAY_SIZE(g_R310_seqSquint)}, // 찡그림
+    {EMT_HEART        , g_R310_seqHeart        , G_R310_ARRAY_SIZE(g_R310_seqHeart) }, // 하트
 */
 };
 
