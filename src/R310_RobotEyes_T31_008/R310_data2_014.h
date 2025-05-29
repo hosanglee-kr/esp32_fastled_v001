@@ -160,7 +160,7 @@ typedef enum {
     E_E310_ANGRY2,
     E_E310_SMILE,
 	
-    E_R310_SLEEP,         // 잠자는 눈
+    E_E310_SLEEP,         // 잠자는 눈
     E_E310_SLEEP_BLINK,
 /*
 	E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
@@ -409,8 +409,8 @@ const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
     {E_E310_ANGRY2       , g_R310_seqAngry2       , G_R310_ARRAY_SIZE(g_R310_seqAngry2)}, // 좌우 스캔
     {E_E310_SMILE        , g_R310_seqSmile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
 
-    {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
-    {E_R310_SLEEP_BLINK  , g_R310_seqSleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
+    {E_E310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
+    {E_E310_SLEEP_BLINK  , g_R310_seqSleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
 
     //////////////////
 /*
