@@ -285,11 +285,11 @@ void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
     if (p_robotState != g_R310_robotState) {
         if (p_robotState == R_STATE_SLEEPING && g_R310_robotState == R_STATE_AWAKE) {
             // R_STATE_AWAKE -> R_STATE_SLEEPING: 잠자는 애니메이션 시작
-            R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
+            R310_setAnimation(E_E310_SLEEP_BLINK, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
 			//R310_setAnimation(E_R310_SLEEP, false, false, true);
         } else if (p_robotState == R_STATE_AWAKE && g_R310_robotState == R_STATE_SLEEPING) {
             // R_STATE_SLEEPING -> R_STATE_AWAKE: 잠 깨는 애니메이션 시작 (역방향)
-            R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON);
+            R310_setAnimation(E_E310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON);
 			//R310_setAnimation(E_R310_SLEEP, false, true, true);
         }
         g_R310_robotState = p_robotState; // 상태 업데이트
@@ -348,7 +348,7 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(E_R310_SCAN_LR, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
 
 	} else if (strcmp(p_command, "sleep_anim") == 0) { // 잠자는 애니메이션 명시적 실행
-        R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
+        R310_setAnimation(E_E310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     }
     // 로봇 상태 직접 변경 명령
     else if (strcmp(p_command, "awake") == 0) {
@@ -414,11 +414,11 @@ bool R310_runAnimation(void) {
                  // 최소 대기 시간 경과 후 무작위 확률(예: 30% 확률)로 깜빡임을 트리거합니다.
                  if (random(1000) > 700) {
                     if (g_R310_robotState == R_STATE_SLEEPING) {					
-						R310_setAnimation(E_R310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
-						//R310_setAnimation(E_R310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
-                        //R310_setAnimation(E_R310_BLINK, true, false, true); 
+						R310_setAnimation(E_E310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
+						//R310_setAnimation(E_E310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
+                        //R310_setAnimation(E_E310_BLINK, true, false, true); 
                     } else if (g_R310_robotState == R_STATE_AWAKE) {
-                        R310_setAnimation(E_R310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 깨어있는 상태: 일반 깜빡임
+                        R310_setAnimation(E_E310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 깨어있는 상태: 일반 깜빡임
                     }
                     g_R310_timeLastAnimation = millis(); // 타이머 리셋
                  } else {
