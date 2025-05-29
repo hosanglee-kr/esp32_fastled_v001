@@ -1,13 +1,11 @@
-
 #pragma once
 
+// R310_Main_013.h - 로봇 눈 애니메이션 및 상태 관리의 변수 및 함수 구현 파일
+// 이 파일은 필요한 데이터 및 타입 헤더 파일을 포함하고 main.cpp에서 사용됩니다.
 
 //#define R310_DEB
 #define R310_PROGRESS_1
 
-
-// R310_variables_and_funcs_005.h - 로봇 눈 애니메이션 및 상태 관리의 변수 및 함수 구현 파일
-// 이 파일은 필요한 데이터 및 타입 헤더 파일을 포함하고 main.cpp에서 사용됩니다.
 
 // 기본 타입 및 설정 헤더 파일 포함
 #include "R310_config_009.h"
@@ -287,12 +285,12 @@ void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
     if (p_robotState != g_R310_robotState) {
         if (p_robotState == R_STATE_SLEEPING && g_R310_robotState == R_STATE_AWAKE) {
             // R_STATE_AWAKE -> R_STATE_SLEEPING: 잠자는 애니메이션 시작
-            R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-			//R310_setAnimation(E_R310_SLEEP, false, false, true);
+            R310_setAnimation(E_E310_SLEEP_BLINK, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
+			//R310_setAnimation(E_E310_SLEEP, false, false, true);
         } else if (p_robotState == R_STATE_AWAKE && g_R310_robotState == R_STATE_SLEEPING) {
             // R_STATE_SLEEPING -> R_STATE_AWAKE: 잠 깨는 애니메이션 시작 (역방향)
-            R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON);
-			//R310_setAnimation(E_R310_SLEEP, false, true, true);
+            R310_setAnimation(E_E310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON);
+			//R310_setAnimation(E_E310_SLEEP, false, true, true);
         }
         g_R310_robotState = p_robotState; // 상태 업데이트
         // Serial.print("State changed to: "); // 상태 변경 시리얼 출력 (옵션)
@@ -348,8 +346,17 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(E_R310_SCAN_UD, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     } else if (strcmp(p_command, "leftright") == 0) {
         R310_setAnimation(E_R310_SCAN_LR, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-    
 
+	} else if (strcmp(p_command, "sleep_anim") == 0) { // 잠자는 애니메이션 명시적 실행
+        R310_setAnimation(E_E310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
+    }
+    // 로봇 상태 직접 변경 명령
+    else if (strcmp(p_command, "awake") == 0) {
+        R310_set_RobotState(R_STATE_AWAKE);
+    } else if (strcmp(p_command, "sleeping") == 0) {
+        R310_set_RobotState(R_STATE_SLEEPING);
+    }
+/*
     } else if (strcmp(p_command, "angry") == 0) {
         R310_setAnimation(E_R310_ANGRY, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     } else if (strcmp(p_command, "sad") == 0) {
@@ -364,15 +371,10 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(E_R310_DEAD, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     } else if (strcmp(p_command, "core") == 0) { // "core" 명령은 E_HEART
         R310_setAnimation(E_R310_HEART, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "sleep_anim") == 0) { // 잠자는 애니메이션 명시적 실행
-        R310_setAnimation(E_R310_SLEEP, EMT_AUTO_REVERSE_OFF, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
-    }
-    // 로봇 상태 직접 변경 명령
-    else if (strcmp(p_command, "awake") == 0) {
-        R310_set_RobotState(R_STATE_AWAKE);
-    } else if (strcmp(p_command, "sleeping") == 0) {
-        R310_set_RobotState(R_STATE_SLEEPING);
-    }
+    
+*/
+
+	
     // 위 명령들에 해당하지 않으면 텍스트 표시 명령으로 간주
     else {
         // 명령 문자열을 고정 버퍼로 복사 (최대 길이 제한 및 널 종료 보장)
@@ -411,9 +413,10 @@ bool R310_runAnimation(void) {
             if (g_R310_autoBlink && (millis() - g_R310_timeLastAnimation) >= g_R310_timeBlinkMinimum) {
                  // 최소 대기 시간 경과 후 무작위 확률(예: 30% 확률)로 깜빡임을 트리거합니다.
                  if (random(1000) > 700) {
-                    if (g_R310_robotState == R_STATE_SLEEPING) {
+                    if (g_R310_robotState == R_STATE_SLEEPING) {					
+						R310_setAnimation(E_E310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
+						//R310_setAnimation(E_E310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
                         //R310_setAnimation(E_R310_BLINK, true, false, true); 
-                        R310_setAnimation(E_R310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
                     } else if (g_R310_robotState == R_STATE_AWAKE) {
                         R310_setAnimation(E_R310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 깨어있는 상태: 일반 깜빡임
                     }
@@ -526,6 +529,12 @@ void R310_init() {
 
     FastLED.setBrightness(20);
 
+	   // limit my draw to 1A at 5v of power draw
+    FastLED.setMaxPowerInVoltsAndMilliamps(5,1000); 
+   
+	// limit my draw to 5W로 전력제한
+    // FastLED.setMaxPowerInMilliWatts(5000);
+
     // FastLED 초기화 및 LED 설정
     FastLED.addLeds<G_R310_LED_TYPE, G_R310_NEOPIXEL_PIN, G_R310_COLOR_ORDER>(g_R310_leds, G_R310_NEOPIXEL_NUM_LEDS).setCorrection(TypicalLEDStrip);
     g_R310_leds_ptr = g_R310_leds; // CRGB 배열 주소 포인터에 할당
@@ -584,11 +593,11 @@ void R310_run() {
 
     // 비활성 시간 기준 로봇 상태 변경 로직 예제
     // R_STATE_SLEEPING 상태가 아니고 비활성 시간 경과 시
-    if (g_R310_robotState != R_STATE_SLEEPING && millis() - g_R310_lastCommandTime >= G_R310_TIME_TO_SLEEP_EXAMPLE) {
+    if (g_R310_robotState != R_STATE_SLEEPING && millis() - g_R310_lastCommandTime >= G_R310_TIME_TO_SLEEP) {
         R310_set_RobotState(R_STATE_SLEEPING); // R_STATE_SLEEPING 상태로 변경 (잠자는 애니메이션 트리거)
     }
     // R_STATE_SLEEPING 상태인데 활동 감지 시
-    else if (g_R310_robotState == R_STATE_SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP_EXAMPLE) {
+    else if (g_R310_robotState == R_STATE_SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP) {
          R310_set_RobotState(R_STATE_AWAKE); // R_STATE_AWAKE 상태로 변경 (잠 깨는 애니메이션 트리거)
     }
 

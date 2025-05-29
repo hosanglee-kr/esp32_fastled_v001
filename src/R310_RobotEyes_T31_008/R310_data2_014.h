@@ -1,6 +1,6 @@
 #pragma once
 
-// R310_data_005.h - 로봇 눈 애니메이션 및 폰트 데이터 정의 파일
+// R310_data2_014.h - 로봇 눈 애니메이션 및 폰트 데이터 정의 파일
 // 이 파일은 로봇 눈 애니메이션에 사용되는 모든 정적 데이터 테이블을 정의합니다.
 // 데이터는 프로그램 메모리(PROGMEM)에 저장되어 RAM 사용량을 절약합니다.
 
@@ -12,7 +12,7 @@
 // --- 전역 상수 정의 (G_R310_ 로 시작) ---
 // 로봇 상태 관리를 위한 비활성 시간 기준 정의
 // 예제: 로봇이 일정 시간(10초) 동안 명령을 받지 않으면 R_STATE_SLEEPING 상태로 전환됩니다.
-const unsigned long G_R310_TIME_TO_SLEEP_EXAMPLE = 10000; // 밀리초 단위 (10초)
+const unsigned long G_R310_TIME_TO_SLEEP = 10000; // 밀리초 단위 (10초)
 
 
 ///////////////////////////////////
@@ -105,6 +105,8 @@ typedef enum {
 
     // 기타 눈 모양 (인덱스 49-55)
     EYE_SQUINTED,              // 찡그린 눈 (최대로 찡그린)
+
+/*
     EYE_HEART_STAGE1,          // 하트 눈 모양 1
     EYE_HEART_STAGE2,          // 하트 눈 모양 2
     EYE_SLEEP_STAGE1,          // 잠자는 눈 모양 1
@@ -113,6 +115,7 @@ typedef enum {
     EYE_SLEEP_STAGE4,          // 잠자는 눈 모양 4
     EYE_SLEEP_STAGE5,          // 잠자는 눈 모양 5
     EYE_SLEEP_STAGE6           // 잠자는 눈 모양 6 (완전히 감김/패턴)
+*/
 
 } T_R310_EyeFontIndex_t;
 
@@ -155,11 +158,11 @@ typedef enum {
     E_R310_SCAN_LR,       // 좌우 스캔
 
     E_E310_ANGRY2,
-    E_E320_SMILE,
-
+    E_E310_SMILE,
 	
-    E_R310_SLEEP,         // 잠자는 눈
-
+    E_E310_SLEEP,         // 잠자는 눈
+    E_E310_SLEEP_BLINK,
+/*
 	E_R310_SQUINT_BLINK,  // 찡그림 깜빡임
 
     E_R310_ANGRY,         // 화남
@@ -170,6 +173,7 @@ typedef enum {
     E_R310_DEAD,          // 죽은 눈
     E_R310_IDLE,          // 대기 상태 (찡그린 눈 고정)
     E_R310_HEART,         // 하트
+*/
 } T_R310_emotion_t;
 
 // 애니메이션 시퀀스 단일 프레임
@@ -302,10 +306,16 @@ const T_R310_animFrame_t g_R310_seqSleep[] PROGMEM = {
     {{ EYE_CLOSE_3, EYE_CLOSE_3 }, G_R310_FRAME_TIME},   // 프레임 3: 더 감김
     {{ EYE_CLOSE_4, EYE_CLOSE_4 }, G_R310_FRAME_TIME},   // 프레임 4: 더 감김
     {{ EYE_CLOSE_5, EYE_CLOSE_5 }, G_R310_FRAME_TIME},   // 프레임 5: 더 감김
-  //{{ EYE_ALL_OFF,6 EYE_ALL_OFF }, G_R310_FRAME_TIME},   // 프레임 6: 완전히 감긴 모양 또는 패턴 등
+    {{ EYE_ALL_OFF, EYE_ALL_OFF }, G_R310_FRAME_TIME * 2},   // 프레임 6: 완전히 감긴 모양 또는 패턴 등
 };
 
+const T_R310_animFrame_t g_R310_seqSleepBlink[] PROGMEM = {
+    {{ EYE_CLOSE_4         	, EYE_CLOSE_4      }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
+    {{ EYE_CLOSE_5         	, EYE_CLOSE_5      }, G_R310_FRAME_TIME},   // 프레임 0: 최대로 찡그린 모양
+    {{ EYE_ALL_OFF          , EYE_ALL_OFF      }, G_R310_FRAME_TIME},   // 프레임 1: 완전히 감긴 모양
+};
 
+/*
 ////////₩///////
 
 // 화남 애니메이션 시퀀스 데이터 (좌우 눈 모양 인덱스 다름)
@@ -377,7 +387,7 @@ const T_R310_animFrame_t g_R310_seqHeart[] PROGMEM = {
     {{ EYE_HEART_STAGE2,   EYE_HEART_STAGE2   }, 2000},                // 프레임 2: 완성된 하트 모양 (2초 유지)
 };
 
-
+*/
 
 
 // 감정 애니메이션 조회 테이블
@@ -397,12 +407,13 @@ const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
     {E_R310_SCAN_UD      , g_R310_seqScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
 
     {E_E310_ANGRY2       , g_R310_seqAngry2       , G_R310_ARRAY_SIZE(g_R310_seqAngry2)}, // 좌우 스캔
-    {E_E320_SMILE        , g_R310_seqSmile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
+    {E_E310_SMILE        , g_R310_seqSmile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
 
-    {E_R310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
+    {E_E310_SLEEP        , g_R310_seqSleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
+    {E_E310_SLEEP_BLINK  , g_R310_seqSleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
 
     //////////////////
-
+/*
 	{E_R310_SQUINT_BLINK , g_R310_seqSquintBlink  , G_R310_ARRAY_SIZE(g_R310_seqSquintBlink)}, // 찡그림 깜빡임
 
     {E_R310_ANGRY        , g_R310_seqAngry        , G_R310_ARRAY_SIZE(g_R310_seqAngry) }, // 화남
@@ -413,6 +424,7 @@ const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
     {E_R310_IDLE         , g_R310_seqIdle         , G_R310_ARRAY_SIZE(g_R310_seqIdle)  }, // 대기 상태
     {E_R310_SQUINT       , g_R310_seqSquint       , G_R310_ARRAY_SIZE(g_R310_seqSquint)}, // 찡그림
     {E_R310_HEART        , g_R310_seqHeart        , G_R310_ARRAY_SIZE(g_R310_seqHeart) }, // 하트
+*/
 };
 
 
@@ -1022,6 +1034,8 @@ const T_R310_FontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b00000000  // . . . . . . . .
     }},
 
+
+/*
     // 인덱스 50: EYE_HEART_STAGE1 (하트 눈 모양 1)
     {8, {
         0b00111100, // . . # # # # . .
@@ -1117,6 +1131,7 @@ const T_R310_FontChar g_R310_RobotEyes_Font[] PROGMEM = {
         0b01111110, // . # # # # # # .
         0b00111100  // . . # # # # . .
     }},
+*/
 };
 
 // 폰트 데이터 배열의 길이 (T_R310_FontChar 개수)
