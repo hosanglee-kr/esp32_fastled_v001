@@ -38,24 +38,7 @@ bool			   g_R310_autoBlink			= true;
 T_R310_animTable_t g_R310_animEntry;                                // 현재 실행 중인 애니메이션 시퀀스 정보
 
 int8_t			   g_R310_animIndex		 = 0;                       // 현재 시퀀스 내 프레임 인덱스
-
-/*  
-typedef enum {
-    EMT_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
-    EMT_AUTO_REVERSE_ON,
-} EMT_AutoReverse_t;
-
-typedef enum {
-    EMT_PLY_DIR_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
-    EMT_PLY_DIR_LAST,
-} EMT_PlyDirect_t;
-
-typedef enum {
-    EMT_FORCE_PLY_OFF,     // p_force 현재 상태에 관계없이 즉시 시작 여부
-    EMT_FORCE_PLY_ON,
-} EMT_ForcePly_t;
-
-*/
+  
 EMT_PlyDirect_t	     g_R310_animReverse	 = EMT_PLY_DIR_FIRST;                   // 애니메이션 시퀀스 역방향 재생 여부
 EMT_AutoReverse_t	 g_R310_autoReverse	 = EMT_AUTO_REVERSE_OFF;                   // 시퀀스 완료 후 자동 역방향 재생 여부
 
@@ -241,22 +224,7 @@ void R310_showText(bool p_bInit) {
 // @param p_r 시퀀스 완료 후 자동 역재생 여부
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
-/*
-typedef enum {
-    EMT_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
-    EMT_AUTO_REVERSE_ON,
-} EMT_AutoReverse_t;
 
-typedef enum {
-    EMT_PLY_DIR_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
-    EMT_PLY_DIR_LAST,
-} EMT_PlyDirect_t;
-
-typedef enum {
-    EMT_FORCE_PLY_OFF,     // p_force 현재 상태에 관계없이 즉시 시작 여부
-    EMT_FORCE_PLY_ON,
-} EMT_ForcePly_t;
-*/
 
 void R310_setAnimation(T_R310_emotion_t p_e, EMT_AutoReverse_t p_r, EMT_PlyDirect_t p_b, EMT_ForcePly_t p_force) {
 //void R310_setAnimation(T_R310_emotion_t p_e, bool p_r, bool p_b, bool p_force) {
@@ -297,26 +265,6 @@ void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
         // Serial.println(p_robotState == R_STATE_AWAKE ? "R_STATE_AWAKE" : "R_STATE_SLEEPING");
     }
 }
-
-/*  
-typedef enum {
-    EMT_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
-    EMT_AUTO_REVERSE_ON,
-} EMT_AutoReverse_t;
-
-typedef enum {
-    EMT_PLY_DIR_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
-    EMT_PLY_DIR_LAST,
-} EMT_PlyDirect_t;
-
-typedef enum {
-    EMT_FORCE_PLY_OFF,     // p_force 현재 상태에 관계없이 즉시 시작 여부
-    EMT_FORCE_PLY_ON,
-} EMT_ForcePly_t
-
-void R310_setAnimation(T_R310_emotion_t p_e, EMT_AutoReverse_t p_r, EMT_PlyDirect_t p_b, EMT_ForcePly_t p_force) {
-
-*/
 
 // 외부 명령 문자열 처리 (애니메이션 또는 텍스트)
 // 수신된 명령 파싱하여 눈 모양 변경
