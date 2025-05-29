@@ -416,9 +416,9 @@ bool R310_runAnimation(void) {
                     if (g_R310_robotState == R_STATE_SLEEPING) {					
 						R310_setAnimation(E_E310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
 						//R310_setAnimation(E_E310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
-                        //R310_setAnimation(E_E310_BLINK, true, false, true); 
+                        //R310_setAnimation(E_R310_BLINK, true, false, true); 
                     } else if (g_R310_robotState == R_STATE_AWAKE) {
-                        R310_setAnimation(E_E310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 깨어있는 상태: 일반 깜빡임
+                        R310_setAnimation(E_R310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 깨어있는 상태: 일반 깜빡임
                     }
                     g_R310_timeLastAnimation = millis(); // 타이머 리셋
                  } else {
