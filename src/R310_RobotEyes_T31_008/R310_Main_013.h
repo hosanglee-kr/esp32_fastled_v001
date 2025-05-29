@@ -414,9 +414,10 @@ bool R310_runAnimation(void) {
             if (g_R310_autoBlink && (millis() - g_R310_timeLastAnimation) >= g_R310_timeBlinkMinimum) {
                  // 최소 대기 시간 경과 후 무작위 확률(예: 30% 확률)로 깜빡임을 트리거합니다.
                  if (random(1000) > 700) {
-                    if (g_R310_robotState == R_STATE_SLEEPING) {
+                    if (g_R310_robotState == R_STATE_SLEEPING) {					
+						R310_setAnimation(E_R310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
+						//R310_setAnimation(E_R310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
                         //R310_setAnimation(E_R310_BLINK, true, false, true); 
-                        R310_setAnimation(E_R310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
                     } else if (g_R310_robotState == R_STATE_AWAKE) {
                         R310_setAnimation(E_R310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 깨어있는 상태: 일반 깜빡임
                     }
