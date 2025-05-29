@@ -278,7 +278,7 @@ void R310_processCommand(const char* p_command) {
     } else if (strcmp(p_command, "blink") == 0) {
         R310_setAnimation(E_R310_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
     
-    } else if (strcmp(p_command, "neutral") == 0) {
+    } else if (strcmp(p_command, "wink") == 0) {
         R310_setAnimation(E_R310_WINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON);
 
     } else if (strcmp(p_command, "left") == 0) {
@@ -368,7 +368,7 @@ bool R310_runAnimation(void) {
                  // 최소 대기 시간 경과 후 무작위 확률(예: 30% 확률)로 깜빡임을 트리거합니다.
                  if (random(1000) > 700) {
                     if (g_R310_robotState == R_STATE_SLEEPING) {					
-						R310_setAnimation(E_R310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
+						R310_setAnimation(E_R310_SLEEP_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_LAST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
 						//R310_setAnimation(E_R310_SQUINT_BLINK, EMT_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMT_FORCE_PLY_ON); // 잠자는 상태: 찡그림 깜빡임
                         //R310_setAnimation(E_R310_BLINK, true, false, true); 
                     } else if (g_R310_robotState == R_STATE_AWAKE) {
