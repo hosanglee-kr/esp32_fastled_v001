@@ -39,8 +39,8 @@ T_R310_animTable_t g_R310_animEntry;                                // 현재 �
 
 int8_t			   g_R310_animIndex		 = 0;                       // 현재 시퀀스 내 프레임 인덱스
   
-EMT_PlyDirect_t	     g_R310_animReverse	 = EMT_PLY_DIR_FIRST;                   // 애니메이션 시퀀스 역방향 재생 여부
-EMTP_AutoReverse_t	 g_R310_autoReverse	 = EMT_AUTO_REVERSE_OFF;                   // 시퀀스 완료 후 자동 역방향 재생 여부
+EMTP_PlyDirect_t	 g_R310_animReverse	 = EMTP_PLY_DIR_FIRST;                   // 애니메이션 시퀀스 역방향 재생 여부
+EMTP_AutoReverse_t	 g_R310_autoReverse	 = EMTP_AUTO_REVERSE_OFF;                   // 시퀀스 완료 후 자동 역방향 재생 여부
 
 T_R310_emotion_t   g_R310_nextEmotion	 = EMT_NONE;             // 다음에 재생할 애니메이션 감정 종류
 
