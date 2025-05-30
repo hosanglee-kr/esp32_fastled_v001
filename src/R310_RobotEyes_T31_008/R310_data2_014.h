@@ -129,19 +129,19 @@ typedef enum {
 } T_R310_RobotState_t;
 
 typedef enum {
-    EMT_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
-    EMT_AUTO_REVERSE_ON,
-} EMT_AutoReverse_t;
+    EMTP_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
+    EMTP_AUTO_REVERSE_ON,
+} EMTP_AutoReverse_t;
 
 typedef enum {
-    EMT_PLY_DIR_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
-    EMT_PLY_DIR_LAST,
-} EMT_PlyDirect_t;
+    EMTP_PLY_DIR_FIRST,      // p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향) //g_R310_animReverse
+    EMTP_PLY_DIR_LAST,
+} EMTP_PlyDirect_t;
 
 typedef enum {
-    EMT_FORCE_PLY_OFF,     // p_force 현재 상태에 관계없이 즉시 시작 여부
-    EMT_FORCE_PLY_ON,
-} EMT_ForcePly_t;
+    EMTP_FORCE_PLY_OFF,     // p_force 현재 상태에 관계없이 즉시 시작 여부
+    EMTP_FORCE_PLY_ON,
+} EMTP_ForcePly_t;
 
 
 // 로봇 눈 감정 애니메이션 종류
