@@ -228,7 +228,7 @@ void R310_setAnimation(T_R310_emotion_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDir
         g_R310_animReverse = p_b;     // 시작 방향 설정
 
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
-        if (p_force == EMTP_FORCE_PLY_ON || g_R310P_animState == S_IDLE) {
+        if (p_force == EMTP_FORCE_PLY_ON || g_R310_animState == S_IDLE) {
              g_R310_animState = S_RESTART;
         }
     }
@@ -266,7 +266,7 @@ void R310_processCommand(const char* p_command) {
         R310_setAnimation(EMT_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
     
     } else if (strcmp(p_command, "wink") == 0) {
-        R310_setAnimation(EMT_WINK, EMTP_AUTO_REVERSE_ON, EMT_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+        R310_setAnimation(EMT_WINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
 
     } else if (strcmp(p_command, "left") == 0) {
         R310_setAnimation(EMT_LOOK_L, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
@@ -419,7 +419,7 @@ bool R310_runAnimation(void) {
                 if (g_R310_autoReverse) {
                     // 자동 역재생: 동일 시퀀스를 반대 방향으로 다시 시작 준비
 					EMTP_PlyDirect_t   v_emtp_ply_dir;
-					if( g_R310_animReverse == EMT_PLY_DIR_LAST){
+					if( g_R310_animReverse == EMTP_PLY_DIR_LAST){
                        v_emtp_ply_dir  = EMTP_PLY_DIR_FIRST;
 					} else {
 						v_emtp_ply_dir  = EMTP_PLY_DIR_LAST;
