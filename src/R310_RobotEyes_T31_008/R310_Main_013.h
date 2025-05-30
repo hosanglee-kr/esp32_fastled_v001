@@ -157,7 +157,7 @@ uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
     }
 
     // 애니메이션 시작 인덱스 설정 (정방향 또는 역방향)
-    if (g_R310_animReverse == EMT_PLY_DIR_LAST)
+    if (g_R310_animReverse == EMTP_PLY_DIR_LAST)
         g_R310_animIndex = g_R310_animEntry.size - 1;
     else
         g_R310_animIndex = 0;
