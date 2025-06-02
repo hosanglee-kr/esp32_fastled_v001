@@ -45,7 +45,7 @@ const unsigned long G_M010_SERIAL_PRINT_INTERVAL_MS = 5000;
 // ====================================================================================================
 // 자동차 움직임 상태 열거형
 // ====================================================================================================
-enum CarMovementState {
+typedef enum {
     E_M010_STATE_UNKNOWN,       // 초기/알 수 없음
     E_M010_STATE_STOPPED_INIT,  // 정차 초기
     E_M010_STATE_SIGNAL_WAIT1,  // 신호대기 1
@@ -57,13 +57,13 @@ enum CarMovementState {
     E_M010_STATE_REVERSE,       // 후진
     E_M010_STATE_DECELERATING,  // 급감속
     E_M010_STATE_SPEED_BUMP     // 과속 방지턱 통과
-};
+} T_M010_CarMovementState;
 
 // ====================================================================================================
 // 자동차 상태 정보 구조체
 // ====================================================================================================
-struct M010_CarStatus {
-    CarMovementState v_currentMovementState; // 현재 움직임 상태
+typedef struct {
+    T_M010_CarMovementState v_currentMovementState; // 현재 움직임 상태
 
     float v_currentSpeed_kmh;      // 현재 속도 (km/h, 가속도 적분 추정)
     float v_accelerationX_ms2;     // X축 가속도 (m/s^2)
@@ -81,12 +81,12 @@ struct M010_CarStatus {
     unsigned long v_lastMovementTime_ms; // 마지막 움직임 감지 시간 (ms)
     unsigned long v_stopStartTime_ms;    // 정차 시작 시간 (ms)
     unsigned long v_currentStopTime_ms;  // 현재 정차 지속 시간 (ms)
-};
+} T_M010_CarStatus;
 
 // ====================================================================================================
 // 전역 변수 (g_M010_으로 시작)
 // ====================================================================================================
-M010_CarStatus g_M010_carStatus; // 자동차 상태 구조체 인스턴스
+T_M010_CarStatus g_M010_carStatus; // 자동차 상태 구조체 인스턴스
 
 // MPU6050 DMP 관련
 bool g_M010_dmpReady = false;    // DMP 초기화 완료 여부
