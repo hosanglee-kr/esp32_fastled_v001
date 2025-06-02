@@ -59,7 +59,7 @@ ESP32와 MPU6050을 사용하여
 자동차 움직임 관련 구조체
 
 
-```
+```cpp
 // 정차와 주차를 구분하는 시간 기준 (초)
 // 이 값보다 오랫동안 움직임이 감지되지 않으면 '주차' 상태로 간주합니다.
 const unsigned long G_M010_PARK_THRESHOLD_SECONDS = 60; // 예시: 60초 이상 움직임 없으면 주차
@@ -135,3 +135,5 @@ struct M010_CarStatus {
 // 이 변수에 MPU6050 데이터를 기반으로 분석된 자동차의 현재 상태 정보가 저장됩니다.
 M010_CarStatus g_M010_carStatus;
 
+
+```
