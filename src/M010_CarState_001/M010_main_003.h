@@ -10,7 +10,7 @@
 
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
-#include <MPU6050_6Axis_MotionApps612.h> // MPU6050 DMP 기능 - MotionApps612로 변경!
+#include <MPU6050_6Axis_MotionApps612.h> // MPU6050 DMP 기능
 
 // MPU6050 객체
 MPU6050 g_M010_mpu;
@@ -46,17 +46,17 @@ const unsigned long G_M010_SERIAL_PRINT_INTERVAL_MS = 5000;
 // 자동차 움직임 상태 열거형
 // ====================================================================================================
 enum CarMovementState {
-    G_M010_STATE_UNKNOWN,       // 초기/알 수 없음
-    G_M010_STATE_STOPPED_INIT,  // 정차 초기
-    G_M010_STATE_SIGNAL_WAIT1,  // 신호대기 1
-    G_M010_STATE_SIGNAL_WAIT2,  // 신호대기 2
-    G_M010_STATE_STOPPED1,      // 정차 1
-    G_M010_STATE_STOPPED2,      // 정차 2
-    G_M010_STATE_PARKED,        // 주차
-    G_M010_STATE_FORWARD,       // 전진
-    G_M010_STATE_REVERSE,       // 후진
-    G_M010_STATE_DECELERATING,  // 급감속
-    G_M010_STATE_SPEED_BUMP     // 과속 방지턱 통과
+    E_M010_STATE_UNKNOWN,       // 초기/알 수 없음
+    E_M010_STATE_STOPPED_INIT,  // 정차 초기
+    E_M010_STATE_SIGNAL_WAIT1,  // 신호대기 1
+    E_M010_STATE_SIGNAL_WAIT2,  // 신호대기 2
+    E_M010_STATE_STOPPED1,      // 정차 1
+    E_M010_STATE_STOPPED2,      // 정차 2
+    E_M010_STATE_PARKED,        // 주차
+    E_M010_STATE_FORWARD,       // 전진
+    E_M010_STATE_REVERSE,       // 후진
+    E_M010_STATE_DECELERATING,  // 급감속
+    E_M010_STATE_SPEED_BUMP     // 과속 방지턱 통과
 };
 
 // ====================================================================================================
@@ -102,8 +102,7 @@ VectorFloat g_M010_gravity;     // 중력 벡터
 float g_M010_ypr[3];            // Yaw, Pitch, Roll (radian)
 float g_M010_yawRateDegPs;      // Yaw 각속도 (deg/s)
 
-// 가속도 데이터 (raw 및 필터링)
-// int16_t g_M010_ax, g_M010_ay, g_M010_az; // Raw 가속도 (더 이상 개별 변수로 필요 없음)
+// 가속도 데이터 (필터링)
 float g_M010_filteredAx, g_M010_filteredAy, g_M010_filteredAz; // 필터링 가속도 (m/s^2)
 
 // 시간 관련
@@ -117,9 +116,9 @@ void M010_dmpDataReady() {
 }
 
 // ====================================================================================================
-// 함수 선언 (프로토타입) - 함수가 정의되기 전에 미리 선언하여 컴파일러에게 알립니다.
+// 함수 선언 (프로토타입)
 // ====================================================================================================
-void M010_defineCarState(unsigned long p_currentTime_ms); // 이 줄을 추가
+void M010_defineCarState(unsigned long p_currentTime_ms);
 
 // ====================================================================================================
 // 함수 정의 (M010_으로 시작)
@@ -139,11 +138,6 @@ void M010_setupMPU6050() {
     Serial.println(F("DMP 로딩 중..."));
     g_M010_devStatus = g_M010_mpu.dmpInitialize();
 
-    // MPU6050 DMP 초기화 시, setDMPEnabled(true) 전에 setXGyroOffset, setYGyroOffset 등을
-    // 적절히 호출하여 오프셋을 설정하는 것이 좋습니다.
-    // 여기서는 예제 코드를 기반으로 하지만, 실제 사용에서는 캘리브레이션 루틴이 필요할 수 있습니다.
-    // 예: g_M010_mpu.setXGyroOffset(220); g_M010_mpu.setYGyroOffset(76); 등
-
     if (g_M010_devStatus == 0) {
         Serial.println(F("DMP 활성화 중..."));
         g_M010_mpu.setDMPEnabled(true);
@@ -155,14 +149,7 @@ void M010_setupMPU6050() {
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
         g_M010_mpuIntStatus = g_M010_mpu.getIntStatus();
 
-        // MotionApps612에서는 dmpGetFIFOPacketSize()가 MPU6050.h가 아닌
-        // MPU6050_6Axis_MotionApps612.h에 직접 정의되어 있지 않을 수 있습니다.
-        // 대신 DMP_FIFO_RATE를 설정할 때 내부적으로 패킷 크기가 결정됩니다.
-        // 하지만 편의상 이전 버전과 동일하게 사용하거나, 
-        // dmpGetCurrentFIFOPacket이 알아서 처리하므로 크게 중요하지 않을 수도 있습니다.
-        // 일반적으로 42바이트입니다.
-        g_M010_packetSize = 42; // MPU6050_6Axis_MotionApps612의 기본 DMP 패킷 크기
-        // g_M010_packetSize = g_M010_mpu.dmpGetFIFOPacketSize(); // 이 함수는 612에서 사라졌을 수 있습니다.
+        g_M010_packetSize = 42; 
 
         g_M010_dmpReady = true;
         Serial.println(F("DMP 초기화 완료!"));
@@ -180,16 +167,12 @@ void M010_setupMPU6050() {
 void M010_updateCarStatus() {
     if (!g_M010_dmpReady) return; // DMP 미준비 시 종료
 
-    // MPU 인터럽트 발생 여부 또는 FIFO에 충분한 데이터가 있는지 확인 (MotionApps612 방식)
     if (!g_M010_mpuInterrupt && g_M010_fifoCount < g_M010_packetSize) {
         return; // 인터럽트가 없거나 데이터가 부족하면 함수 종료
     }
     
-    // MPU 인터럽트 플래그 리셋 (인터럽트 루틴에서 설정)
     g_M010_mpuInterrupt = false;
 
-    // DMP 패킷을 읽어옴. 이 함수는 FIFO 리셋 등의 내부 처리를 포함합니다.
-    // dmpGetCurrentFIFOPacket은 FIFO에서 하나의 패킷을 읽어와 fifoBuffer에 저장합니다.
     if (g_M010_mpu.dmpGetCurrentFIFOPacket(g_M010_fifoBuffer)) { 
         unsigned long v_currentTime_ms = millis();
         float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
@@ -198,7 +181,7 @@ void M010_updateCarStatus() {
         // 쿼터니언, Yaw/Pitch/Roll 계산
         g_M010_mpu.dmpGetQuaternion(&g_M010_q, g_M010_fifoBuffer);
         g_M010_mpu.dmpGetGravity(&g_M010_gravity, &g_M010_q); 
-        g_M010_mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_q, &g_M010_gravity); // g_M010_gravity는 VectorFloat* 타입
+        g_M010_mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_q, &g_M010_gravity);
 
         g_M010_carStatus.v_currentYawAngle_deg = g_M010_ypr[0] * 180 / M_PI;
         g_M010_carStatus.v_pitchAngle_deg = g_M010_ypr[1] * 180 / M_PI;
@@ -207,11 +190,9 @@ void M010_updateCarStatus() {
         VectorInt16 aa; // Raw 가속도 (int16)
         VectorInt16 linAccel; // 선형 가속도 결과를 VectorInt16으로 받음
 
-        g_M010_mpu.dmpGetAccel(&aa, g_M010_fifoBuffer); // Raw 가속도 가져오기
-        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity); // 수정된 함수 호출
+        g_M010_mpu.dmpGetAccel(&aa, g_M010_fifoBuffer);
+        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity);
 
-        // MPU6050_6Axis_MotionApps612는 일반적으로 linAccel을 'g' 단위로 반환합니다.
-        // 따라서 g_M010_GRAVITY_MPS2를 곱하여 m/s^2 단위로 변환합니다.
         float v_currentAx_ms2 = (float)linAccel.x * G_M010_GRAVITY_MPS2;
         float v_currentAy_ms2 = (float)linAccel.y * G_M010_GRAVITY_MPS2;
         float v_currentAz_ms2 = (float)linAccel.z * G_M010_GRAVITY_MPS2;
@@ -226,7 +207,7 @@ void M010_updateCarStatus() {
 
         // Yaw 각속도 (Z축 자이로)
         VectorInt16 gyr; // 자이로 데이터 (VectorInt16)
-        g_M010_mpu.dmpGetGyro(&gyr, g_M010_fifoBuffer); // VectorInt16*와 const uint8_t* packet=0 오버로드 사용
+        g_M010_mpu.dmpGetGyro(&gyr, g_M010_fifoBuffer);
 
         g_M010_yawRateDegPs = (float)gyr.z / 131.0f; // 131 LSB/deg/s @ +/-250 deg/s
         g_M010_carStatus.v_yawRate_degps = g_M010_yawRateDegPs;
@@ -260,7 +241,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
         (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
         g_M010_carStatus.v_speedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms;
-        g_M010_carStatus.v_currentMovementState = G_M010_STATE_SPEED_BUMP;
+        g_M010_carStatus.v_currentMovementState = E_M010_STATE_SPEED_BUMP;
         return; // 최우선 감지
     } else if (g_M010_carStatus.v_speedBumpDetected &&
                (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
@@ -270,7 +251,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
     // 급감속 감지 (Y축 가속도 급감)
     if (v_accelY < G_M010_ACCEL_DECEL_THRESHOLD_MPS2) {
         g_M010_carStatus.v_isEmergencyBraking = true;
-        g_M010_carStatus.v_currentMovementState = G_M010_STATE_DECELERATING;
+        g_M010_carStatus.v_currentMovementState = E_M010_STATE_DECELERATING;
         return; // 최우선 감지
     } else {
         g_M010_carStatus.v_isEmergencyBraking = false;
@@ -278,31 +259,31 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
 
     // 전진, 후진, 정차, 주차 판단
     if (fabs(v_speed) < G_M010_SPEED_THRESHOLD_KMH) { // 정차/주차 상태
-        if (g_M010_carStatus.v_currentMovementState != G_M010_STATE_STOPPED_INIT &&
-            g_M010_carStatus.v_currentMovementState != G_M010_STATE_SIGNAL_WAIT1 &&
-            g_M010_carStatus.v_currentMovementState != G_M010_STATE_SIGNAL_WAIT2 &&
-            g_M010_carStatus.v_currentMovementState != G_M010_STATE_STOPPED1 &&
-            g_M010_carStatus.v_currentMovementState != G_M010_STATE_STOPPED2 &&
-            g_M010_carStatus.v_currentMovementState != G_M010_STATE_PARKED) {
+        if (g_M010_carStatus.v_currentMovementState != E_M010_STATE_STOPPED_INIT &&
+            g_M010_carStatus.v_currentMovementState != E_M010_STATE_SIGNAL_WAIT1 &&
+            g_M010_carStatus.v_currentMovementState != E_M010_STATE_SIGNAL_WAIT2 &&
+            g_M010_carStatus.v_currentMovementState != E_M010_STATE_STOPPED1 &&
+            g_M010_carStatus.v_currentMovementState != E_M010_STATE_STOPPED2 &&
+            g_M010_carStatus.v_currentMovementState != E_M010_STATE_PARKED) {
             g_M010_carStatus.v_stopStartTime_ms = p_currentTime_ms; // 정차 시작 시간 기록
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_STOPPED_INIT;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_STOPPED_INIT;
         }
 
         g_M010_carStatus.v_currentStopTime_ms = p_currentTime_ms - g_M010_carStatus.v_stopStartTime_ms;
         unsigned long v_stopSeconds = g_M010_carStatus.v_currentStopTime_ms / 1000;
 
         if (v_stopSeconds >= G_M010_PARK_SECONDS) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_PARKED;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_PARKED;
         } else if (v_stopSeconds >= G_M010_STOP2_SECONDS) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_STOPPED2;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_STOPPED2;
         } else if (v_stopSeconds >= G_M010_STOP1_SECONDS) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_STOPPED1;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_STOPPED1;
         } else if (v_stopSeconds >= G_M010_SIGNAL_WAIT2_SECONDS) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_SIGNAL_WAIT2;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_SIGNAL_WAIT2;
         } else if (v_stopSeconds >= G_M010_SIGNAL_WAIT1_SECONDS) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_SIGNAL_WAIT1;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_SIGNAL_WAIT1;
         } else {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_STOPPED_INIT;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_STOPPED_INIT;
         }
         g_M010_carStatus.v_lastMovementTime_ms = 0; // 정지 중
     } else { // 움직이는 상태
@@ -310,11 +291,11 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
         g_M010_carStatus.v_stopStartTime_ms = 0; // 정차 시작 시간 리셋
 
         if (v_speed > G_M010_SPEED_THRESHOLD_KMH) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_FORWARD;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_FORWARD;
         } else if (v_speed < -G_M010_SPEED_THRESHOLD_KMH) {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_REVERSE;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_REVERSE;
         } else {
-            g_M010_carStatus.v_currentMovementState = G_M010_STATE_UNKNOWN;
+            g_M010_carStatus.v_currentMovementState = E_M010_STATE_UNKNOWN;
         }
     }
 }
@@ -326,17 +307,17 @@ void M010_printCarStatus() {
     Serial.println(F("\n--- 자동차 현재 상태 ---"));
     Serial.print(F("  상태: "));
     switch (g_M010_carStatus.v_currentMovementState) {
-        case G_M010_STATE_UNKNOWN: Serial.println(F("알 수 없음")); break;
-        case G_M010_STATE_STOPPED_INIT: Serial.println(F("정차 중 (초기)")); break;
-        case G_M010_STATE_SIGNAL_WAIT1: Serial.print(F("신호대기 1 (60초 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case G_M010_STATE_SIGNAL_WAIT2: Serial.print(F("신호대기 2 (120초 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case G_M010_STATE_STOPPED1: Serial.print(F("정차 1 (5분 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case G_M010_STATE_STOPPED2: Serial.print(F("정차 2 (10분 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case G_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case G_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
-        case G_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
-        case G_M010_STATE_DECELERATING: Serial.println(F("급감속 중")); break;
-        case G_M010_STATE_SPEED_BUMP: Serial.println(F("과속 방지턱 통과")); break;
+        case E_M010_STATE_UNKNOWN: Serial.println(F("알 수 없음")); break;
+        case E_M010_STATE_STOPPED_INIT: Serial.println(F("정차 중 (초기)")); break;
+        case E_M010_STATE_SIGNAL_WAIT1: Serial.print(F("신호대기 1 (60초 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
+        case E_M010_STATE_SIGNAL_WAIT2: Serial.print(F("신호대기 2 (120초 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
+        case E_M010_STATE_STOPPED1: Serial.print(F("정차 1 (5분 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
+        case E_M010_STATE_STOPPED2: Serial.print(F("정차 2 (10분 미만), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
+        case E_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_carStatus.v_currentStopTime_ms / 1000); Serial.println(F("s")); break;
+        case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
+        case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
+        case E_M010_STATE_DECELERATING: Serial.println(F("급감속 중")); break;
+        case E_M010_STATE_SPEED_BUMP: Serial.println(F("과속 방지턱 통과")); break;
     }
     Serial.print(F("  추정 속도: ")); Serial.print(g_M010_carStatus.v_currentSpeed_kmh, 2); Serial.println(F(" km/h"));
     Serial.print(F("  가속도(X,Y,Z): "));
@@ -359,7 +340,7 @@ void M010_MPU_init() {
     M010_setupMPU6050(); // MPU6050 초기화
 
     // 자동차 상태 구조체 초기화
-    g_M010_carStatus.v_currentMovementState = G_M010_STATE_UNKNOWN;
+    g_M010_carStatus.v_currentMovementState = E_M010_STATE_UNKNOWN;
     g_M010_carStatus.v_currentSpeed_kmh = 0.0;
     g_M010_carStatus.v_accelerationX_ms2 = 0.0;
     g_M010_carStatus.v_accelerationY_ms2 = 0.0;
