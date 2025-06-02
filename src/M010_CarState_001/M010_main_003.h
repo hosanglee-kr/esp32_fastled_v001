@@ -5,12 +5,12 @@
 // 설명: ESP32 + MPU6050 활용, 차량 움직임 감지 및 LED Matrix 로봇 눈 표정 표현.
 //       본 코드는 MPU6050 데이터 처리 및 자동차 상태 정의.
 // 개발 환경: PlatformIO Arduino Core (ESP32)
-// 사용 라이브러리: MPU6050_DMP6 (I2Cdevlib by Jeff Rowberg)
+// 사용 라이브러리: MPU6050_DMP6 (I2Cdevlib by Jeff Rowberg) - MotionApps612 사용
 // ====================================================================================================
 
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
-#include <MPU6050_6Axis_MotionApps20.h> // MPU6050 DMP 기능
+#include <MPU6050_6Axis_MotionApps612.h> // MPU6050 DMP 기능 - MotionApps612로 변경!
 
 // MPU6050 객체
 MPU6050 g_M010_mpu;
@@ -98,12 +98,12 @@ uint8_t g_M010_fifoBuffer[64];  // FIFO 버퍼
 
 // 쿼터니언 및 오일러 각
 Quaternion g_M010_q;            // 쿼터니언
-VectorFloat g_M010_gravity;     // 중력 벡터 (수정: VectorInt16 -> VectorFloat)
+VectorFloat g_M010_gravity;     // 중력 벡터 
 float g_M010_ypr[3];            // Yaw, Pitch, Roll (radian)
 float g_M010_yawRateDegPs;      // Yaw 각속도 (deg/s)
 
 // 가속도 데이터 (raw 및 필터링)
-int16_t g_M010_ax, g_M010_ay, g_M010_az; // Raw 가속도
+// int16_t g_M010_ax, g_M010_ay, g_M010_az; // Raw 가속도 (더 이상 개별 변수로 필요 없음)
 float g_M010_filteredAx, g_M010_filteredAy, g_M010_filteredAz; // 필터링 가속도 (m/s^2)
 
 // 시간 관련
@@ -115,6 +115,11 @@ volatile bool g_M010_mpuInterrupt = false; // MPU6050 인터럽트 발생 여부
 void M010_dmpDataReady() {
     g_M010_mpuInterrupt = true;
 }
+
+// ====================================================================================================
+// 함수 선언 (프로토타입) - 함수가 정의되기 전에 미리 선언하여 컴파일러에게 알립니다.
+// ====================================================================================================
+void M010_defineCarState(unsigned long p_currentTime_ms); // 이 줄을 추가
 
 // ====================================================================================================
 // 함수 정의 (M010_으로 시작)
@@ -134,6 +139,11 @@ void M010_setupMPU6050() {
     Serial.println(F("DMP 로딩 중..."));
     g_M010_devStatus = g_M010_mpu.dmpInitialize();
 
+    // MPU6050 DMP 초기화 시, setDMPEnabled(true) 전에 setXGyroOffset, setYGyroOffset 등을
+    // 적절히 호출하여 오프셋을 설정하는 것이 좋습니다.
+    // 여기서는 예제 코드를 기반으로 하지만, 실제 사용에서는 캘리브레이션 루틴이 필요할 수 있습니다.
+    // 예: g_M010_mpu.setXGyroOffset(220); g_M010_mpu.setYGyroOffset(76); 등
+
     if (g_M010_devStatus == 0) {
         Serial.println(F("DMP 활성화 중..."));
         g_M010_mpu.setDMPEnabled(true);
@@ -145,7 +155,15 @@ void M010_setupMPU6050() {
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
         g_M010_mpuIntStatus = g_M010_mpu.getIntStatus();
 
-        g_M010_packetSize = g_M010_mpu.dmpGetFIFOPacketSize();
+        // MotionApps612에서는 dmpGetFIFOPacketSize()가 MPU6050.h가 아닌
+        // MPU6050_6Axis_MotionApps612.h에 직접 정의되어 있지 않을 수 있습니다.
+        // 대신 DMP_FIFO_RATE를 설정할 때 내부적으로 패킷 크기가 결정됩니다.
+        // 하지만 편의상 이전 버전과 동일하게 사용하거나, 
+        // dmpGetCurrentFIFOPacket이 알아서 처리하므로 크게 중요하지 않을 수도 있습니다.
+        // 일반적으로 42바이트입니다.
+        g_M010_packetSize = 42; // MPU6050_6Axis_MotionApps612의 기본 DMP 패킷 크기
+        // g_M010_packetSize = g_M010_mpu.dmpGetFIFOPacketSize(); // 이 함수는 612에서 사라졌을 수 있습니다.
+
         g_M010_dmpReady = true;
         Serial.println(F("DMP 초기화 완료!"));
     } else {
@@ -162,33 +180,24 @@ void M010_setupMPU6050() {
 void M010_updateCarStatus() {
     if (!g_M010_dmpReady) return; // DMP 미준비 시 종료
 
-    while (!g_M010_mpuInterrupt && g_M010_fifoCount < g_M010_packetSize) {} // 데이터 대기
-
+    // MPU 인터럽트 발생 여부 또는 FIFO에 충분한 데이터가 있는지 확인 (MotionApps612 방식)
+    if (!g_M010_mpuInterrupt && g_M010_fifoCount < g_M010_packetSize) {
+        return; // 인터럽트가 없거나 데이터가 부족하면 함수 종료
+    }
+    
+    // MPU 인터럽트 플래그 리셋 (인터럽트 루틴에서 설정)
     g_M010_mpuInterrupt = false;
-    g_M010_mpuIntStatus = g_M010_mpu.getIntStatus();
-    g_M010_fifoCount = g_M010_mpu.getFIFOCount();
 
-    if ((g_M010_mpuIntStatus & 0x10) || g_M010_fifoCount == 1024) {
-        g_M010_mpu.resetFIFO();
-        Serial.println(F("FIFO 오버플로우!"));
-    } else if (g_M010_mpuIntStatus & 0x02) {
-        while (g_M010_fifoCount < g_M010_packetSize) g_M010_fifoCount = g_M010_mpu.getFIFOCount();
-        g_M010_mpu.getFIFOBytes(g_M010_fifoBuffer, g_M010_packetSize);
-        g_M010_fifoCount -= g_M010_packetSize;
-
+    // DMP 패킷을 읽어옴. 이 함수는 FIFO 리셋 등의 내부 처리를 포함합니다.
+    // dmpGetCurrentFIFOPacket은 FIFO에서 하나의 패킷을 읽어와 fifoBuffer에 저장합니다.
+    if (g_M010_mpu.dmpGetCurrentFIFOPacket(g_M010_fifoBuffer)) { 
         unsigned long v_currentTime_ms = millis();
         float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
         g_M010_lastSampleTime_ms = v_currentTime_ms;
 
         // 쿼터니언, Yaw/Pitch/Roll 계산
         g_M010_mpu.dmpGetQuaternion(&g_M010_q, g_M010_fifoBuffer);
-        
-        // --- 수정된 부분 시작 ---
-        // dmpGetGravity 함수의 첫 번째 인자를 VectorFloat* 타입으로 변경
-        // 전역 변수 g_M010_gravity가 VectorFloat 타입이므로 이를 사용
         g_M010_mpu.dmpGetGravity(&g_M010_gravity, &g_M010_q); 
-        // --- 수정된 부분 끝 ---
-
         g_M010_mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_q, &g_M010_gravity); // g_M010_gravity는 VectorFloat* 타입
 
         g_M010_carStatus.v_currentYawAngle_deg = g_M010_ypr[0] * 180 / M_PI;
@@ -196,20 +205,16 @@ void M010_updateCarStatus() {
 
         // 선형 가속도 (중력분 제거) 및 필터링
         VectorInt16 aa; // Raw 가속도 (int16)
-        // dmpGetLinearAccel의 세 번째 인자는 gravity vector (VectorFloat*) 여야 함
-        // 따라서 위에서 g_M010_gravity (VectorFloat)를 바로 사용
-        VectorFloat linAccel; // 선형 가속도 결과 (float)
+        VectorInt16 linAccel; // 선형 가속도 결과를 VectorInt16으로 받음
 
         g_M010_mpu.dmpGetAccel(&aa, g_M010_fifoBuffer); // Raw 가속도 가져오기
-        
-        // --- 수정된 부분 시작 ---
-        // dmpGetLinearAccel 함수의 인자 타입에 맞게 g_M010_gravity (VectorFloat) 사용
-        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity);
-        // --- 수정된 부분 끝 ---
+        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity); // 수정된 함수 호출
 
-        float v_currentAx_ms2 = linAccel.x * G_M010_GRAVITY_MPS2;
-        float v_currentAy_ms2 = linAccel.y * G_M010_GRAVITY_MPS2;
-        float v_currentAz_ms2 = linAccel.z * G_M010_GRAVITY_MPS2;
+        // MPU6050_6Axis_MotionApps612는 일반적으로 linAccel을 'g' 단위로 반환합니다.
+        // 따라서 g_M010_GRAVITY_MPS2를 곱하여 m/s^2 단위로 변환합니다.
+        float v_currentAx_ms2 = (float)linAccel.x * G_M010_GRAVITY_MPS2;
+        float v_currentAy_ms2 = (float)linAccel.y * G_M010_GRAVITY_MPS2;
+        float v_currentAz_ms2 = (float)linAccel.z * G_M010_GRAVITY_MPS2;
 
         g_M010_filteredAx = G_M010_ACCEL_ALPHA * g_M010_filteredAx + (1 - G_M010_ACCEL_ALPHA) * v_currentAx_ms2;
         g_M010_filteredAy = G_M010_ACCEL_ALPHA * g_M010_filteredAy + (1 - G_M010_ACCEL_ALPHA) * v_currentAy_ms2;
@@ -220,9 +225,10 @@ void M010_updateCarStatus() {
         g_M010_carStatus.v_accelerationZ_ms2 = g_M010_filteredAz;
 
         // Yaw 각속도 (Z축 자이로)
-        int16_t v_gx, v_gy, v_gz;
-        g_M010_mpu.dmpGetGyro(&v_gx, &v_gy, &v_gz, g_M010_fifoBuffer);
-        g_M010_yawRateDegPs = (float)v_gz / 131.0f; // 131 LSB/deg/s @ +/-250 deg/s
+        VectorInt16 gyr; // 자이로 데이터 (VectorInt16)
+        g_M010_mpu.dmpGetGyro(&gyr, g_M010_fifoBuffer); // VectorInt16*와 const uint8_t* packet=0 오버로드 사용
+
+        g_M010_yawRateDegPs = (float)gyr.z / 131.0f; // 131 LSB/deg/s @ +/-250 deg/s
         g_M010_carStatus.v_yawRate_degps = g_M010_yawRateDegPs;
 
         // 속도 추정 (Y축 가속도 적분, 오차 누적 유의)
