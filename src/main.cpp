@@ -51,6 +51,9 @@
     #include "R310_RobotEyes_T31_008/R310_Main_013.h"
 #endif
 
+#ifdef M010
+    #include "M010_CarState_001/M010_main_003.h"
+#endif
 
 #ifdef C100
     #include "C100_CarEyes_v003/C100_CarEyes_Main_001.h"
@@ -106,6 +109,11 @@ void setup() {
 	    R310_init();
 	#endif
 
+	
+	#ifdef M010
+	    M010_MPU_init();
+	#endif
+
 	#ifdef C100
 		C100_init();
 	#endif
@@ -158,6 +166,10 @@ void loop() {
 
 	#ifdef R310
 	    R310_run();
+	#endif
+
+	#ifdef M010
+	    M010_MPU_run();
 	#endif
 	
 	#ifdef C100
