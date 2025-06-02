@@ -1,4 +1,4 @@
-#pragma once
+#pragma ones
 
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
@@ -98,7 +98,7 @@ uint8_t g_M010_fifoBuffer[64];  // FIFO 버퍼
 
 // 쿼터니언 및 오일러 각
 Quaternion g_M010_q;            // 쿼터니언
-VectorFloat g_M010_gravity;     // 중력 벡터
+VectorFloat g_M010_gravity;     // 중력 벡터 (수정: VectorInt16 -> VectorFloat)
 float g_M010_ypr[3];            // Yaw, Pitch, Roll (radian)
 float g_M010_yawRateDegPs;      // Yaw 각속도 (deg/s)
 
@@ -182,18 +182,30 @@ void M010_updateCarStatus() {
 
         // 쿼터니언, Yaw/Pitch/Roll 계산
         g_M010_mpu.dmpGetQuaternion(&g_M010_q, g_M010_fifoBuffer);
-        g_M010_mpu.dmpGetGravity(&g_M010_gravity, &g_M010_q);
-        g_M010_mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_q, &g_M010_gravity);
+        
+        // --- 수정된 부분 시작 ---
+        // dmpGetGravity 함수의 첫 번째 인자를 VectorFloat* 타입으로 변경
+        // 전역 변수 g_M010_gravity가 VectorFloat 타입이므로 이를 사용
+        g_M010_mpu.dmpGetGravity(&g_M010_gravity, &g_M010_q); 
+        // --- 수정된 부분 끝 ---
+
+        g_M010_mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_q, &g_M010_gravity); // g_M010_gravity는 VectorFloat* 타입
+
         g_M010_carStatus.v_currentYawAngle_deg = g_M010_ypr[0] * 180 / M_PI;
         g_M010_carStatus.v_pitchAngle_deg = g_M010_ypr[1] * 180 / M_PI;
 
         // 선형 가속도 (중력분 제거) 및 필터링
-        VectorInt16 aa;
-        VectorInt16 gv;
-        VectorFloat linAccel;
-        g_M010_mpu.dmpGetAccel(&aa, g_M010_fifoBuffer);
-        g_M010_mpu.dmpGetGravity(&gv, &g_M010_q);
-        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &gv);
+        VectorInt16 aa; // Raw 가속도 (int16)
+        // dmpGetLinearAccel의 세 번째 인자는 gravity vector (VectorFloat*) 여야 함
+        // 따라서 위에서 g_M010_gravity (VectorFloat)를 바로 사용
+        VectorFloat linAccel; // 선형 가속도 결과 (float)
+
+        g_M010_mpu.dmpGetAccel(&aa, g_M010_fifoBuffer); // Raw 가속도 가져오기
+        
+        // --- 수정된 부분 시작 ---
+        // dmpGetLinearAccel 함수의 인자 타입에 맞게 g_M010_gravity (VectorFloat) 사용
+        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity);
+        // --- 수정된 부분 끝 ---
 
         float v_currentAx_ms2 = linAccel.x * G_M010_GRAVITY_MPS2;
         float v_currentAy_ms2 = linAccel.y * G_M010_GRAVITY_MPS2;
