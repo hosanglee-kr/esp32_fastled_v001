@@ -111,7 +111,7 @@ void setup() {
 
 	
 	#ifdef M010
-	    M010_MPI_init();
+	    M010_MPU_init();
 	#endif
 
 	#ifdef C100
@@ -169,7 +169,7 @@ void loop() {
 	#endif
 
 	#ifdef M010
-	    M010_MPI_run();
+	    M010_MPU_run();
 	#endif
 	
 	#ifdef C100
