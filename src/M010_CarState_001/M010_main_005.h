@@ -145,7 +145,7 @@ void M010_setupMPU6050() {
     Wire.begin(); // I2C 시작
     Wire.setClock(400000); // I2C 속도 400kHz
 
-    dbgP1_println_F(F("MPU6050 초기화 중..."));
+
     dbgP1_print_F(F("MPU6050 연결 테스트: "));
     dbgP1_println_F(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
     dbgP1_println_F(F("DMP 로딩 중..."));
