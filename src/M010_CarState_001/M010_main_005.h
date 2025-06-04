@@ -9,6 +9,9 @@
 // ====================================================================================================
 
 
+#define G_M010_PRINT_DEBUG
+#define G_M010_PRINT_PROGRESS_1
+
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
 #include <MPU6050_6Axis_MotionApps612.h> // MPU6050 DMP 기능
