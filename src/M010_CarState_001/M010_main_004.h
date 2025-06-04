@@ -12,15 +12,15 @@
 - 급감속, 과속방지턱은 상태에서 분리 
 - 급감속, 과속방지턱 상태 유지시간 
 
-*₩
+*/
 
 
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
 #include <MPU6050_6Axis_MotionApps612.h> // MPU6050 DMP 기능
 
-// MPU6050 객체
-MPU6050 g_M010_mpu;
+// MPU6050 객g_M010_mpu체
+MPU6050 g_M010_Mpu;
 
 // ====================================================================================================
 // 전역 상수 (G_M010_으로 시작)
@@ -63,8 +63,8 @@ typedef enum {
     E_M010_STATE_PARKED,        // 주차
     E_M010_STATE_FORWARD,       // 전진
     E_M010_STATE_REVERSE,       // 후진
-    E_M010_STATE_DECELERATING,  // 급감속
-    E_M010_STATE_SPEED_BUMP     // 과속 방지턱 통과
+    // E_M010_STATE_DECELERATING,  // 급감속
+    // E_M010_STATE_SPEED_BUMP     // 과속 방지턱 통과
 } T_M010_CarMovementState;
 
 // ====================================================================================================
@@ -74,9 +74,9 @@ typedef struct {
     T_M010_CarMovementState movementState; // 현재 움직임 상태
 
     float speed_kmh;               // 현재 속도 (km/h, 가속도 적분 추정)
-    float accel_X_ms2;             // X축 가속도 (m/s^2)
-    float accel_Y_ms2;             // Y축 가속도 (m/s^2, 전진 기준: 양수-가속, 음수-감속)
-    float accel_Z_ms2;             // Z축 가속도 (m/s^2, 노면 충격 감지)
+    float accelX_ms2;             // X축 가속도 (m/s^2)
+    float accelY_ms2;             // Y축 가속도 (m/s^2, 전진 기준: 양수-가속, 음수-감속)
+    float accelZ_ms2;             // Z축 가속도 (m/s^2, 노면 충격 감지)
 
     float yawAngle_deg;            // Yaw 각도 (도)
     float yawAngleVelocity_degps;  // Yaw 각속도 (도/초, 양수-우회전, 음수-좌회전)
@@ -143,21 +143,21 @@ void M010_setupMPU6050() {
 
     Serial.println(F("MPU6050 초기화 중..."));
     Serial.print(F("MPU6050 연결 테스트: "));
-    Serial.println(g_M010_mpu.testConnection() ? F("성공") : F("실패"));
+    Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
 
     Serial.println(F("DMP 로딩 중..."));
-    g_M010_dmp_devStatus = g_M010_mpu.dmpInitialize();
+    g_M010_dmp_devStatus = g_M010_Mpu.dmpInitialize();
 
     if (g_M010_dmp_devStatus == 0) {
         Serial.println(F("DMP 활성화 중..."));
-        g_M010_mpu.setDMPEnabled(true);
+        g_M010_Mpu.setDMPEnabled(true);
 
         Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
         Serial.print(G_M010_MPU_INTERRUPT_PIN);
         Serial.println(F(") 설정 중..."));
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
-        g_M010_mpu_interruptStatus = g_M010_mpu.getIntStatus();
+        g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus();
 
         g_M010_dmp_packetSize = 42; 
 
@@ -183,15 +183,15 @@ void M010_updateCarStatus() {
     
     g_M010_mpu_isInterrupt = false;
 
-    if (g_M010_mpu.dmpGetCurrentFIFOPacket(g_M010_dmp_fifoBuffer)) { 
+    if (g_M010_Mpu.dmpGetCurrentFIFOPacket(g_M010_dmp_fifoBuffer)) { 
         unsigned long v_currentTime_ms = millis();
         float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
         g_M010_lastSampleTime_ms = v_currentTime_ms;
 
         // 쿼터니언, Yaw/Pitch/Roll 계산
-        g_M010_mpu.dmpGetQuaternion(&g_M010_Quaternion, g_M010_dmp_fifoBuffer);
-        g_M010_mpu.dmpGetGravity(&g_M010_gravity, &g_M010_Quaternion); 
-        g_M010_mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_Quaternion, &g_M010_gravity);
+        g_M010_Mpu.dmpGetQuaternion(&g_M010_Quaternion, g_M010_dmp_fifoBuffer);
+        g_M010_Mpu.dmpGetGravity(&g_M010_gravity, &g_M010_Quaternion); 
+        g_M010_Mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_Quaternion, &g_M010_gravity);
 
         g_M010_CarStatus.yawAngle_deg = g_M010_ypr[0] * 180 / M_PI;
         g_M010_CarStatus.pitchAngle_deg = g_M010_ypr[1] * 180 / M_PI;
@@ -200,8 +200,8 @@ void M010_updateCarStatus() {
         VectorInt16 aa; // Raw 가속도 (int16)
         VectorInt16 linAccel; // 선형 가속도 결과를 VectorInt16으로 받음
 
-        g_M010_mpu.dmpGetAccel(&aa, g_M010_dmp_fifoBuffer);
-        g_M010_mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity);
+        g_M010_Mpu.dmpGetAccel(&aa, g_M010_dmp_fifoBuffer);
+        g_M010_Mpu.dmpGetLinearAccel(&linAccel, &aa, &g_M010_gravity);
 
         float v_currentAx_ms2 = (float)linAccel.x * G_M010_GRAVITY_MPS2;
         float v_currentAy_ms2 = (float)linAccel.y * G_M010_GRAVITY_MPS2;
@@ -211,23 +211,23 @@ void M010_updateCarStatus() {
         g_M010_filteredAy = G_M010_ACCEL_ALPHA * g_M010_filteredAy + (1 - G_M010_ACCEL_ALPHA) * v_currentAy_ms2;
         g_M010_filteredAz = G_M010_ACCEL_ALPHA * g_M010_filteredAz + (1 - G_M010_ACCEL_ALPHA) * v_currentAz_ms2;
 
-        g_M010_CarStatus.accel_X_ms2 = g_M010_filteredAx;
-        g_M010_CarStatus.accel_Y_ms2 = g_M010_filteredAy;
-        g_M010_CarStatus.accel_Z_ms2 = g_M010_filteredAz;
+        g_M010_CarStatus.accelX_ms2 = g_M010_filteredAx;
+        g_M010_CarStatus.accelY_ms2 = g_M010_filteredAy;
+        g_M010_CarStatus.accelZ_ms2 = g_M010_filteredAz;
 
         // Yaw 각속도 (Z축 자이로)
         VectorInt16 gyr; // 자이로 데이터 (VectorInt16)
-        g_M010_mpu.dmpGetGyro(&gyr, g_M010_dmp_fifoBuffer);
+        g_M010_Mpu.dmpGetGyro(&gyr, g_M010_dmp_fifoBuffer);
 
         g_M010_yawAngleVelocity_degps = (float)gyr.z / 131.0f; // 131 LSB/deg/s @ +/-250 deg/s
         g_M010_CarStatus.yawAngleVelocity_degps = g_M010_yawAngleVelocity_degps;
 
         // 속도 추정 (Y축 가속도 적분, 오차 누적 유의)
-        float v_speedChange_mps = g_M010_CarStatus.accel_Y_ms2 * v_deltaTime_s;
+        float v_speedChange_mps = g_M010_CarStatus.accelY_ms2 * v_deltaTime_s;
         g_M010_CarStatus.speed_kmh += (v_speedChange_mps * 3.6); // m/s -> km/h
 
         // 정지 시 속도 드리프트 보정
-        if (fabs(g_M010_CarStatus.accel_Y_ms2) < G_M010_ACCEL_STOP_THRESHOLD_MPS2 &&
+        if (fabs(g_M010_CarStatus.accelY_ms2) < G_M010_ACCEL_STOP_THRESHOLD_MPS2 &&
             fabs(g_M010_CarStatus.yawAngleVelocity_degps) < 1.0) {
             g_M010_CarStatus.speed_kmh = 0.0;
         }
@@ -243,15 +243,15 @@ void M010_updateCarStatus() {
  */
 void M010_defineCarState(unsigned long p_currentTime_ms) {
     float v_speed = g_M010_CarStatus.speed_kmh;
-    float v_accelY = g_M010_CarStatus.accel_Y_ms2;
-    float v_accelZ = g_M010_CarStatus.accel_Z_ms2;
+    float v_accelY = g_M010_CarStatus.accelY_ms2;
+    float v_accelZ = g_M010_CarStatus.accelZ_ms2;
 
     // 과속 방지턱 감지 (Z축 가속도 급변)
     if (fabs(v_accelZ) > G_M010_ACCEL_BUMP_THRESHOLD_MPS2 &&
         (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
         g_M010_CarStatus.isSpeedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms;
-        g_M010_CarStatus.movementState = E_M010_STATE_SPEED_BUMP;
+        //// g_M010_CarStatus.movementState = E_M010_STATE_SPEED_BUMP;
         return; // 최우선 감지
     } else if (g_M010_CarStatus.isSpeedBumpDetected &&
                (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
@@ -261,7 +261,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
     // 급감속 감지 (Y축 가속도 급감)
     if (v_accelY < G_M010_ACCEL_DECEL_THRESHOLD_MPS2) {
         g_M010_CarStatus.isEmergencyBraking = true;
-        g_M010_CarStatus.movementState = E_M010_STATE_DECELERATING;
+        //// g_M010_CarStatus.movementState = E_M010_STATE_DECELERATING;
         return; // 최우선 감지
     } else {
         g_M010_CarStatus.isEmergencyBraking = false;
@@ -326,14 +326,14 @@ void M010_printCarStatus() {
         case E_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
         case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
         case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
-        case E_M010_STATE_DECELERATING: Serial.println(F("급감속 중")); break;
-        case E_M010_STATE_SPEED_BUMP: Serial.println(F("과속 방지턱 통과")); break;
+        //// case E_M010_STATE_DECELERATING: Serial.println(F("급감속 중")); break;
+        //// case E_M010_STATE_SPEED_BUMP: Serial.println(F("과속 방지턱 통과")); break;
     }
     Serial.print(F("  추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
     Serial.print(F("  가속도(X,Y,Z): "));
-    Serial.print(g_M010_CarStatus.accel_X_ms2, 2); Serial.print(F(" m/s^2, "));
-    Serial.print(g_M010_CarStatus.accel_Y_ms2, 2); Serial.print(F(" m/s^2, "));
-    Serial.print(g_M010_CarStatus.accel_Z_ms2, 2); Serial.println(F(" m/s^2"));
+    Serial.print(g_M010_CarStatus.accelX_ms2, 2); Serial.print(F(" m/s^2, "));
+    Serial.print(g_M010_CarStatus.accelY_ms2, 2); Serial.print(F(" m/s^2, "));
+    Serial.print(g_M010_CarStatus.accelZ_ms2, 2); Serial.println(F(" m/s^2"));
     Serial.print(F("  Yaw 각도: ")); Serial.print(g_M010_CarStatus.yawAngle_deg, 2); Serial.println(F(" 도"));
     Serial.print(F("  Pitch 각도: ")); Serial.print(g_M010_CarStatus.pitchAngle_deg, 2); Serial.println(F(" 도"));
     Serial.print(F("  Yaw 각속도: ")); Serial.print(g_M010_CarStatus.yawAngleVelocity_degps, 2); Serial.println(F(" 도/초"));
@@ -352,9 +352,9 @@ void M010_MPU_init() {
     // 자동차 상태 구조체 초기화
     g_M010_CarStatus.movementState = E_M010_STATE_UNKNOWN;
     g_M010_CarStatus.speed_kmh = 0.0;
-    g_M010_CarStatus.accel_X_ms2 = 0.0;
-    g_M010_CarStatus.accel_Y_ms2 = 0.0;
-    g_M010_CarStatus.accel_Z_ms2 = 0.0;
+    g_M010_CarStatus.accelX_ms2 = 0.0;
+    g_M010_CarStatus.accelY_ms2 = 0.0;
+    g_M010_CarStatus.accelZ_ms2 = 0.0;
     g_M010_CarStatus.yawAngle_deg = 0.0;
     g_M010_CarStatus.yawAngleVelocity_degps = 0.0;
     g_M010_CarStatus.pitchAngle_deg = 0.0;
