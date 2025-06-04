@@ -9,12 +9,14 @@
 // ====================================================================================================
 
 // --- 시리얼 출력 제어 매크로 ---
-// 오류 관련 Serial.print 출력을 활성화하려면 이 줄의 주석을 해제하세요.
-#define G_M010_PRINT_ERROR
-// 디버그 관련 Serial.print 출력을 활성화하려면 이 줄의 주석을 해제하세요.
-#define G_M010_PRINT_DEBUG
+// 디버그 출력을 활성화하려면 DEBUG_P1의 주석을 해제하세요.
+#define DEBUG_P1 // 이 라인을 주석 처리하면 모든 dbgP1_ 매크로가 비활성화됩니다.
+//#define DEBUG_P2 // 필요에 따라 추가적인 디버그 레벨/모듈을 정의할 수 있습니다.
 // -----------------------------
 
+
+
+// ====================================================================================================
 
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
@@ -143,30 +145,19 @@ void M010_setupMPU6050() {
     Wire.begin(); // I2C 시작
     Wire.setClock(400000); // I2C 속도 400kHz
 
-    #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("MPU6050 초기화 중..."));
-        Serial.print(F("MPU6050 연결 테스트: "));
-        Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
-    #endif
+    dbgP1_println_F(F("MPU6050 초기화 중..."));
+    dbgP1_print_F(F("MPU6050 연결 테스트: "));
+    dbgP1_println_F(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
+    dbgP1_println_F(F("DMP 로딩 중..."));
 
-    #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("DMP 로딩 중..."));
-    #endif
-	
     g_M010_dmp_devStatus = g_M010_Mpu.dmpInitialize();
 
     if (g_M010_dmp_devStatus == 0) {
-        #ifdef G_M010_PRINT_DEBUG
-            Serial.println(F("DMP 활성화 중..."));
-        #endif
-		
-        g_M010_Mpu.setDMPEnabled(true);
-
-        #ifdef G_M010_PRINT_DEBUG
-            Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
-            Serial.print(G_M010_MPU_INTERRUPT_PIN);
-            Serial.println(F(") 설정 중..."));
-        #endif
+        dbgP1_println_F(F("DMP 활성화 중..."));
+        dbgP1_print_F(F("MPU6050 인터럽트 핀 (GPIO "));
+        dbgP1_print(G_M010_MPU_INTERRUPT_PIN);
+        dbgP1_println_F(F(") 설정 중..."));
+        
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
         g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus();
@@ -174,15 +165,9 @@ void M010_setupMPU6050() {
         g_M010_dmp_packetSize = 42; 
 
         g_M010_dmp_isReady = true;
-        #ifdef G_M010_PRINT_DEBUG
-            Serial.println(F("DMP 초기화 완료!"));
-        #endif
+        dbgP1_println_F(F("DMP 초기화 완료!"));
     } else {
-        #ifdef G_M010_PRINT_ERROR
-            Serial.print(F("DMP 초기화 실패 (오류 코드: "));
-            Serial.print(g_M010_dmp_devStatus);
-            Serial.println(F(")"));
-        #endif
+        dbgP1_printf_F(F("DMP 초기화 실패 (오류 코드: %d)\n"), g_M010_dmp_devStatus);
         while (true); // 오류 시 무한 대기
     }
 }
@@ -345,32 +330,30 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
  * @brief 자동차 상태 정보 시리얼 출력.
  */
 void M010_printCarStatus() {
-    #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("\n---- 자동차 현재 상태 ----"));
-        Serial.print(F("상태: "));
-        switch (g_M010_CarStatus.movementState) {
-            case E_M010_STATE_UNKNOWN: Serial.println(F("알 수 없음")); break;
-            case E_M010_STATE_STOPPED_INIT: Serial.println(F("정차 중 (초기)")); break;
-            case E_M010_STATE_SIGNAL_WAIT1: Serial.print(F("신호대기 1 (60초 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-            case E_M010_STATE_SIGNAL_WAIT2: Serial.print(F("신호대기 2 (120초 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-            case E_M010_STATE_STOPPED1: Serial.print(F("정차 1 (5분 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-            case E_M010_STATE_STOPPED2: Serial.print(F("정차 2 (10분 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-            case E_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-            case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
-            case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
-        }
-        Serial.print(F("추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
-        Serial.print(F("가속도(X,Y,Z): "));
-        Serial.print(g_M010_CarStatus.accelX_ms2, 2); Serial.print(F(" m/s^2, "));
-        Serial.print(g_M010_CarStatus.accelY_ms2, 2); Serial.print(F(" m/s^2, "));
-        Serial.print(g_M010_CarStatus.accelZ_ms2, 2); Serial.println(F(" m/s^2"));
-        Serial.print(F("Yaw 각도: ")); Serial.print(g_M010_CarStatus.yawAngle_deg, 2); Serial.println(F(" 도"));
-        Serial.print(F("Pitch 각도: ")); Serial.print(g_M010_CarStatus.pitchAngle_deg, 2); Serial.println(F(" 도"));
-        Serial.print(F("Yaw 각속도: ")); Serial.print(g_M010_CarStatus.yawAngleVelocity_degps, 2); Serial.println(F(" 도/초"));
-        Serial.print(F("급감속: ")); Serial.println(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
-        Serial.print(F("과속 방지턱: ")); Serial.println(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
-        Serial.println(F("--------------------------"));
-    #endif
+    dbgP1_println_F(F("\n---- 자동차 현재 상태 ----"));
+    dbgP1_print_F(F("상태: "));
+    switch (g_M010_CarStatus.movementState) {
+        case E_M010_STATE_UNKNOWN: dbgP1_println_F(F("알 수 없음")); break;
+        case E_M010_STATE_STOPPED_INIT: dbgP1_println_F(F("정차 중 (초기)")); break;
+        case E_M010_STATE_SIGNAL_WAIT1: dbgP1_print_F(F("신호대기 1 (60초 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_STATE_SIGNAL_WAIT2: dbgP1_print_F(F("신호대기 2 (120초 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_STATE_STOPPED1: dbgP1_print_F(F("정차 1 (5분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_STATE_STOPPED2: dbgP1_print_F(F("정차 2 (10분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_STATE_PARKED: dbgP1_print_F(F("주차 중 (10분 이상), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_STATE_FORWARD: dbgP1_println_F(F("전진 중")); break;
+        case E_M010_STATE_REVERSE: dbgP1_println_F(F("후진 중")); break;
+    }
+    dbgP1_print_F(F("추정 속도: ")); dbgP1_print(g_M010_CarStatus.speed_kmh, 2); dbgP1_println_F(F(" km/h"));
+    dbgP1_print_F(F("가속도(X,Y,Z): "));
+    dbgP1_print(g_M010_CarStatus.accelX_ms2, 2); dbgP1_print_F(F(" m/s^2, "));
+    dbgP1_print(g_M010_CarStatus.accelY_ms2, 2); dbgP1_print_F(F(" m/s^2, "));
+    dbgP1_print(g_M010_CarStatus.accelZ_ms2, 2); dbgP1_println_F(F(" m/s^2"));
+    dbgP1_print_F(F("Yaw 각도: ")); dbgP1_print(g_M010_CarStatus.yawAngle_deg, 2); dbgP1_println_F(F(" 도"));
+    dbgP1_print_F(F("Pitch 각도: ")); dbgP1_print(g_M010_CarStatus.pitchAngle_deg, 2); dbgP1_println_F(F(" 도"));
+    dbgP1_print_F(F("Yaw 각속도: ")); dbgP1_print(g_M010_CarStatus.yawAngleVelocity_degps, 2); dbgP1_println_F(F(" 도/초"));
+    dbgP1_print_F(F("급감속: ")); dbgP1_println_F(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
+    dbgP1_print_F(F("과속 방지턱: ")); dbgP1_println_F(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
+    dbgP1_println_F(F("--------------------------"));
 }
 
 /**
@@ -400,9 +383,7 @@ void M010_MPU_init() {
     g_M010_lastBumpDetectionTime_ms = 0; // 초기화
     g_M010_lastDecelDetectionTime_ms = 0; // 초기화
 
-    #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("Setup 완료!"));
-    #endif
+    dbgP1_println_F(F("Setup 완료!"));
 }
 
 /**
