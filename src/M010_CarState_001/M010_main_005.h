@@ -1,9 +1,9 @@
 #pragma once
-// M010_main_004.h
+// M010_main_005.h
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
 // 설명: ESP32 + MPU6050 활용, 차량 움직임 감지 및 LED Matrix 로봇 눈 표정 표현.
-//       본 코드는 MPU6050 데이터 처리 및 자동차 상태 정의.
+//       본 코드는 MPU6000 데이터 처리 및 자동차 상태 정의.
 // 개발 환경: PlatformIO Arduino Core (ESP32)
 // 사용 라이브러리: MPU6050_DMP6 (I2Cdevlib by Jeff Rowberg) - MotionApps612 사용
 // ====================================================================================================
@@ -144,24 +144,24 @@ void M010_setupMPU6050() {
     Wire.setClock(400000); // I2C 속도 400kHz
 
 #ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("    MPU6050 초기화 중..."));
-    Serial.print(F("    MPU6050 연결 테스트: "));
+    Serial.println(F("MPU6050 초기화 중..."));
+    Serial.print(F("MPU6050 연결 테스트: "));
     Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
 #endif
 
 #ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("    DMP 로딩 중..."));
+    Serial.println(F("DMP 로딩 중..."));
 #endif
     g_M010_dmp_devStatus = g_M010_Mpu.dmpInitialize();
 
     if (g_M010_dmp_devStatus == 0) {
 #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("    DMP 활성화 중..."));
+        Serial.println(F("DMP 활성화 중..."));
 #endif
         g_M010_Mpu.setDMPEnabled(true);
 
 #ifdef G_M010_PRINT_DEBUG
-        Serial.print(F("    MPU6050 인터럽트 핀 (GPIO "));
+        Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
         Serial.print(G_M010_MPU_INTERRUPT_PIN);
         Serial.println(F(") 설정 중..."));
 #endif
@@ -173,11 +173,11 @@ void M010_setupMPU6050() {
 
         g_M010_dmp_isReady = true;
 #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("    DMP 초기화 완료!"));
+        Serial.println(F("DMP 초기화 완료!"));
 #endif
     } else {
 #ifdef G_M010_PRINT_ERROR
-        Serial.print(F("    DMP 초기화 실패 (오류 코드: "));
+        Serial.print(F("DMP 초기화 실패 (오류 코드: "));
         Serial.print(g_M010_dmp_devStatus);
         Serial.println(F(")"));
 #endif
@@ -319,101 +319,4 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
             g_M010_CarStatus.movementState = E_M010_STATE_STOPPED1;
         } else if (v_stopSeconds >= G_M010_SIGNAL_WAIT2_SECONDS) {
             g_M010_CarStatus.movementState = E_M010_STATE_SIGNAL_WAIT2;
-        } else if (v_stopSeconds >= G_M010_SIGNAL_WAIT1_SECONDS) {
-            g_M010_CarStatus.movementState = E_M010_STATE_SIGNAL_WAIT1;
-        } else {
-            g_M010_CarStatus.movementState = E_M010_STATE_STOPPED_INIT;
-        }
-        g_M010_CarStatus.lastMovementTime_ms = 0; // 정지 중
-    } else { // 움직이는 상태
-        g_M010_CarStatus.lastMovementTime_ms = p_currentTime_ms; // 마지막 움직임 시간 업데이트
-        g_M010_CarStatus.stopStartTime_ms = 0; // 정차 시작 시간 리셋
-
-        if (v_speed > G_M010_SPEED_THRESHOLD_KMH) {
-            g_M010_CarStatus.movementState = E_M010_STATE_FORWARD;
-        } else if (v_speed < -G_M010_SPEED_THRESHOLD_KMH) {
-            g_M010_CarStatus.movementState = E_M010_STATE_REVERSE;
-        } else {
-            g_M010_CarStatus.movementState = E_M010_STATE_UNKNOWN;
-        }
-    }
-}
-
-/**
- * @brief 자동차 상태 정보 시리얼 출력.
- */
-void M010_printCarStatus() {
-#ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("\n---- 자동차 현재 상태 ----"));
-    Serial.print(F("    상태: "));
-    switch (g_M010_CarStatus.movementState) {
-        case E_M010_STATE_UNKNOWN: Serial.println(F("알 수 없음")); break;
-        case E_M010_STATE_STOPPED_INIT: Serial.println(F("정차 중 (초기)")); break;
-        case E_M010_STATE_SIGNAL_WAIT1: Serial.print(F("신호대기 1 (60초 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case E_M010_STATE_SIGNAL_WAIT2: Serial.print(F("신호대기 2 (120초 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case E_M010_STATE_STOPPED1: Serial.print(F("정차 1 (5분 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case E_M010_STATE_STOPPED2: Serial.print(F("정차 2 (10분 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case E_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
-        case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
-        case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
-    }
-    Serial.print(F("    추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
-    Serial.print(F("    가속도(X,Y,Z): "));
-    Serial.print(g_M010_CarStatus.accelX_ms2, 2); Serial.print(F(" m/s^2, "));
-    Serial.print(g_M010_CarStatus.accelY_ms2, 2); Serial.print(F(" m/s^2, "));
-    Serial.print(g_M010_CarStatus.accelZ_ms2, 2); Serial.println(F(" m/s^2"));
-    Serial.print(F("    Yaw 각도: ")); Serial.print(g_M010_CarStatus.yawAngle_deg, 2); Serial.println(F(" 도"));
-    Serial.print(F("    Pitch 각도: ")); Serial.print(g_M010_CarStatus.pitchAngle_deg, 2); Serial.println(F(" 도"));
-    Serial.print(F("    Yaw 각속도: ")); Serial.print(g_M010_CarStatus.yawAngleVelocity_degps, 2); Serial.println(F(" 도/초"));
-    Serial.print(F("    급감속: ")); Serial.println(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
-    Serial.print(F("    과속 방지턱: ")); Serial.println(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
-    Serial.println(F("--------------------------"));
-#endif
-}
-
-/**
- * @brief 초기 설정 (ESP32 시작 시 1회 실행).
- */
-void M010_MPU_init() {
-    
-    M010_setupMPU6050(); // MPU6050 초기화
-
-    // 자동차 상태 구조체 초기화
-    g_M010_CarStatus.movementState = E_M010_STATE_UNKNOWN;
-    g_M010_CarStatus.speed_kmh = 0.0;
-    g_M010_CarStatus.accelX_ms2 = 0.0;
-    g_M010_CarStatus.accelY_ms2 = 0.0;
-    g_M010_CarStatus.accelZ_ms2 = 0.0;
-    g_M010_CarStatus.yawAngle_deg = 0.0;
-    g_M010_CarStatus.yawAngleVelocity_degps = 0.0;
-    g_M010_CarStatus.pitchAngle_deg = 0.0;
-    g_M010_CarStatus.isSpeedBumpDetected = false;
-    g_M010_CarStatus.isEmergencyBraking = false;
-    g_M010_CarStatus.lastMovementTime_ms = millis();
-    g_M010_CarStatus.stopStartTime_ms = 0;
-    g_M010_CarStatus.currentStopTime_ms = 0;
-
-    g_M010_lastSampleTime_ms = millis();
-    g_M010_lastSerialPrintTime_ms = millis();
-    g_M010_lastBumpDetectionTime_ms = 0; // 초기화
-    g_M010_lastDecelDetectionTime_ms = 0; // 초기화
-
-#ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("    Setup 완료!"));
-#endif
-}
-
-/**
- * @brief 메인 루프 (ESP32 반복 실행).
- */
-void M010_MPU_run() {
-    M010_updateCarStatus(); // MPU6050 데이터 및 상태 업데이트
-
-    // 5초 간격 시리얼 출력
-    if (millis() - g_M010_lastSerialPrintTime_ms >= G_M010_SERIAL_PRINT_INTERVAL_MS) {
-        M010_printCarStatus();
-        g_M010_lastSerialPrintTime_ms = millis();
-    }
-
-    // LED Matrix 업데이트 등 추가 작업 (예: M010_updateLEDMatrix(g_M010_CarStatus.movementState);)
-}
+        } else if (v_stopSeconds >= G_M010
