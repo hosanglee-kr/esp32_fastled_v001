@@ -37,9 +37,14 @@ const float G_M010_GRAVITY_MPS2 = 9.80665; // 중력 가속도 (m/s^2)
 
 // 자동차 상태 감지 임계값
 const float G_M010_SPEED_THRESHOLD_KMH = 0.5;       // 속도 임계값 (km/h)
-const float G_M010_ACCEL_STOP_THRESHOLD_MPS2 = 0.5; // 정차 가속도 변화 임계값 (m/s^2)
+const float G_M010_ACCEL_STOP_THRESHOLD_MPS2 = 0.2; // 정차 가속도 변화 임계값 (m/s^2)
+const float G_M010_GYRO_STOP_THRESHOLD_DPS = 0.5;   // 정차 자이로 변화 임계값 (deg/s)
+const unsigned long G_M010_STOP_STABLE_DURATION_MS = 200; // 정지 안정화 지속 시간 (ms)
+
 const float G_M010_ACCEL_DECEL_THRESHOLD_MPS2 = -3.0; // 급감속 Y축 가속도 임계값 (m/s^2)
 const float G_M010_ACCEL_BUMP_THRESHOLD_MPS2 = 5.0; // 방지턱 Z축 가속도 변화 임계값 (m/s^2)
+const float G_M010_BUMP_MIN_SPEED_KMH = 5.0; // 방지턱 감지 최소 속도 (km/h)
+
 const unsigned long G_M010_BUMP_COOLDOWN_MS = 1000; // 방지턱 감지 후 쿨다운 (ms) - 재감지 방지
 const unsigned long G_M010_DECEL_HOLD_DURATION_MS = 10000; // 급감속 상태 유지 시간 (10초)
 const unsigned long G_M010_BUMP_HOLD_DURATION_MS = 10000;  // 과속방지턱 감지 상태 유지 시간 (10초)
@@ -92,6 +97,7 @@ typedef struct {
     unsigned long lastMovementTime_ms; // 마지막 움직임 감지 시간 (ms)
     unsigned long stopStartTime_ms;    // 정차 시작 시간 (ms)
     unsigned long currentStopTime_ms;  // 현재 정차 지속 시간 (ms)
+    unsigned long stopStableStartTime_ms; // 정지 상태 안정화 시작 시간 (ms)
 } T_M010_CarStatus;
 
 // ====================================================================================================
@@ -167,7 +173,6 @@ void M010_setupMPU6050() {
         g_M010_dmp_isReady = true;
         dbgP1_println_F(F("DMP 초기화 완료!"));
     } else {
-        // 이 부분이 수정되었습니다: F() 매크로를 사용하는 printf 계열 호출을 위해 A01_DEBUG_printf 매크로를 수정했습니다.
         dbgP1_printf_F(F("DMP 초기화 실패 (오류 코드: %d)\n"), g_M010_dmp_devStatus);
         while (true); // 오류 시 무한 대기
     }
@@ -228,11 +233,20 @@ void M010_updateCarStatus() {
         float v_speedChange_mps = g_M010_CarStatus.accelY_ms2 * v_deltaTime_s;
         g_M010_CarStatus.speed_kmh += (v_speedChange_mps * 3.6); // m/s -> km/h
 
-        // 정지 시 속도 드리프트 보정
+        // 정지 시 속도 드리프트 보정 강화
+        // 가속도 및 각속도 변화가 모두 임계값 이하로 충분히 오래 유지될 때만 속도를 0으로 설정
         if (fabs(g_M010_CarStatus.accelY_ms2) < G_M010_ACCEL_STOP_THRESHOLD_MPS2 &&
-            fabs(g_M010_CarStatus.yawAngleVelocity_degps) < 1.0) {
-            g_M010_CarStatus.speed_kmh = 0.0;
+            fabs(g_M010_CarStatus.yawAngleVelocity_degps) < G_M010_GYRO_STOP_THRESHOLD_DPS) {
+            
+            if (g_M010_CarStatus.stopStableStartTime_ms == 0) { // 정지 안정화 시작 시간 기록
+                g_M010_CarStatus.stopStableStartTime_ms = v_currentTime_ms;
+            } else if ((v_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= G_M010_STOP_STABLE_DURATION_MS) {
+                g_M010_CarStatus.speed_kmh = 0.0; // 충분히 안정적인 상태로 판단되면 속도 0으로 보정
+            }
+        } else {
+            g_M010_CarStatus.stopStableStartTime_ms = 0; // 움직임 감지 시 안정화 시작 시간 리셋
         }
+
 
         // 자동차 상태 정의
         M010_defineCarState(v_currentTime_ms);
@@ -250,7 +264,9 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
 
     // --- 과속 방지턱 감지 (Z축 가속도 급변) 및 상태 유지 ---
     // 새로 감지되었거나, 기존 감지 상태를 유지해야 하는 경우
+    // 방지턱 감지에 속도 임계값 추가: G_M010_BUMP_MIN_SPEED_KMH 이상일 때만 감지
     if (fabs(v_accelZ) > G_M010_ACCEL_BUMP_THRESHOLD_MPS2 &&
+        fabs(v_speed) > G_M010_BUMP_MIN_SPEED_KMH && // 속도 조건 추가
         (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
         g_M010_CarStatus.isSpeedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
@@ -378,6 +394,7 @@ void M010_MPU_init() {
     g_M010_CarStatus.lastMovementTime_ms = millis();
     g_M010_CarStatus.stopStartTime_ms = 0;
     g_M010_CarStatus.currentStopTime_ms = 0;
+    g_M010_CarStatus.stopStableStartTime_ms = 0; // 초기화 추가
 
     g_M010_lastSampleTime_ms = millis();
     g_M010_lastSerialPrintTime_ms = millis();
