@@ -143,28 +143,31 @@ void M010_setupMPU6050() {
     Wire.begin(); // I2C 시작
     Wire.setClock(400000); // I2C 속도 400kHz
 
-#ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("MPU6050 초기화 중..."));
-    Serial.print(F("MPU6050 연결 테스트: "));
-    Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
-#endif
+    #ifdef G_M010_PRINT_DEBUG
+        Serial.println(F("MPU6050 초기화 중..."));
+        Serial.print(F("MPU6050 연결 테스트: "));
+        Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
+    #endif
 
-#ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("DMP 로딩 중..."));
-#endif
+    #ifdef G_M010_PRINT_DEBUG
+        Serial.println(F("DMP 로딩 중..."));
+    #endif
+	
     g_M010_dmp_devStatus = g_M010_Mpu.dmpInitialize();
 
     if (g_M010_dmp_devStatus == 0) {
-#ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("DMP 활성화 중..."));
-#endif
+        #ifdef G_M010_PRINT_DEBUG
+            Serial.println(F("DMP 활성화 중..."));
+        #endif
+		
         g_M010_Mpu.setDMPEnabled(true);
 
-#ifdef G_M010_PRINT_DEBUG
-        Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
-        Serial.print(G_M010_MPU_INTERRUPT_PIN);
-        Serial.println(F(") 설정 중..."));
-#endif
+        #ifdef G_M010_PRINT_DEBUG
+            Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
+            Serial.print(G_M010_MPU_INTERRUPT_PIN);
+            Serial.println(F(") 설정 중..."));
+        #endif
+		
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
         g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus();
@@ -172,15 +175,16 @@ void M010_setupMPU6050() {
         g_M010_dmp_packetSize = 42; 
 
         g_M010_dmp_isReady = true;
-#ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("DMP 초기화 완료!"));
-#endif
+		
+        #ifdef G_M010_PRINT_DEBUG
+            Serial.println(F("DMP 초기화 완료!"));
+        #endif
     } else {
-#ifdef G_M010_PRINT_ERROR
-        Serial.print(F("DMP 초기화 실패 (오류 코드: "));
-        Serial.print(g_M010_dmp_devStatus);
-        Serial.println(F(")"));
-#endif
+        #ifdef G_M010_PRINT_ERROR
+            Serial.print(F("DMP 초기화 실패 (오류 코드: "));
+            Serial.print(g_M010_dmp_devStatus);
+            Serial.println(F(")"));
+        #endif
         while (true); // 오류 시 무한 대기
     }
 }
