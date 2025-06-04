@@ -9,7 +9,6 @@
 // ====================================================================================================
 
 /* todo
-- 급감속, 과속방지턱은 상태에서 분리 
 - 급감속, 과속방지턱 상태 유지시간 
 
 */
@@ -63,8 +62,6 @@ typedef enum {
     E_M010_STATE_PARKED,        // 주차
     E_M010_STATE_FORWARD,       // 전진
     E_M010_STATE_REVERSE,       // 후진
-    // E_M010_STATE_DECELERATING,  // 급감속
-    // E_M010_STATE_SPEED_BUMP     // 과속 방지턱 통과
 } T_M010_CarMovementState;
 
 // ====================================================================================================
@@ -251,7 +248,6 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
         (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
         g_M010_CarStatus.isSpeedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms;
-        //// g_M010_CarStatus.movementState = E_M010_STATE_SPEED_BUMP;
         return; // 최우선 감지
     } else if (g_M010_CarStatus.isSpeedBumpDetected &&
                (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
@@ -261,7 +257,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
     // 급감속 감지 (Y축 가속도 급감)
     if (v_accelY < G_M010_ACCEL_DECEL_THRESHOLD_MPS2) {
         g_M010_CarStatus.isEmergencyBraking = true;
-        //// g_M010_CarStatus.movementState = E_M010_STATE_DECELERATING;
+    
         return; // 최우선 감지
     } else {
         g_M010_CarStatus.isEmergencyBraking = false;
@@ -326,8 +322,7 @@ void M010_printCarStatus() {
         case E_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
         case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
         case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
-        //// case E_M010_STATE_DECELERATING: Serial.println(F("급감속 중")); break;
-        //// case E_M010_STATE_SPEED_BUMP: Serial.println(F("과속 방지턱 통과")); break;
+    
     }
     Serial.print(F("  추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
     Serial.print(F("  가속도(X,Y,Z): "));
