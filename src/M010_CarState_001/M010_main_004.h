@@ -8,6 +8,13 @@
 // 사용 라이브러리: MPU6050_DMP6 (I2Cdevlib by Jeff Rowberg) - MotionApps612 사용
 // ====================================================================================================
 
+/* todo
+- 급감속, 과속방지턱은 상태에서 분리 
+- 급감속, 과속방지턱 상태 유지시간 
+
+*₩
+
+
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
 #include <MPU6050_6Axis_MotionApps612.h> // MPU6050 DMP 기능
@@ -64,7 +71,7 @@ typedef enum {
 // 자동차 상태 정보 구조체
 // ====================================================================================================
 typedef struct {
-    T_M010_CarMovementState v_currentMovementState; // 현재 움직임 상태
+    T_M010_CarMovementState movementState; // 현재 움직임 상태
 
     float speed_kmh;               // 현재 속도 (km/h, 가속도 적분 추정)
     float accel_X_ms2;             // X축 가속도 (m/s^2)
@@ -244,7 +251,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
         (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
         g_M010_CarStatus.isSpeedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms;
-        g_M010_CarStatus.v_currentMovementState = E_M010_STATE_SPEED_BUMP;
+        g_M010_CarStatus.movementState = E_M010_STATE_SPEED_BUMP;
         return; // 최우선 감지
     } else if (g_M010_CarStatus.isSpeedBumpDetected &&
                (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
@@ -254,7 +261,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
     // 급감속 감지 (Y축 가속도 급감)
     if (v_accelY < G_M010_ACCEL_DECEL_THRESHOLD_MPS2) {
         g_M010_CarStatus.isEmergencyBraking = true;
-        g_M010_CarStatus.v_currentMovementState = E_M010_STATE_DECELERATING;
+        g_M010_CarStatus.movementState = E_M010_STATE_DECELERATING;
         return; // 최우선 감지
     } else {
         g_M010_CarStatus.isEmergencyBraking = false;
@@ -262,31 +269,31 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
 
     // 전진, 후진, 정차, 주차 판단
     if (fabs(v_speed) < G_M010_SPEED_THRESHOLD_KMH) { // 정차/주차 상태
-        if (g_M010_CarStatus.v_currentMovementState != E_M010_STATE_STOPPED_INIT &&
-            g_M010_CarStatus.v_currentMovementState != E_M010_STATE_SIGNAL_WAIT1 &&
-            g_M010_CarStatus.v_currentMovementState != E_M010_STATE_SIGNAL_WAIT2 &&
-            g_M010_CarStatus.v_currentMovementState != E_M010_STATE_STOPPED1 &&
-            g_M010_CarStatus.v_currentMovementState != E_M010_STATE_STOPPED2 &&
-            g_M010_CarStatus.v_currentMovementState != E_M010_STATE_PARKED) {
+        if (g_M010_CarStatus.movementState != E_M010_STATE_STOPPED_INIT &&
+            g_M010_CarStatus.movementState != E_M010_STATE_SIGNAL_WAIT1 &&
+            g_M010_CarStatus.movementState != E_M010_STATE_SIGNAL_WAIT2 &&
+            g_M010_CarStatus.movementState != E_M010_STATE_STOPPED1 &&
+            g_M010_CarStatus.movementState != E_M010_STATE_STOPPED2 &&
+            g_M010_CarStatus.movementState != E_M010_STATE_PARKED) {
             g_M010_CarStatus.stopStartTime_ms = p_currentTime_ms; // 정차 시작 시간 기록
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_STOPPED_INIT;
+            g_M010_CarStatus.movementState = E_M010_STATE_STOPPED_INIT;
         }
 
         g_M010_CarStatus.currentStopTime_ms = p_currentTime_ms - g_M010_CarStatus.stopStartTime_ms;
         unsigned long v_stopSeconds = g_M010_CarStatus.currentStopTime_ms / 1000;
 
         if (v_stopSeconds >= G_M010_PARK_SECONDS) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_PARKED;
+            g_M010_CarStatus.movementState = E_M010_STATE_PARKED;
         } else if (v_stopSeconds >= G_M010_STOP2_SECONDS) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_STOPPED2;
+            g_M010_CarStatus.movementState = E_M010_STATE_STOPPED2;
         } else if (v_stopSeconds >= G_M010_STOP1_SECONDS) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_STOPPED1;
+            g_M010_CarStatus.movementState = E_M010_STATE_STOPPED1;
         } else if (v_stopSeconds >= G_M010_SIGNAL_WAIT2_SECONDS) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_SIGNAL_WAIT2;
+            g_M010_CarStatus.movementState = E_M010_STATE_SIGNAL_WAIT2;
         } else if (v_stopSeconds >= G_M010_SIGNAL_WAIT1_SECONDS) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_SIGNAL_WAIT1;
+            g_M010_CarStatus.movementState = E_M010_STATE_SIGNAL_WAIT1;
         } else {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_STOPPED_INIT;
+            g_M010_CarStatus.movementState = E_M010_STATE_STOPPED_INIT;
         }
         g_M010_CarStatus.lastMovementTime_ms = 0; // 정지 중
     } else { // 움직이는 상태
@@ -294,11 +301,11 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
         g_M010_CarStatus.stopStartTime_ms = 0; // 정차 시작 시간 리셋
 
         if (v_speed > G_M010_SPEED_THRESHOLD_KMH) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_FORWARD;
+            g_M010_CarStatus.movementState = E_M010_STATE_FORWARD;
         } else if (v_speed < -G_M010_SPEED_THRESHOLD_KMH) {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_REVERSE;
+            g_M010_CarStatus.movementState = E_M010_STATE_REVERSE;
         } else {
-            g_M010_CarStatus.v_currentMovementState = E_M010_STATE_UNKNOWN;
+            g_M010_CarStatus.movementState = E_M010_STATE_UNKNOWN;
         }
     }
 }
@@ -309,7 +316,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
 void M010_printCarStatus() {
     Serial.println(F("\n--- 자동차 현재 상태 ---"));
     Serial.print(F("  상태: "));
-    switch (g_M010_CarStatus.v_currentMovementState) {
+    switch (g_M010_CarStatus.movementState) {
         case E_M010_STATE_UNKNOWN: Serial.println(F("알 수 없음")); break;
         case E_M010_STATE_STOPPED_INIT: Serial.println(F("정차 중 (초기)")); break;
         case E_M010_STATE_SIGNAL_WAIT1: Serial.print(F("신호대기 1 (60초 미만), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
@@ -343,7 +350,7 @@ void M010_MPU_init() {
     M010_setupMPU6050(); // MPU6050 초기화
 
     // 자동차 상태 구조체 초기화
-    g_M010_CarStatus.v_currentMovementState = E_M010_STATE_UNKNOWN;
+    g_M010_CarStatus.movementState = E_M010_STATE_UNKNOWN;
     g_M010_CarStatus.speed_kmh = 0.0;
     g_M010_CarStatus.accel_X_ms2 = 0.0;
     g_M010_CarStatus.accel_Y_ms2 = 0.0;
@@ -375,5 +382,5 @@ void M010_MPU_run() {
         g_M010_lastSerialPrintTime_ms = millis();
     }
 
-    // LED Matrix 업데이트 등 추가 작업 (예: M010_updateLEDMatrix(g_M010_CarStatus.v_currentMovementState);)
+    // LED Matrix 업데이트 등 추가 작업 (예: M010_updateLEDMatrix(g_M010_CarStatus.movementState);)
 }
