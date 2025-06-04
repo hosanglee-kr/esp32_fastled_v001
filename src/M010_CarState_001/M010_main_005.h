@@ -8,9 +8,10 @@
 // 사용 라이브러리: MPU6050_DMP6 (I2Cdevlib by Jeff Rowberg) - MotionApps612 사용
 // ====================================================================================================
 
+// 시리얼 출력 제어 매크로
+#define G_M010_PRINT_ERROR // 오류 관련 Serial.print 활성화
+#define G_M010_PRINT_DEBUG // 디버그 및 일반 정보 Serial.print 활성화
 
-#define G_M010_PRINT_DEBUG
-#define G_M010_PRINT_PROGRESS_1
 
 #include <Wire.h> // I2C 통신
 #include <I2Cdev.h> // I2C 장치 통신
@@ -139,20 +140,23 @@ void M010_setupMPU6050() {
     Wire.begin(); // I2C 시작
     Wire.setClock(400000); // I2C 속도 400kHz
 
+    #ifdef G_M010_PRINT_DEBUG
     Serial.println(F("MPU6050 초기화 중..."));
     Serial.print(F("MPU6050 연결 테스트: "));
     Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
-
     Serial.println(F("DMP 로딩 중..."));
+    #endif
+
     g_M010_dmp_devStatus = g_M010_Mpu.dmpInitialize();
 
     if (g_M010_dmp_devStatus == 0) {
+        #ifdef G_M010_PRINT_DEBUG
         Serial.println(F("DMP 활성화 중..."));
-        g_M010_Mpu.setDMPEnabled(true);
-
         Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
         Serial.print(G_M010_MPU_INTERRUPT_PIN);
         Serial.println(F(") 설정 중..."));
+        #endif
+
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
         g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus();
@@ -160,11 +164,15 @@ void M010_setupMPU6050() {
         g_M010_dmp_packetSize = 42; 
 
         g_M010_dmp_isReady = true;
+        #ifdef G_M010_PRINT_DEBUG
         Serial.println(F("DMP 초기화 완료!"));
+        #endif
     } else {
+        #ifdef G_M010_PRINT_ERROR
         Serial.print(F("DMP 초기화 실패 (오류 코드: "));
         Serial.print(g_M010_dmp_devStatus);
         Serial.println(F(")"));
+        #endif
         while (true); // 오류 시 무한 대기
     }
 }
@@ -327,6 +335,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
  * @brief 자동차 상태 정보 시리얼 출력.
  */
 void M010_printCarStatus() {
+    #ifdef G_M010_PRINT_DEBUG
     Serial.println(F("\n--- 자동차 현재 상태 ---"));
     Serial.print(F("  상태: "));
     switch (g_M010_CarStatus.movementState) {
@@ -351,6 +360,7 @@ void M010_printCarStatus() {
     Serial.print(F("  급감속: ")); Serial.println(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
     Serial.print(F("  과속 방지턱: ")); Serial.println(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
     Serial.println(F("-----------------------"));
+    #endif
 }
 
 /**
@@ -380,8 +390,9 @@ void M010_MPU_init() {
     g_M010_lastBumpDetectionTime_ms = 0; // 초기화
     g_M010_lastDecelDetectionTime_ms = 0; // 초기화
 
-
+    #ifdef G_M010_PRINT_DEBUG
     Serial.println(F("Setup 완료!"));
+    #endif
 }
 
 /**
