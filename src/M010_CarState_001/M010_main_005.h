@@ -12,7 +12,7 @@
 // 디버그 출력을 활성화하려면 DEBUG_P1의 주석을 해제하세요.
 #define DEBUG_P1 // 이 라인을 주석 처리하면 모든 dbgP1_ 매크로가 비활성화됩니다.
 //#define DEBUG_P2 // 필요에 따라 추가적인 디버그 레벨/모듈을 정의할 수 있습니다.
-// -----------------------------
+
 #include "A01_debug_001.h"
 
 
@@ -167,6 +167,7 @@ void M010_setupMPU6050() {
         g_M010_dmp_isReady = true;
         dbgP1_println_F(F("DMP 초기화 완료!"));
     } else {
+        // 이 부분이 수정되었습니다: F() 매크로를 사용하는 printf 계열 호출을 위해 A01_DEBUG_printf 매크로를 수정했습니다.
         dbgP1_printf_F(F("DMP 초기화 실패 (오류 코드: %d)\n"), g_M010_dmp_devStatus);
         while (true); // 오류 시 무한 대기
     }
