@@ -1,5 +1,5 @@
 #pragma once
-// M010_main_004.h
+// M010_main_005.h
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
 // 설명: ESP32 + MPU6050 활용, 차량 움직임 감지 및 LED Matrix 로봇 눈 표정 표현.
@@ -59,8 +59,6 @@ typedef enum {
     E_M010_STATE_PARKED,        // 주차
     E_M010_STATE_FORWARD,       // 전진
     E_M010_STATE_REVERSE,       // 후진
-    E_M010_STATE_EMERGENCY_BRAKING, // 급감속
-    E_M010_STATE_SPEED_BUMP,    // 과속 방지턱
 } T_M010_CarMovementState;
 
 // ====================================================================================================
@@ -249,19 +247,16 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
         (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > G_M010_BUMP_COOLDOWN_MS) {
         g_M010_CarStatus.isSpeedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
-        g_M010_CarStatus.movementState = E_M010_STATE_SPEED_BUMP; // 상태 변경
-        return; // 최우선 감지 (다른 상태 판단 중단)
     } 
     // 과속 방지턱 상태 유지 시간 체크
     else if (g_M010_CarStatus.isSpeedBumpDetected &&
                (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) < G_M010_BUMP_HOLD_DURATION_MS) {
-        g_M010_CarStatus.movementState = E_M010_STATE_SPEED_BUMP; // 상태 유지
-        return; // 상태 유지 중에는 다른 상태 판단 중단
+        // 상태 유지 (isSpeedBumpDetected는 이미 true)
     }
     // 유지 시간 종료 시 리셋
     else if (g_M010_CarStatus.isSpeedBumpDetected &&
              (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) >= G_M010_BUMP_HOLD_DURATION_MS) {
-        g_M010_CarStatus.isSpeedBumpDetected = false; // 쿨다운/유지 시간 후 리셋
+        g_M010_CarStatus.isSpeedBumpDetected = false; // 유지 시간 후 리셋
     }
 
     // --- 급감속 감지 (Y축 가속도 급감) 및 상태 유지 ---
@@ -269,14 +264,11 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
     if (v_accelY < G_M010_ACCEL_DECEL_THRESHOLD_MPS2) {
         g_M010_CarStatus.isEmergencyBraking = true;
         g_M010_lastDecelDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
-        g_M010_CarStatus.movementState = E_M010_STATE_EMERGENCY_BRAKING; // 상태 변경
-        return; // 최우선 감지 (다른 상태 판단 중단)
     }
     // 급감속 상태 유지 시간 체크
     else if (g_M010_CarStatus.isEmergencyBraking &&
              (p_currentTime_ms - g_M010_lastDecelDetectionTime_ms) < G_M010_DECEL_HOLD_DURATION_MS) {
-        g_M010_CarStatus.movementState = E_M010_STATE_EMERGENCY_BRAKING; // 상태 유지
-        return; // 상태 유지 중에는 다른 상태 판단 중단
+        // 상태 유지 (isEmergencyBraking는 이미 true)
     }
     // 유지 시간 종료 시 리셋
     else if (g_M010_CarStatus.isEmergencyBraking &&
@@ -285,7 +277,7 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
     }
 
 
-    // 전진, 후진, 정차, 주차 판단 (급감속/방지턱 상태가 아닐 때만 실행)
+    // 전진, 후진, 정차, 주차 판단 (특수 상태 플래그와 무관하게 동작)
     if (fabs(v_speed) < G_M010_SPEED_THRESHOLD_KMH) { // 정차/주차 상태
         if (g_M010_CarStatus.movementState != E_M010_STATE_STOPPED_INIT &&
             g_M010_CarStatus.movementState != E_M010_STATE_SIGNAL_WAIT1 &&
@@ -344,8 +336,6 @@ void M010_printCarStatus() {
         case E_M010_STATE_PARKED: Serial.print(F("주차 중 (10분 이상), 시간: ")); Serial.print(g_M010_CarStatus.currentStopTime_ms / 1000); Serial.println(F("s")); break;
         case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
         case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
-        case E_M010_STATE_EMERGENCY_BRAKING: Serial.println(F("급감속!")); break;
-        case E_M010_STATE_SPEED_BUMP: Serial.println(F("과속 방지턱 통과!")); break;
     }
     Serial.print(F("  추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
     Serial.print(F("  가속도(X,Y,Z): "));
