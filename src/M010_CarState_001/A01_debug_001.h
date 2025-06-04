@@ -1,3 +1,4 @@
+// -----------------------------
 
 // ====================================================================================================
 // 커스텀 디버그 매크로 정의
@@ -16,12 +17,13 @@
 } 
 
 // printf 계열: 포맷 문자열과 가변 인자 사용, 함수 정보 출력 여부 제어
+// F() 매크로로 전달된 문자열 (Flash String)을 처리할 수 있도록 printf_P 사용
 #define A01_DEBUG_printf(v_debugType, v_funcName, fmt, ...) {              \
     if (v_funcName == 'Y') {                                               \
         Serial.print((v_debugType));                                       \
-        Serial.printf((" %s.%s()- line# %05d") , __FILE__, __func__, __LINE__); \
+        Serial.printf_P(PSTR(" %s.%s()- line# %05d") , __FILE__, __func__, __LINE__); /* PSTR() 추가 */ \
     }                                                                      \
-    Serial.printf(fmt, ##__VA_ARGS__);                                     \
+    Serial.printf_P((PGM_P)F(fmt), ##__VA_ARGS__); /* fmt가 F()로 감싸져 있으므로, PGM_P로 캐스팅 후 printf_P에 전달 */ \
 }
 
 // v2 버전 (개선된 상세 정보 출력)
