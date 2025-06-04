@@ -1,5 +1,5 @@
 #pragma once
-// M010_main_005.h
+// M010_main_004.h
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
 // 설명: ESP32 + MPU6050 활용, 차량 움직임 감지 및 LED Matrix 로봇 눈 표정 표현.
@@ -8,9 +8,12 @@
 // 사용 라이브러리: MPU6050_DMP6 (I2Cdevlib by Jeff Rowberg) - MotionApps612 사용
 // ====================================================================================================
 
-// 시리얼 출력 제어 매크로
-#define G_M010_PRINT_ERROR // 오류 관련 Serial.print 활성화
-#define G_M010_PRINT_DEBUG // 디버그 및 일반 정보 Serial.print 활성화
+// --- 시리얼 출력 제어 매크로 ---
+// 오류 관련 Serial.print 출력을 활성화하려면 이 줄의 주석을 해제하세요.
+#define G_M010_PRINT_ERROR
+// 디버그 관련 Serial.print 출력을 활성화하려면 이 줄의 주석을 해제하세요.
+#define G_M010_PRINT_DEBUG
+// -----------------------------
 
 
 #include <Wire.h> // I2C 통신
@@ -140,23 +143,28 @@ void M010_setupMPU6050() {
     Wire.begin(); // I2C 시작
     Wire.setClock(400000); // I2C 속도 400kHz
 
-    #ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("MPU6050 초기화 중..."));
-    Serial.print(F("MPU6050 연결 테스트: "));
+#ifdef G_M010_PRINT_DEBUG
+    Serial.println(F("    MPU6050 초기화 중..."));
+    Serial.print(F("    MPU6050 연결 테스트: "));
     Serial.println(g_M010_Mpu.testConnection() ? F("성공") : F("실패"));
-    Serial.println(F("DMP 로딩 중..."));
-    #endif
+#endif
 
+#ifdef G_M010_PRINT_DEBUG
+    Serial.println(F("    DMP 로딩 중..."));
+#endif
     g_M010_dmp_devStatus = g_M010_Mpu.dmpInitialize();
 
     if (g_M010_dmp_devStatus == 0) {
-        #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("DMP 활성화 중..."));
-        Serial.print(F("MPU6050 인터럽트 핀 (GPIO "));
+#ifdef G_M010_PRINT_DEBUG
+        Serial.println(F("    DMP 활성화 중..."));
+#endif
+        g_M010_Mpu.setDMPEnabled(true);
+
+#ifdef G_M010_PRINT_DEBUG
+        Serial.print(F("    MPU6050 인터럽트 핀 (GPIO "));
         Serial.print(G_M010_MPU_INTERRUPT_PIN);
         Serial.println(F(") 설정 중..."));
-        #endif
-
+#endif
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
         attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
         g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus();
@@ -164,15 +172,15 @@ void M010_setupMPU6050() {
         g_M010_dmp_packetSize = 42; 
 
         g_M010_dmp_isReady = true;
-        #ifdef G_M010_PRINT_DEBUG
-        Serial.println(F("DMP 초기화 완료!"));
-        #endif
+#ifdef G_M010_PRINT_DEBUG
+        Serial.println(F("    DMP 초기화 완료!"));
+#endif
     } else {
-        #ifdef G_M010_PRINT_ERROR
-        Serial.print(F("DMP 초기화 실패 (오류 코드: "));
+#ifdef G_M010_PRINT_ERROR
+        Serial.print(F("    DMP 초기화 실패 (오류 코드: "));
         Serial.print(g_M010_dmp_devStatus);
         Serial.println(F(")"));
-        #endif
+#endif
         while (true); // 오류 시 무한 대기
     }
 }
@@ -335,9 +343,9 @@ void M010_defineCarState(unsigned long p_currentTime_ms) {
  * @brief 자동차 상태 정보 시리얼 출력.
  */
 void M010_printCarStatus() {
-    #ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("\n--- 자동차 현재 상태 ---"));
-    Serial.print(F("  상태: "));
+#ifdef G_M010_PRINT_DEBUG
+    Serial.println(F("\n---- 자동차 현재 상태 ----"));
+    Serial.print(F("    상태: "));
     switch (g_M010_CarStatus.movementState) {
         case E_M010_STATE_UNKNOWN: Serial.println(F("알 수 없음")); break;
         case E_M010_STATE_STOPPED_INIT: Serial.println(F("정차 중 (초기)")); break;
@@ -349,18 +357,18 @@ void M010_printCarStatus() {
         case E_M010_STATE_FORWARD: Serial.println(F("전진 중")); break;
         case E_M010_STATE_REVERSE: Serial.println(F("후진 중")); break;
     }
-    Serial.print(F("  추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
-    Serial.print(F("  가속도(X,Y,Z): "));
+    Serial.print(F("    추정 속도: ")); Serial.print(g_M010_CarStatus.speed_kmh, 2); Serial.println(F(" km/h"));
+    Serial.print(F("    가속도(X,Y,Z): "));
     Serial.print(g_M010_CarStatus.accelX_ms2, 2); Serial.print(F(" m/s^2, "));
     Serial.print(g_M010_CarStatus.accelY_ms2, 2); Serial.print(F(" m/s^2, "));
     Serial.print(g_M010_CarStatus.accelZ_ms2, 2); Serial.println(F(" m/s^2"));
-    Serial.print(F("  Yaw 각도: ")); Serial.print(g_M010_CarStatus.yawAngle_deg, 2); Serial.println(F(" 도"));
-    Serial.print(F("  Pitch 각도: ")); Serial.print(g_M010_CarStatus.pitchAngle_deg, 2); Serial.println(F(" 도"));
-    Serial.print(F("  Yaw 각속도: ")); Serial.print(g_M010_CarStatus.yawAngleVelocity_degps, 2); Serial.println(F(" 도/초"));
-    Serial.print(F("  급감속: ")); Serial.println(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
-    Serial.print(F("  과속 방지턱: ")); Serial.println(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
-    Serial.println(F("-----------------------"));
-    #endif
+    Serial.print(F("    Yaw 각도: ")); Serial.print(g_M010_CarStatus.yawAngle_deg, 2); Serial.println(F(" 도"));
+    Serial.print(F("    Pitch 각도: ")); Serial.print(g_M010_CarStatus.pitchAngle_deg, 2); Serial.println(F(" 도"));
+    Serial.print(F("    Yaw 각속도: ")); Serial.print(g_M010_CarStatus.yawAngleVelocity_degps, 2); Serial.println(F(" 도/초"));
+    Serial.print(F("    급감속: ")); Serial.println(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
+    Serial.print(F("    과속 방지턱: ")); Serial.println(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
+    Serial.println(F("--------------------------"));
+#endif
 }
 
 /**
@@ -390,9 +398,9 @@ void M010_MPU_init() {
     g_M010_lastBumpDetectionTime_ms = 0; // 초기화
     g_M010_lastDecelDetectionTime_ms = 0; // 초기화
 
-    #ifdef G_M010_PRINT_DEBUG
-    Serial.println(F("Setup 완료!"));
-    #endif
+#ifdef G_M010_PRINT_DEBUG
+    Serial.println(F("    Setup 완료!"));
+#endif
 }
 
 /**
