@@ -642,12 +642,7 @@ bool M010_Config_load() {
         return false; // 파일이 없으면 로드 실패로 간주
     }
 
-    // StaticJsonDocument를 사용하여 메모리 할당을 스택에, 또는 동적 할당을 피합니다.
-    // 설정값 개수에 따라 JSON_DOCUMENT_SIZE를 적절히 조절해야 합니다.
-    // 여기서는 대략적인 크기를 설정하며, 실제 JSON 크기에 맞게 조절하세요.
-    // ArduinoJson Assistant (https://arduinojson.org/v7/assistant/) 사용 권장
-    const size_t CAPACITY = JSON_OBJECT_SIZE(30) + 20 * 4; // 대략적인 필요 메모리 (key-value 쌍 개수 * 각 타입의 크기)
-    StaticJsonDocument<CAPACITY> doc; 
+    JsonDocument doc; 
 
     DeserializationError error = deserializeJson(doc, configFile);
     configFile.close();
@@ -719,8 +714,7 @@ bool M010_Config_save() {
         return false;
     }
 
-    const size_t CAPACITY = JSON_OBJECT_SIZE(30) + 20 * 4; // 로드 시와 동일한 크기
-    StaticJsonDocument<CAPACITY> doc;
+    JsonDocument doc;
 
     // g_M010_Config 구조체에서 JSON 문서로 값을 복사
     doc["accelAlpha"] = g_M010_Config.accelAlpha;
