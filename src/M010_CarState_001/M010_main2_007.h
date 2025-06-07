@@ -538,10 +538,10 @@ void M010_printCarStatus() {
         case E_M010_STATE_UNKNOWN: dbgP1_println_F(F("알 수 없음")); break;
         case E_M010_STATE_STOPPED_INIT: dbgP1_println_F(F("정차 중 (초기)")); break;
         case E_M010_STATE_SIGNAL_WAIT1: dbgP1_print_F(F("신호대기 1 (60초 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_STATE_SIGNAL_WAIT2: dbP1_print_F(F("신호대기 2 (120초 미만), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
-        case E_M010_STATE_STOPPED1: dbP1_print_F(F("정차 1 (5분 미만), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
-        case E_M010_STATE_STOPPED2: dbP1_print_F(F("정차 2 (10분 미만), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
-        case E_M010_STATE_PARKED: dbP1_print_F(F("주차 중 (10분 이상), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
+        case E_M010_STATE_SIGNAL_WAIT2: dbgP1_print_F(F("신호대기 2 (120초 미만), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
+        case E_M010_STATE_STOPPED1: dbgP1_print_F(F("정차 1 (5분 미만), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
+        case E_M010_STATE_STOPPED2: dbgP1_print_F(F("정차 2 (10분 미만), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
+        case E_M010_STATE_PARKED: dbgP1_print_F(F("주차 중 (10분 이상), 시간: ")); dbP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbP1_println_F(F("s")); break;
         case E_M010_STATE_FORWARD: dbgP1_println_F(F("전진 중")); break;
         case E_M010_STATE_REVERSE: dbgP1_println_F(F("후진 중")); break;
     }
