@@ -321,9 +321,11 @@ void M010_updateCarStatus() {
             g_M010_CarStatus.stopStableStartTime_ms = 0; // 움직임 감지 시 안정화 시작 시간 리셋
         }
 
+		g_M010_mpu_isDataReady = true;
+
         // 자동차 움직임 상태 및 회전 상태 정의 함수 호출
-        M010_defineCarState(v_currentTime_ms);
-        M010_defineCarTurnState(v_currentTime_ms); // 새로 추가된 회전 상태 정의 함수 호출
+        // M010_defineCarState(v_currentTime_ms);
+        // M010_defineCarTurnState(v_currentTime_ms); // 새로 추가된 회전 상태 정의 함수 호출
     }
 }
 
@@ -618,6 +620,12 @@ void M010_MPU_run() {
     M010_updateCarStatus(); // MPU6050 데이터 읽기 및 자동차 상태 업데이트
 
 	if(g_M010_mpu_isDataReady==true){
+		unsigned long v_currentTime_ms = millis(); 
+		// 자동차 움직임 상태 및 회전 상태 정의 함수 호출
+        M010_defineCarState(v_currentTime_ms);
+        M010_defineCarTurnState(v_currentTime_ms); // 새로 추가된 회전 상태 정의 함수 호출
+		g_M010_mpu_isDataReady = false;
+  
 
 	}
     // 5초 간격으로 자동차 상태를 시리얼 출력
