@@ -1,5 +1,6 @@
 #pragma once
 // M010_main2_006.h
+// 전후진 등에서만 상태머신 적용
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
 // 설명: ESP32 + MPU6050 활용, 차량 움직임 감지 및 LED Matrix 로봇 눈 표정 표현.
@@ -28,6 +29,27 @@ MPU6050 g_M010_Mpu;
 // ====================================================================================================
 // 전역 상수 (G_M010_으로 시작)
 // ====================================================================================================
+
+// --- 차량 상태 머신 (State Machine) 개요 ---
+/*
+ * 주요 상태: 정지 (STOPPED_INIT 및 세부 상태), 전진 (FORWARD), 후진 (REVERSE)
+ * 상태 전환은 히스테리시스 (임계값 차등) 및 시간 지연 (조건 지속 시간)을 통해 노이즈에 강인하게 동작합니다.
+ *
+ * 상태               | 진입 조건                                                          | 전이 조건 (다음 상태)
+ * -------------------|--------------------------------------------------------------------|--------------------------------------------------------------------
+ * E_M010_STATE_UNKNOWN | (초기 상태)                                                      | - 초기화 시 -> E_M010_STATE_STOPPED_INIT
+ * E_M010_STATE_STOPPED_INIT | - 초기 진입                                                  | - 속도 > G_M010_SPEED_FORWARD_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_FORWARD
+ * (and sub-states:    | - (FROM FORWARD/REVERSE): 속도 < G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 | - 속도 < -G_M010_SPEED_REVERSE_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_REVERSE
+ * SIGNAL_WAIT1/2,      |                                                                    | - (내부적으로 시간 경과에 따라): SIGNAL_WAIT1/2, STOPPED1/2, PARKED
+ * STOPPED1/2, PARKED) |                                                                    |
+ * E_M010_STATE_FORWARD | - (FROM STOPPED_INIT): 속도 > G_M010_SPEED_FORWARD_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 | - 속도 < G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_STOPPED_INIT
+ * E_M010_STATE_REVERSE | - (FROM STOPPED_INIT): 속도 < -G_M010_SPEED_REVERSE_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 | - 속도 > -G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_STOPPED_INIT
+ *
+ * 특수 감지 플래그 (메인 상태와 독립적으로 동작하며, 해당 조건이 만족될 때만 True):
+ * - isSpeedBumpDetected: Z축 가속도 임계값 초과 & 최소 속도 이상 & 쿨다운 시간 경과 시 True. G_M010_BUMP_HOLD_DURATION_MS 동안 유지.
+ * - isEmergencyBraking: Y축 가속도 급감속 임계값 미만 시 True. G_M010_DECEL_HOLD_DURATION_MS 동안 유지.
+ */
+// ---------------------------------------------------
 
 // MPU6050 관련
 const int G_M010_MPU_INTERRUPT_PIN = 4; // MPU6050 INT -> ESP32 GPIO 4
