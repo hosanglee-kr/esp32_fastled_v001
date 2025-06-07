@@ -617,6 +617,9 @@ void M010_MPU_init() {
 void M010_MPU_run() {
     M010_updateCarStatus(); // MPU6050 데이터 읽기 및 자동차 상태 업데이트
 
+	if(g_M010_mpu_isDataReady==true){
+
+	}
     // 5초 간격으로 자동차 상태를 시리얼 출력
     if (millis() - g_M010_lastSerialPrintTime_ms >= G_M010_SERIAL_PRINT_INTERVAL_MS) {
         M010_printCarStatus();
