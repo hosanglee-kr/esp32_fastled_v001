@@ -211,7 +211,7 @@ void M010_defineCarTurnState(unsigned long p_currentTime_ms); // 차량 회전 �
 /**
  * @brief MPU6050 센서 및 DMP (Digital Motion Processor)를 초기화합니다.
  */
-void M010_setupMPU6050() {
+void M010_MPU6050_init() {
     Wire.begin(); // I2C 통신 시작
     Wire.setClock(400000); // I2C 통신 속도를 400kHz로 설정
 
@@ -573,14 +573,7 @@ void M010_printCarStatus() {
     dbgP1_println_F(F("--------------------------"));
 }
 
-/**
- * @brief ESP32가 시작될 때 한 번 실행되는 초기 설정 함수입니다.
- * MPU6050 초기화 및 모든 전역 상태 변수를 설정합니다.
- */
-void M010_MPU_init() {
-    
-    M010_setupMPU6050(); // MPU6050 센서 초기화
-
+void M010_GlobalVar_init(){
     // 자동차 상태 구조체 초기화
     g_M010_CarStatus.movementState = E_M010_STATE_UNKNOWN; // 초기 움직임 상태를 알 수 없음으로 설정
     g_M010_CarStatus.turnState = E_M010_TURN_NONE;         // 초기 회전 상태를 회전 없음으로 설정 (새로 추가)
@@ -609,6 +602,18 @@ void M010_MPU_init() {
     s_potentialTurnState = E_M010_TURN_NONE;
     s_turnStateStartTime_ms = 0;
 
+}
+
+/**
+ * @brief ESP32가 시작될 때 한 번 실행되는 초기 설정 함수입니다.
+ * MPU6050 초기화 및 모든 전역 상태 변수를 설정합니다.
+ */
+void M010_MPU_init() {
+    
+    M010_MPU6050_init(); // MPU6050 센서 초기화
+
+    M010_GlobalVar_init();
+	
     dbgP1_println_F(F("Setup 완료!"));
 }
 
