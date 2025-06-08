@@ -271,12 +271,12 @@ void M010_updateCarStatus(unsigned long* p_currentTime_ms) {
 
     // DMP FIFO에서 최신 패킷을 읽어옴
     if (g_M010_Mpu.dmpGetCurrentFIFOPacket(g_M010_dmp_fifoBuffer)) { 
-		p_currentTime_ms = millis(); // 현재 시간 가져오기
+		*p_currentTime_ms = millis(); // 현재 시간 가져오기
         // unsigned long v_currentTime_ms = millis(); // 현재 시간 가져오기
 		
         // 샘플링 시간 간격 계산 (이전 샘플링 시간과 현재 시간의 차이)
-		float v_deltaTime_s = (p_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
-        g_M010_lastSampleTime_ms = p_currentTime_ms; // 마지막 샘플링 시간 업데이트
+		float v_deltaTime_s = (*p_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
+        g_M010_lastSampleTime_ms = *p_currentTime_ms; // 마지막 샘플링 시간 업데이트
         // float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
         // g_M010_lastSampleTime_ms = v_currentTime_ms; // 마지막 샘플링 시간 업데이트
 
