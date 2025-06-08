@@ -329,7 +329,8 @@ void M010_updateCarStatus(unsigned long* p_currentTime_ms) {
             fabs(g_M010_CarStatus.yawAngleVelocity_degps) < g_M010_Config.gyroStopThresholdDps) {
             
             if (g_M010_CarStatus.stopStableStartTime_ms == 0) { // 정지 안정화 시작 시간 기록
-                g_M010_CarStatus.stopStableStartTime_ms = v_currentTime_ms;
+				g_M010_CarStatus.stopStableStartTime_ms = *p_currentTime_ms;
+                // g_M010_CarStatus.stopStableStartTime_ms = v_currentTime_ms;
             } else if ((v_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
                 g_M010_CarStatus.speed_kmh = 0.0; // 충분히 안정적인 정지 상태로 판단되면 속도 0으로 보정
             }
