@@ -259,7 +259,7 @@ void M010_MPU6050_init() {
  * @brief MPU6050 데이터를 읽고 자동차 상태를 업데이트합니다.
  * 주기적으로 호출되어 센서 데이터를 처리하고 차량의 상태를 갱신합니다.
  */
-void M010_updateCarStatus() {
+void M010_updateCarStatus(unsigned long* p_currentTime_ms) {
     if (!g_M010_dmp_isReady) return; // DMP가 준비되지 않았으면 함수 종료
 
     // 인터럽트가 발생하지 않았거나 FIFO에 충분한 데이터가 없으면 종료
@@ -271,10 +271,14 @@ void M010_updateCarStatus() {
 
     // DMP FIFO에서 최신 패킷을 읽어옴
     if (g_M010_Mpu.dmpGetCurrentFIFOPacket(g_M010_dmp_fifoBuffer)) { 
-        unsigned long v_currentTime_ms = millis(); // 현재 시간 가져오기
+		p_currentTime_ms = millis(); // 현재 시간 가져오기
+        // unsigned long v_currentTime_ms = millis(); // 현재 시간 가져오기
+		
         // 샘플링 시간 간격 계산 (이전 샘플링 시간과 현재 시간의 차이)
-        float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
-        g_M010_lastSampleTime_ms = v_currentTime_ms; // 마지막 샘플링 시간 업데이트
+		float v_deltaTime_s = (p_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
+        g_M010_lastSampleTime_ms = p_currentTime_ms; // 마지막 샘플링 시간 업데이트
+        // float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
+        // g_M010_lastSampleTime_ms = v_currentTime_ms; // 마지막 샘플링 시간 업데이트
 
         // 쿼터니언, Yaw/Pitch/Roll 및 중력 벡터 계산
         g_M010_Mpu.dmpGetQuaternion(&g_M010_Quaternion, g_M010_dmp_fifoBuffer);
@@ -955,10 +959,12 @@ void M010_MPU_init() {
  * MPU6050 데이터를 지속적으로 업데이트하고, 주기적으로 상태를 시리얼 출력합니다.
  */
 void M010_MPU_run() {
-    M010_updateCarStatus(); // MPU6050 데이터 읽기 및 자동차 상태 업데이트
+	unsigned long v_currentTime_ms;
+	
+    M010_updateCarStatus(&v_currentTime_ms); // MPU6050 데이터 읽기 및 자동차 상태 업데이트
 
 	if(g_M010_mpu_isDataReady==true){
-		unsigned long v_currentTime_ms = millis(); 
+		//unsigned long v_currentTime_ms = millis(); 
 		// 자동차 움직임 상태 및 회전 상태 정의 함수 호출
         M010_defineCarState(v_currentTime_ms);
         M010_defineCarTurnState(v_currentTime_ms); // 새로 추가된 회전 상태 정의 함수 호출
