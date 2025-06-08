@@ -331,7 +331,8 @@ void M010_updateCarStatus(unsigned long* p_currentTime_ms) {
             if (g_M010_CarStatus.stopStableStartTime_ms == 0) { // 정지 안정화 시작 시간 기록
 				g_M010_CarStatus.stopStableStartTime_ms = *p_currentTime_ms;
                 // g_M010_CarStatus.stopStableStartTime_ms = v_currentTime_ms;
-            } else if ((v_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
+            } else if ((*p_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
+			// } else if ((v_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
                 g_M010_CarStatus.speed_kmh = 0.0; // 충분히 안정적인 정지 상태로 판단되면 속도 0으로 보정
             }
         } else {
@@ -960,7 +961,7 @@ void M010_MPU_init() {
  * MPU6050 데이터를 지속적으로 업데이트하고, 주기적으로 상태를 시리얼 출력합니다.
  */
 void M010_MPU_run() {
-	unsigned long v_currentTime_ms;
+	unsigned long v_currentTime_ms = 0;
 	
     M010_updateCarStatus(&v_currentTime_ms); // MPU6050 데이터 읽기 및 자동차 상태 업데이트
 
