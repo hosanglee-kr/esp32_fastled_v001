@@ -64,7 +64,6 @@ const float G_M010_GRAVITY_MPS2         = 9.80665; // 중력 가속도 (m/s^2)
 // 설정값을 담을 구조체 정의
 typedef struct {
     float       accelAlpha;                 // 가속도 필터링을 위한 상보 필터 계수
-    // float       gravityMps2;                // 중력 가속도 값 (m/s^2)
 
     // 자동차 움직임 상태 감지 임계값 (상태 머신 전이 조건)
     float       speedForwardThresholdKmh;   // 정지 상태에서 전진 상태로 전환하기 위한 최소 속도 (km/h)
@@ -268,7 +267,6 @@ void M010_MPU6050_init() {
 void M010_Config_initDefaults() {
     dbgP1_println_F(F("설정 기본값 초기화 중..."));
     g_M010_Config.accelAlpha                = 0.8;
-    // g_M010_Config.gravityMps2            = 9.80665;
 
     g_M010_Config.speedForwardThresholdKmh  = 0.8;
     g_M010_Config.speedReverseThresholdKmh  = 0.8;
@@ -339,7 +337,6 @@ bool M010_Config_load() {
 
     // JSON 문서에서 값을 읽어 g_M010_Config 구조체에 저장
     g_M010_Config.accelAlpha = v_config_doc["accelAlpha"] | g_M010_Config.accelAlpha; // 기본값과 OR 연산하여 없으면 기본값 유지
-    // g_M010_Config.gravityMps2 = v_config_doc["gravityMps2"] | g_M010_Config.gravityMps2;
 
     g_M010_Config.speedForwardThresholdKmh = v_config_doc["speedForwardThresholdKmh"] | g_M010_Config.speedForwardThresholdKmh;
     g_M010_Config.speedReverseThresholdKmh = v_config_doc["speedReverseThresholdKmh"] | g_M010_Config.speedReverseThresholdKmh;
@@ -401,7 +398,6 @@ bool M010_Config_save() {
 
     // g_M010_Config 구조체에서 JSON 문서로 값을 복사
     v_config_doc["accelAlpha"]                   = g_M010_Config.accelAlpha;
-    // v_config_doc["gravityMps2"]                  = g_M010_Config.gravityMps2;
 
     v_config_doc["speedForwardThresholdKmh"]     = g_M010_Config.speedForwardThresholdKmh;
     v_config_doc["speedReverseThresholdKmh"]     = g_M010_Config.speedReverseThresholdKmh;
@@ -457,7 +453,6 @@ bool M010_Config_save() {
 void M010_Config_print() {
     dbgP1_println_F(F("\n---- 현재 설정값 ----"));
     dbgP1_print_F(F("accelAlpha: "                  )); dbgP1_println(g_M010_Config.accelAlpha, 3);
-    // dbgP1_print_F(F("gravityMps2: "                 )); dbgP1_println(g_M010_Config.gravityMps2, 3);
     dbgP1_print_F(F("speedForwardThresholdKmh: "    )); dbgP1_println(g_M010_Config.speedForwardThresholdKmh, 2);
     dbgP1_print_F(F("speedReverseThresholdKmh: "    )); dbgP1_println(g_M010_Config.speedReverseThresholdKmh, 2);
     dbgP1_print_F(F("speedStopThresholdKmh: "       )); dbgP1_println(g_M010_Config.speedStopThresholdKmh, 2);
@@ -513,7 +508,6 @@ void M010_Config_handleSerialInput() {
                 
                 // 문자열을 적절한 타입으로 변환하여 설정값 업데이트
                 if      (paramName.equals("accelAlpha"                  )) g_M010_Config.accelAlpha = valueStr.toFloat();
-                // else if (paramName.equals("gravityMps2"                 )) g_M010_Config.gravityMps2 = valueStr.toFloat();
                 else if (paramName.equals("speedForwardThresholdKmh"    )) g_M010_Config.speedForwardThresholdKmh = valueStr.toFloat();
                 else if (paramName.equals("speedReverseThresholdKmh"    )) g_M010_Config.speedReverseThresholdKmh = valueStr.toFloat();
                 else if (paramName.equals("speedStopThresholdKmh"       )) g_M010_Config.speedStopThresholdKmh = valueStr.toFloat();
@@ -674,9 +668,9 @@ void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
 
         // 계산된 선형 가속도를 m/s^2 단위로 변환
 
-        float v_currentAx_ms2 = (float)v_accel_linear.x * G_M010_GRAVITY_MPS2;  // g_M010_Config.gravityMps2;
-        float v_currentAy_ms2 = (float)v_accel_linear.y * G_M010_GRAVITY_MPS2;  // g_M010_Config.gravityMps2;
-        float v_currentAz_ms2 = (float)v_accel_linear.z * G_M010_GRAVITY_MPS2;  // g_M010_Config.gravityMps2;
+        float v_currentAx_ms2 = (float)v_accel_linear.x * G_M010_GRAVITY_MPS2;  
+        float v_currentAy_ms2 = (float)v_accel_linear.y * G_M010_GRAVITY_MPS2;  
+        float v_currentAz_ms2 = (float)v_accel_linear.z * G_M010_GRAVITY_MPS2;  
 
         // 상보 필터를 사용하여 가속도 데이터 평활화
         g_M010_filteredAx = g_M010_Config.accelAlpha * g_M010_filteredAx + (1 - g_M010_Config.accelAlpha) * v_currentAx_ms2;
