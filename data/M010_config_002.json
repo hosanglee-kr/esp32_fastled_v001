@@ -1,0 +1,37 @@
+{
+  "mvState_accelFilter_Alpha": 0.8,
+  "mvState_Forward_speedKmh_Threshold_Min": 0.8,
+  "mvState_Reverse_speedKmh_Threshold_Min": 0.8,
+  "mvState_Stop_speedKmh_Threshold_Max": 0.2,
+  "mvState_Stop_accelMps2_Threshold_Max": 0.2,
+  "mvState_Stop_gyroDps_Threshold_Max": 0.5,
+
+  "mvState_stop_durationMs_Stable_Min": 200,
+  "mvState_move_durationMs_Stable_Min": 150,
+  "mvState_normalMove_durationMs": 100,
+
+  "mvState_Decel_accelMps2_Threshold": -3.0,
+  "mvState_Bump_accelMps2_Threshold": 5.0,
+  "mvState_Bump_SpeedKmh_Min": 5.0,
+
+  "mvState_Bump_CooldownMs": 1000,
+  "mvState_Decel_durationMs_Hold": 10000,
+  "mvState_Bump_durationMs_Hold": 10000,
+
+  "mvState_PeriodMs_stopGrace": 2000,
+  "mvState_signalWait1_Seconds": 60,
+  "mvState_signalWait2_Seconds": 120,
+  "mvState_stopped1_Seconds": 300,
+  "mvState_stopped2_Seconds": 600,
+  "mvState_park_Seconds": 600,
+
+  "serialPrint_intervalMs": 5000,
+  
+  "turnState_Center_yawAngleVelocityDegps_Thresold": 5.0,
+  "turnState_LR_1_yawAngleVelocityDegps_Thresold": 15.0,
+  "turnState_LR_2_yawAngleVelocityDegps_Thresold": 30.0,
+  "turnState_LR_3_yawAngleVelocityDegps_Thresold": 50.0,
+  "turnState_speedKmh_MinSpeed": 1.0,
+  "turnState_speedKmh_HighSpeed_Threshold": 30.0,
+  "turnState_StableDurationMs": 100
+}
