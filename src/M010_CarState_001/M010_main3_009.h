@@ -63,46 +63,46 @@ const float G_M010_GRAVITY_MPS2         = 9.80665; // 중력 가속도 (m/s^2)
 
 // 설정값을 담을 구조체 정의
 typedef struct {
-    float       accelAlpha;                 // 가속도 필터링을 위한 상보 필터 계수
+    float       mvState_accelFilter_Alpha;                  // 가속도 필터링을 위한 상보 필터 계수
 
-                                            // 자동차 움직임 상태 감지 임계값 (상태 머신 전이 조건)
-    float       speedForwardThresholdKmh;   // 정지 상태에서 전진 상태로 전환하기 위한 최소 속도 (km/h)
-    float       speedReverseThresholdKmh;   // 정지 상태에서 후진 상태로 전환하기 위한 최소 속도 (km/h)
-    float       speedStopThresholdKmh;      // 전진/후진 상태에서 정지 상태로 전환하기 위한 최대 속도 (km/h)
-    float       accelStopThresholdMps2;     // 차량 정차 여부 판단을 위한 Y축 가속도 변화 임계값 (m/s^2)
-    float       gyroStopThresholdDps;       // 차량 정차 여부 판단을 위한 Yaw 각속도 변화 임계값 (deg/s)
+                                                            // 자동차 움직임 상태 감지 임계값 (상태 머신 전이 조건)
+    float       mvState_Forward_speedKmh_Threshold_Min;     // 정지 상태에서 전진 상태로 전환하기 위한 최소 속도 (km/h)
+    float       mvState_Reverse_speedKmh_Threshold_Min;     // 정지 상태에서 후진 상태로 전환하기 위한 최소 속도 (km/h)
+    float       mvState_Stop_speedKmh_Threshold_Max;        // 전진/후진 상태에서 정지 상태로 전환하기 위한 최대 속도 (km/h)
+    float       mvState_Stop_accelMps2_Threshold_Max;       // 차량 정차 여부 판단을 위한 Y축 가속도 변화 임계값 (m/s^2)
+    float       mvState_Stop_gyroDps_Threshold_Max;         // 차량 정차 여부 판단을 위한 Yaw 각속도 변화 임계값 (deg/s)
 
-    u_int32_t   stopStableDurationMs;       // 정지 상태가 안정적으로 지속되어야 하는 시간 (ms)
-    u_int32_t   moveStableDurationMs;       // 움직임이 안정적으로 감지되어야 하는 시간 (ms)
-    u_int32_t   normalMoveDurationMs;       // 특수 상태 해제 후 일반 움직임으로 복귀하는 데 필요한 시간 (ms)
+    u_int32_t   mvState_stop_durationMs_Stable_Min;         // 정지 상태가 안정적으로 지속되어야 하는 시간 (ms)
+    u_int32_t   mvState_move_durationMs_Stable_Min;         // 움직임(전진, 후진)이 안정적으로 감지되어야 하는 시간 (ms)
+    u_int32_t   mvState_normalMove_durationMs;              // 특수 상태 해제 후 일반 움직임으로 복귀하는 데 필요한 시간 (ms)  (현재사용되지 않음)
 
-                                            // 급감속/방지턱 감지 관련 임계값
-    float       accelDecelThresholdMps2;    // 급감속 감지를 위한 Y축 가속도 임계값 (음수 값, m/s^2)
-    float       accelBumpThresholdMps2;     // 방지턱 감지를 위한 Z축 가속도 변화 임계값 (m/s^2)
-    float       bumpMinSpeedKmh;            // 방지턱 감지 시 필요한 최소 속도 (km/h)
+                                                            // 급감속/방지턱 감지 관련 임계값
+    float       mvState_Decel_accelMps2_Threshold;          // 급감속 감지를 위한 Y축 가속도 임계값 (음수 값, m/s^2)
+    float       mvState_Bump_accelMps2_Threshold;           // 방지턱 감지를 위한 Z축 가속도 변화 임계값 (m/s^2)
+    float       mvState_Bump_SpeedKmh_Min;                  // 방지턱 감지 시 필요한 최소 속도 (km/h)
 
-    u_int32_t   bumpCooldownMs;             // 방지턱 감지 후 재감지를 방지하는 쿨다운 시간 (ms)
-    u_int32_t   decelHoldDurationMs;        // 급감속 상태가 유지되는 시간 (ms, 10초)
-    u_int32_t   bumpHoldDurationMs;         // 과속방지턱 감지 상태가 유지되는 시간 (ms, 10초)
+    u_int32_t   mvState_Bump_CooldownMs;                    // 방지턱 감지 후 재감지를 방지하는 쿨다운 시간 (ms)
+    u_int32_t   mvState_Decel_durationMs_Hold;              // 급감속 상태가 유지되는 시간 (ms, 10초)
+    u_int32_t   mvState_Bump_durationMs_Hold;               // 과속방지턱 감지 상태가 유지되는 시간 (ms, 10초)
 
-                                            // 정차/주차 시간 기준 (초)
-    u_int32_t   stopGracePeriodMs;          // 2초 이상 움직임 없으면 정차로 간주 (현재 사용되지 않음, 참고용)
-    u_int32_t   signalWait1Seconds;         // 신호대기 1 상태 기준 시간 (60초)
-    u_int32_t   signalWait2Seconds;         // 신호대기 2 상태 기준 시간 (120초)
-    u_int32_t   stopped1Seconds;            // 정차 1 상태 기준 시간 (300초 = 5분)
-    u_int32_t   stopped2Seconds;            // 정차 2 상태 기준 시간 (600초 = 10분)
-    u_int32_t   parkSeconds;                // 주차 상태 기준 시간 (600초 = 10분)
+                                                            // 정차/주차 시간 기준 (초)
+    u_int32_t   mvState_PeriodMs_stopGrace;                 // 2초 이상 움직임 없으면 정차로 간주 (현재 사용되지 않음, 참고용)
+    u_int32_t   mvState_signalWait1_Seconds;                // 신호대기 1 상태 기준 시간 (60초)
+    u_int32_t   mvState_signalWait2_Seconds;                // 신호대기 2 상태 기준 시간 (120초)
+    u_int32_t   mvState_stopped1_Seconds;                   // 정차 1 상태 기준 시간 (300초 = 5분)
+    u_int32_t   mvState_stopped2_Seconds;                   // 정차 2 상태 기준 시간 (600초 = 10분)
+    u_int32_t   mvState_park_Seconds;                       // 주차 상태 기준 시간 (600초 = 10분)
 
-    u_int32_t   serialPrintIntervalMs;      // 시리얼 출력 간격 (5초)
+    u_int32_t   serialPrint_intervalMs;                     // 시리얼 출력 간격 (5초)
 
-                                            // 회전 감지 관련 상수
-    float       turnState_Center_yawAngleVelocityDegps_Thresold;       // 이 각속도 이하이면 회전이 없다고 간주 (deg/s)
-    float       turnState_LR_1_yawAngleVelocityDegps_Thresold;     // 약간 회전 감지 임계값 (deg/s)
-    float       turnState_LR_2_yawAngleVelocityDegps_Thresold;   // 중간 회전 감지 임계값 (deg/s)
+                                                                    // 회전 감지 관련 상수
+    float       turnState_Center_yawAngleVelocityDegps_Thresold;    // 이 각속도 이하이면 회전이 없다고 간주 (deg/s)
+    float       turnState_LR_1_yawAngleVelocityDegps_Thresold;      // 약간 회전 감지 임계값 (deg/s)
+    float       turnState_LR_2_yawAngleVelocityDegps_Thresold;      // 중간 회전 감지 임계값 (deg/s)
     float       turnState_LR_3_yawAngleVelocityDegps_Thresold;      // 급격한 회전 감지 임계값 (deg/s)
-    float       turnMinSpeedKmh;            // 회전 감지를 위한 최소 속도 (km/h) - 정지 시 오인 방지
-    float       turnHighSpeedThresholdKmh;  // 고속 회전 감지 시 임계값 조정을 위한 기준 속도 (km/h)
-    u_int32_t   turnStableDurationMs;       // 회전 상태가 안정적으로 유지되어야 하는 시간 (ms)
+    float       turnState_speedKmh_MinSpeed;                        // 회전 감지를 위한 최소 속도 (km/h) - 정지 시 오인 방지
+    float       turnState_speedKmh_HighSpeed_Threshold;             // 고속 회전 감지 시 임계값 조정을 위한 기준 속도 (km/h)
+    u_int32_t   turnState_StableDurationMs;                         // 회전 상태가 안정적으로 유지되어야 하는 시간 (ms)
     
 } T_M010_Config;
 
@@ -114,7 +114,7 @@ T_M010_Config g_M010_Config;
 // 자동차 움직임 상태 열거형 (State Machine State) 정의
 // ====================================================================================================
 typedef enum {
-    E_M010_CARMOVESTATE_UNKNOWN,               // 초기/알 수 없는 상태
+    E_M010_CARMOVESTATE_UNKNOWN,        // 초기/알 수 없는 상태
     E_M010_CARMOVESTATE_STOPPED_INIT,   // 기본 정차 상태 (다른 정차 세부 상태 진입점)
     E_M010_CARMOVESTATE_SIGNAL_WAIT1,   // 신호대기 1 (정차 시간 60초 미만)
     E_M010_CARMOVESTATE_SIGNAL_WAIT2,   // 신호대기 2 (120초 미만)
@@ -129,12 +129,12 @@ typedef enum {
 // 새로운 자동차 회전 상태 열거형 정의
 // ====================================================================================================
 typedef enum {
-    E_M010_CARTURNSTATE_CENTER,           // 회전 없음 또는 미미한 회전
-    E_M010_CARTURNSTATE_LEFT_1,    // 약간 좌회전
-    E_M010_CARTURNSTATE_LEFT_2,  // 중간 좌회전
+    E_M010_CARTURNSTATE_CENTER,     // 회전 없음 또는 미미한 회전
+    E_M010_CARTURNSTATE_LEFT_1,     // 약간 좌회전
+    E_M010_CARTURNSTATE_LEFT_2,     // 중간 좌회전
     E_M010_CARTURNSTATE_LEFT_3,     // 급격한 좌회전
-    E_M010_CARTURNSTATE_RIGHT_1,   // 약간 우회전
-    E_M010_CARTURNSTATE_RIGHT_2, // 중간 우회전
+    E_M010_CARTURNSTATE_RIGHT_1,    // 약간 우회전
+    E_M010_CARTURNSTATE_RIGHT_2,    // 중간 우회전
     E_M010_CARTURNSTATE_RIGHT_3     // 급격한 우회전
 } T_M010_CarTurnState;
 
@@ -142,26 +142,26 @@ typedef enum {
 // 자동차 상태 정보 구조체 정의
 // ====================================================================================================
 typedef struct {
-    T_M010_CarMovementState carMovementState;  // 현재 움직임 상태
-    T_M010_CarTurnState     carTurnState;      // 현재 회전 상태 (새로 추가)
+    T_M010_CarMovementState carMovementState;   // 현재 움직임 상태
+    T_M010_CarTurnState     carTurnState;       // 현재 회전 상태 (새로 추가)
 
-    float       speed_kmh;                  // 현재 속도 (km/h, 가속도 적분 추정)
-    float       accelX_ms2;                 // X축 가속도 (m/s^2)
-    float       accelY_ms2;                 // Y축 가속도 (m/s^2, 전진 기준: 양수-가속, 음수-감속)
-    float       accelZ_ms2;                 // Z축 가속도 (m/s^2, 노면 충격 감지)
+    float       speed_kmh;                      // 현재 속도 (km/h, 가속도 적분 추정)
+    float       accelX_ms2;                     // X축 가속도 (m/s^2)
+    float       accelY_ms2;                     // Y축 가속도 (m/s^2, 전진 기준: 양수-가속, 음수-감속)
+    float       accelZ_ms2;                     // Z축 가속도 (m/s^2, 노면 충격 감지)
 
-    float       yawAngle_deg;               // Yaw 각도 (도)
-    float       yawAngleVelocity_degps;     // Yaw 각속도 (도/초, 양수-우회전, 음수-좌회전)
+    float       yawAngle_deg;                   // Yaw 각도 (도)
+    float       yawAngleVelocity_degps;         // Yaw 각속도 (도/초, 양수-우회전, 음수-좌회전)
 
-    float       pitchAngle_deg;             // Pitch 각도 (도, 양수-오르막, 음수-내리막)
+    float       pitchAngle_deg;                 // Pitch 각도 (도, 양수-오르막, 음수-내리막)
 
-    bool        isSpeedBumpDetected;        // 과속 방지턱 감지 여부 (일시적 플래그)
-    bool        isEmergencyBraking;         // 급감속 감지 여부 (일시적 플래그)
+    bool        isSpeedBumpDetected;            // 과속 방지턱 감지 여부 (일시적 플래그)
+    bool        isEmergencyBraking;             // 급감속 감지 여부 (일시적 플래그)
 
-    u_int32_t   lastMovementTime_ms;        // 마지막 움직임 감지 시간 (ms)
-    u_int32_t   stopStartTime_ms;           // 정차 시작 시간 (ms)
-    u_int32_t   currentStopTime_ms;         // 현재 정차 지속 시간 (ms)
-    u_int32_t   stopStableStartTime_ms;     // 정지 상태 안정화 시작 시간 (ms) - 속도 0 보정용
+    u_int32_t   lastMovementTime_ms;            // 마지막 움직임 감지 시간 (ms)
+    u_int32_t   stopStartTime_ms;               // 정차 시작 시간 (ms)
+    u_int32_t   currentStopTime_ms;             // 현재 정차 지속 시간 (ms)
+    u_int32_t   stopStableStartTime_ms;         // 정지 상태 안정화 시작 시간 (ms) - 속도 0 보정용
 } T_M010_CarStatus;
 
 
@@ -212,15 +212,15 @@ void M010_dmpDataReady() {
 // 함수 선언 (프로토타입)
 // ====================================================================================================
 void M010_updateCarStatus(u_int32_t* p_currentTime_ms);
-void M010_defineCarState(u_int32_t p_currentTime_ms);     // 차량 움직임 상태 정의 함수
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms); // 차량 회전 상태 정의 함수 (새로 추가)
+void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수
+void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (새로 추가)
 
 // 설정 관련 함수 선언
-void M010_Config_initDefaults(); // 설정값 기본값 초기화
-bool M010_Config_load();         // LittleFS에서 설정값 로드
-bool M010_Config_save();         // LittleFS에 설정값 저장
-void M010_Config_print();        // 현재 설정값 시리얼 출력
-void M010_Config_handleSerialInput(); // 시리얼 입력 처리
+void M010_Config_initDefaults();                            // 설정값 기본값 초기화
+bool M010_Config_load();                                    // LittleFS에서 설정값 로드
+bool M010_Config_save();                                    // LittleFS에 설정값 저장
+void M010_Config_print();                                   // 현재 설정값 시리얼 출력
+void M010_Config_handleSerialInput();                       // 시리얼 입력 처리
 
 // ====================================================================================================
 // 함수 정의 (M010_으로 시작)
@@ -267,42 +267,42 @@ void M010_MPU6050_init() {
  */
 void M010_Config_initDefaults() {
     dbgP1_println_F(F("설정 기본값 초기화 중..."));
-    g_M010_Config.accelAlpha                = 0.8;
+    g_M010_Config.mvState_accelFilter_Alpha                 = 0.8;
 
-    g_M010_Config.speedForwardThresholdKmh  = 0.8;
-    g_M010_Config.speedReverseThresholdKmh  = 0.8;
-    g_M010_Config.speedStopThresholdKmh     = 0.2;
-    g_M010_Config.accelStopThresholdMps2    = 0.2;
-    g_M010_Config.gyroStopThresholdDps      = 0.5;
+    g_M010_Config.mvState_Forward_speedKmh_Threshold_Min    = 0.8;
+    g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min    = 0.8;
+    g_M010_Config.mvState_Stop_speedKmh_Threshold_Max       = 0.2;
+    g_M010_Config.mvState_Stop_accelMps2_Threshold_Max      = 0.2;
+    g_M010_Config.mvState_Stop_gyroDps_Threshold_Max        = 0.5;
 
-    g_M010_Config.stopStableDurationMs      = 200;
-    g_M010_Config.moveStableDurationMs      = 150;
-    g_M010_Config.normalMoveDurationMs      = 100;
+    g_M010_Config.mvState_stop_durationMs_Stable_Min        = 200;
+    g_M010_Config.mvState_move_durationMs_Stable_Min        = 150;
+    g_M010_Config.mvState_normalMove_durationMs             = 100;
 
-    g_M010_Config.accelDecelThresholdMps2   = -3.0;
-    g_M010_Config.accelBumpThresholdMps2    = 5.0;
-    g_M010_Config.bumpMinSpeedKmh           = 5.0;
+    g_M010_Config.mvState_Decel_accelMps2_Threshold         = -3.0;
+    g_M010_Config.mvState_Bump_accelMps2_Threshold          = 5.0;
+    g_M010_Config.mvState_Bump_SpeedKmh_Min                 = 5.0;
 
-    g_M010_Config.bumpCooldownMs            = 1000;
-    g_M010_Config.decelHoldDurationMs       = 10000;
-    g_M010_Config.bumpHoldDurationMs        = 10000;
+    g_M010_Config.mvState_Bump_CooldownMs                   = 1000;
+    g_M010_Config.mvState_Decel_durationMs_Hold             = 10000;
+    g_M010_Config.mvState_Bump_durationMs_Hold              = 10000;
 
-    g_M010_Config.stopGracePeriodMs         = 2000;
-    g_M010_Config.signalWait1Seconds        = 60;
-    g_M010_Config.signalWait2Seconds        = 120;
-    g_M010_Config.stopped1Seconds           = 300;
-    g_M010_Config.stopped2Seconds           = 600;
-    g_M010_Config.parkSeconds               = 600;
+    g_M010_Config.mvState_PeriodMs_stopGrace                = 2000;
+    g_M010_Config.mvState_signalWait1_Seconds               = 60;
+    g_M010_Config.mvState_signalWait2_Seconds               = 120;
+    g_M010_Config.mvState_stopped1_Seconds                  = 300;
+    g_M010_Config.mvState_stopped2_Seconds                  = 600;
+    g_M010_Config.mvState_park_Seconds                      = 600;
 
-    g_M010_Config.serialPrintIntervalMs     = 5000;
+    g_M010_Config.serialPrint_intervalMs                    = 5000;
 
-    g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold      = 5.0;
-    g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold    = 15.0;
-    g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold  = 30.0;
+    g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold   = 5.0;
+    g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold     = 15.0;
+    g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold     = 30.0;
     g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold     = 50.0;
-    g_M010_Config.turnMinSpeedKmh           = 1.0;
-    g_M010_Config.turnHighSpeedThresholdKmh = 30.0;
-    g_M010_Config.turnStableDurationMs      = 100;
+    g_M010_Config.turnState_speedKmh_MinSpeed                       = 1.0;
+    g_M010_Config.turnState_speedKmh_HighSpeed_Threshold            = 30.0;
+    g_M010_Config.turnState_StableDurationMs                        = 100;
 }
 
 /**
@@ -337,42 +337,42 @@ bool M010_Config_load() {
     dbgP1_println_F(F("config.json 로드 성공."));
 
     // JSON 문서에서 값을 읽어 g_M010_Config 구조체에 저장
-    g_M010_Config.accelAlpha = v_config_doc["accelAlpha"] | g_M010_Config.accelAlpha; // 기본값과 OR 연산하여 없으면 기본값 유지
+    g_M010_Config.mvState_accelFilter_Alpha = v_config_doc["mvState_accelFilter_Alpha"] | g_M010_Config.mvState_accelFilter_Alpha; // 기본값과 OR 연산하여 없으면 기본값 유지
 
-    g_M010_Config.speedForwardThresholdKmh = v_config_doc["speedForwardThresholdKmh"] | g_M010_Config.speedForwardThresholdKmh;
-    g_M010_Config.speedReverseThresholdKmh = v_config_doc["speedReverseThresholdKmh"] | g_M010_Config.speedReverseThresholdKmh;
-    g_M010_Config.speedStopThresholdKmh = v_config_doc["speedStopThresholdKmh"] | g_M010_Config.speedStopThresholdKmh;
-    g_M010_Config.accelStopThresholdMps2 = v_config_doc["accelStopThresholdMps2"] | g_M010_Config.accelStopThresholdMps2;
-    g_M010_Config.gyroStopThresholdDps = v_config_doc["gyroStopThresholdDps"] | g_M010_Config.gyroStopThresholdDps;
+    g_M010_Config.mvState_Forward_speedKmh_Threshold_Min    = v_config_doc["mvState_Forward_speedKmh_Threshold_Min"]    | g_M010_Config.mvState_Forward_speedKmh_Threshold_Min;
+    g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min    = v_config_doc["mvState_Reverse_speedKmh_Threshold_Min"]    | g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min;
+    g_M010_Config.mvState_Stop_speedKmh_Threshold_Max       = v_config_doc["mvState_Stop_speedKmh_Threshold_Max"]       | g_M010_Config.mvState_Stop_speedKmh_Threshold_Max;
+    g_M010_Config.mvState_Stop_accelMps2_Threshold_Max      = v_config_doc["mvState_Stop_accelMps2_Threshold_Max"]      | g_M010_Config.mvState_Stop_accelMps2_Threshold_Max;
+    g_M010_Config.mvState_Stop_gyroDps_Threshold_Max        = v_config_doc["mvState_Stop_gyroDps_Threshold_Max"]        | g_M010_Config.mvState_Stop_gyroDps_Threshold_Max;
 
-    g_M010_Config.stopStableDurationMs = v_config_doc["stopStableDurationMs"] | g_M010_Config.stopStableDurationMs;
-    g_M010_Config.moveStableDurationMs = v_config_doc["moveStableDurationMs"] | g_M010_Config.moveStableDurationMs;
-    g_M010_Config.normalMoveDurationMs = v_config_doc["normalMoveDurationMs"] | g_M010_Config.normalMoveDurationMs;
+    g_M010_Config.mvState_stop_durationMs_Stable_Min    = v_config_doc["mvState_stop_durationMs_Stable_Min"]            | g_M010_Config.mvState_stop_durationMs_Stable_Min;
+    g_M010_Config.mvState_move_durationMs_Stable_Min    = v_config_doc["mvState_move_durationMs_Stable_Min"]            | g_M010_Config.mvState_move_durationMs_Stable_Min;
+    g_M010_Config.mvState_normalMove_durationMs         = v_config_doc["mvState_normalMove_durationMs"]                 | g_M010_Config.mvState_normalMove_durationMs;
 
-    g_M010_Config.accelDecelThresholdMps2 = v_config_doc["accelDecelThresholdMps2"] | g_M010_Config.accelDecelThresholdMps2;
-    g_M010_Config.accelBumpThresholdMps2 = v_config_doc["accelBumpThresholdMps2"] | g_M010_Config.accelBumpThresholdMps2;
-    g_M010_Config.bumpMinSpeedKmh = v_config_doc["bumpMinSpeedKmh"] | g_M010_Config.bumpMinSpeedKmh;
+    g_M010_Config.mvState_Decel_accelMps2_Threshold     = v_config_doc["mvState_Decel_accelMps2_Threshold"]             | g_M010_Config.mvState_Decel_accelMps2_Threshold;
+    g_M010_Config.mvState_Bump_accelMps2_Threshold      = v_config_doc["mvState_Bump_accelMps2_Threshold"]              | g_M010_Config.mvState_Bump_accelMps2_Threshold;
+    g_M010_Config.mvState_Bump_SpeedKmh_Min             = v_config_doc["mvState_Bump_SpeedKmh_Min"]                     | g_M010_Config.mvState_Bump_SpeedKmh_Min;
 
-    g_M010_Config.bumpCooldownMs = v_config_doc["bumpCooldownMs"] | g_M010_Config.bumpCooldownMs;
-    g_M010_Config.decelHoldDurationMs = v_config_doc["decelHoldDurationMs"] | g_M010_Config.decelHoldDurationMs;
-    g_M010_Config.bumpHoldDurationMs = v_config_doc["bumpHoldDurationMs"] | g_M010_Config.bumpHoldDurationMs;
+    g_M010_Config.mvState_Bump_CooldownMs               = v_config_doc["mvState_Bump_CooldownMs"]                       | g_M010_Config.mvState_Bump_CooldownMs;
+    g_M010_Config.mvState_Decel_durationMs_Hold         = v_config_doc["mvState_Decel_durationMs_Hold"]                 | g_M010_Config.mvState_Decel_durationMs_Hold;
+    g_M010_Config.mvState_Bump_durationMs_Hold          = v_config_doc["mvState_Bump_durationMs_Hold"]                  | g_M010_Config.mvState_Bump_durationMs_Hold;
 
-    g_M010_Config.stopGracePeriodMs = v_config_doc["stopGracePeriodMs"] | g_M010_Config.stopGracePeriodMs;
-    g_M010_Config.signalWait1Seconds = v_config_doc["signalWait1Seconds"] | g_M010_Config.signalWait1Seconds;
-    g_M010_Config.signalWait2Seconds = v_config_doc["signalWait2Seconds"] | g_M010_Config.signalWait2Seconds;
-    g_M010_Config.stopped1Seconds = v_config_doc["stopped1Seconds"] | g_M010_Config.stopped1Seconds;
-    g_M010_Config.stopped2Seconds = v_config_doc["stopped2Seconds"] | g_M010_Config.stopped2Seconds;
-    g_M010_Config.parkSeconds = v_config_doc["parkSeconds"] | g_M010_Config.parkSeconds;
+    g_M010_Config.mvState_PeriodMs_stopGrace            = v_config_doc["mvState_PeriodMs_stopGrace"]                    | g_M010_Config.mvState_PeriodMs_stopGrace;
+    g_M010_Config.mvState_signalWait1_Seconds           = v_config_doc["mvState_signalWait1_Seconds"]                   | g_M010_Config.mvState_signalWait1_Seconds;
+    g_M010_Config.mvState_signalWait2_Seconds           = v_config_doc["mvState_signalWait2_Seconds"]                   | g_M010_Config.mvState_signalWait2_Seconds;
+    g_M010_Config.mvState_stopped1_Seconds              = v_config_doc["mvState_stopped1_Seconds"]                      | g_M010_Config.mvState_stopped1_Seconds;
+    g_M010_Config.mvState_stopped2_Seconds              = v_config_doc["mvState_stopped2_Seconds"]                      | g_M010_Config.mvState_stopped2_Seconds;
+    g_M010_Config.mvState_park_Seconds                  = v_config_doc["mvState_park_Seconds"]                          | g_M010_Config.mvState_park_Seconds;
 
-    g_M010_Config.serialPrintIntervalMs = v_config_doc["serialPrintIntervalMs"] | g_M010_Config.serialPrintIntervalMs;
+    g_M010_Config.serialPrint_intervalMs                = v_config_doc["serialPrint_intervalMs"]                        | g_M010_Config.serialPrint_intervalMs;
 
-    g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold = v_config_doc["turnState_Center_yawAngleVelocityDegps_Thresold"] | g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold;
-    g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold = v_config_doc["turnState_LR_1_yawAngleVelocityDegps_Thresold"] | g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold;
-    g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold = v_config_doc["turnState_LR_2_yawAngleVelocityDegps_Thresold"] | g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold;
-    g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold = v_config_doc["turnState_LR_3_yawAngleVelocityDegps_Thresold"] | g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold;
-    g_M010_Config.turnMinSpeedKmh = v_config_doc["turnMinSpeedKmh"] | g_M010_Config.turnMinSpeedKmh;
-    g_M010_Config.turnHighSpeedThresholdKmh = v_config_doc["turnHighSpeedThresholdKmh"] | g_M010_Config.turnHighSpeedThresholdKmh;
-    g_M010_Config.turnStableDurationMs = v_config_doc["turnStableDurationMs"] | g_M010_Config.turnStableDurationMs;
+    g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold   = v_config_doc["turnState_Center_yawAngleVelocityDegps_Thresold"]   | g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold;
+    g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold     = v_config_doc["turnState_LR_1_yawAngleVelocityDegps_Thresold"]     | g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold;
+    g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold     = v_config_doc["turnState_LR_2_yawAngleVelocityDegps_Thresold"]     | g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold;
+    g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold     = v_config_doc["turnState_LR_3_yawAngleVelocityDegps_Thresold"]     | g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold;
+    g_M010_Config.turnState_speedKmh_MinSpeed                       = v_config_doc["turnState_speedKmh_MinSpeed"]                       | g_M010_Config.turnState_speedKmh_MinSpeed;
+    g_M010_Config.turnState_speedKmh_HighSpeed_Threshold            = v_config_doc["turnState_speedKmh_HighSpeed_Threshold"]            | g_M010_Config.turnState_speedKmh_HighSpeed_Threshold;
+    g_M010_Config.turnState_StableDurationMs                        = v_config_doc["turnState_StableDurationMs"]                        | g_M010_Config.turnState_StableDurationMs;
 
     return true;
 }
@@ -398,42 +398,42 @@ bool M010_Config_save() {
     JsonDocument v_config_doc;
 
     // g_M010_Config 구조체에서 JSON 문서로 값을 복사
-    v_config_doc["accelAlpha"]                   = g_M010_Config.accelAlpha;
+    v_config_doc["mvState_accelFilter_Alpha"]                   = g_M010_Config.mvState_accelFilter_Alpha;
 
-    v_config_doc["speedForwardThresholdKmh"]     = g_M010_Config.speedForwardThresholdKmh;
-    v_config_doc["speedReverseThresholdKmh"]     = g_M010_Config.speedReverseThresholdKmh;
-    v_config_doc["speedStopThresholdKmh"]        = g_M010_Config.speedStopThresholdKmh;
-    v_config_doc["accelStopThresholdMps2"]       = g_M010_Config.accelStopThresholdMps2;
-    v_config_doc["gyroStopThresholdDps"]         = g_M010_Config.gyroStopThresholdDps;
+    v_config_doc["mvState_Forward_speedKmh_Threshold_Min"]      = g_M010_Config.mvState_Forward_speedKmh_Threshold_Min;
+    v_config_doc["mvState_Reverse_speedKmh_Threshold_Min"]      = g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min;
+    v_config_doc["mvState_Stop_speedKmh_Threshold_Max"]         = g_M010_Config.mvState_Stop_speedKmh_Threshold_Max;
+    v_config_doc["mvState_Stop_accelMps2_Threshold_Max"]        = g_M010_Config.mvState_Stop_accelMps2_Threshold_Max;
+    v_config_doc["mvState_Stop_gyroDps_Threshold_Max"]          = g_M010_Config.mvState_Stop_gyroDps_Threshold_Max;
 
-    v_config_doc["stopStableDurationMs"]         = g_M010_Config.stopStableDurationMs;
-    v_config_doc["moveStableDurationMs"]         = g_M010_Config.moveStableDurationMs;
-    v_config_doc["normalMoveDurationMs"]         = g_M010_Config.normalMoveDurationMs;
+    v_config_doc["mvState_stop_durationMs_Stable_Min"]          = g_M010_Config.mvState_stop_durationMs_Stable_Min;
+    v_config_doc["mvState_move_durationMs_Stable_Min"]          = g_M010_Config.mvState_move_durationMs_Stable_Min;
+    v_config_doc["mvState_normalMove_durationMs"]               = g_M010_Config.mvState_normalMove_durationMs;
 
-    v_config_doc["accelDecelThresholdMps2"]      = g_M010_Config.accelDecelThresholdMps2;
-    v_config_doc["accelBumpThresholdMps2"]       = g_M010_Config.accelBumpThresholdMps2;
-    v_config_doc["bumpMinSpeedKmh"]              = g_M010_Config.bumpMinSpeedKmh;
+    v_config_doc["mvState_Decel_accelMps2_Threshold"]           = g_M010_Config.mvState_Decel_accelMps2_Threshold;
+    v_config_doc["mvState_Bump_accelMps2_Threshold"]            = g_M010_Config.mvState_Bump_accelMps2_Threshold;
+    v_config_doc["mvState_Bump_SpeedKmh_Min"]                   = g_M010_Config.mvState_Bump_SpeedKmh_Min;
 
-    v_config_doc["bumpCooldownMs"]               = g_M010_Config.bumpCooldownMs;
-    v_config_doc["decelHoldDurationMs"]          = g_M010_Config.decelHoldDurationMs;
-    v_config_doc["bumpHoldDurationMs"]           = g_M010_Config.bumpHoldDurationMs;
+    v_config_doc["mvState_Bump_CooldownMs"]                     = g_M010_Config.mvState_Bump_CooldownMs;
+    v_config_doc["mvState_Decel_durationMs_Hold"]               = g_M010_Config.mvState_Decel_durationMs_Hold;
+    v_config_doc["mvState_Bump_durationMs_Hold"]                = g_M010_Config.mvState_Bump_durationMs_Hold;
 
-    v_config_doc["stopGracePeriodMs"]            = g_M010_Config.stopGracePeriodMs;
-    v_config_doc["signalWait1Seconds"]           = g_M010_Config.signalWait1Seconds;
-    v_config_doc["signalWait2Seconds"]           = g_M010_Config.signalWait2Seconds;
-    v_config_doc["stopped1Seconds"]              = g_M010_Config.stopped1Seconds;
-    v_config_doc["stopped2Seconds"]              = g_M010_Config.stopped2Seconds;
-    v_config_doc["parkSeconds"]                  = g_M010_Config.parkSeconds;
+    v_config_doc["mvState_PeriodMs_stopGrace"]                  = g_M010_Config.mvState_PeriodMs_stopGrace;
+    v_config_doc["mvState_signalWait1_Seconds"]                 = g_M010_Config.mvState_signalWait1_Seconds;
+    v_config_doc["mvState_signalWait2_Seconds"]                 = g_M010_Config.mvState_signalWait2_Seconds;
+    v_config_doc["mvState_stopped1_Seconds"]                    = g_M010_Config.mvState_stopped1_Seconds;
+    v_config_doc["mvState_stopped2_Seconds"]                    = g_M010_Config.mvState_stopped2_Seconds;
+    v_config_doc["mvState_park_Seconds"]                        = g_M010_Config.mvState_park_Seconds;
 
-    v_config_doc["serialPrintIntervalMs"]        = g_M010_Config.serialPrintIntervalMs;
+    v_config_doc["serialPrint_intervalMs"]                      = g_M010_Config.serialPrint_intervalMs;
 
-    v_config_doc["turnState_Center_yawAngleVelocityDegps_Thresold"]         = g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold;
-    v_config_doc["turnState_LR_1_yawAngleVelocityDegps_Thresold"]       = g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold;
-    v_config_doc["turnState_LR_2_yawAngleVelocityDegps_Thresold"]     = g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold;
-    v_config_doc["turnState_LR_3_yawAngleVelocityDegps_Thresold"]        = g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold;
-    v_config_doc["turnMinSpeedKmh"]              = g_M010_Config.turnMinSpeedKmh;
-    v_config_doc["turnHighSpeedThresholdKmh"]    = g_M010_Config.turnHighSpeedThresholdKmh;
-    v_config_doc["turnStableDurationMs"]         = g_M010_Config.turnStableDurationMs;
+    v_config_doc["turnState_Center_yawAngleVelocityDegps_Thresold"] = g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold;
+    v_config_doc["turnState_LR_1_yawAngleVelocityDegps_Thresold"]   = g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold;
+    v_config_doc["turnState_LR_2_yawAngleVelocityDegps_Thresold"]   = g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold;
+    v_config_doc["turnState_LR_3_yawAngleVelocityDegps_Thresold"]   = g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold;
+    v_config_doc["turnState_speedKmh_MinSpeed"]                     = g_M010_Config.turnState_speedKmh_MinSpeed;
+    v_config_doc["turnState_speedKmh_HighSpeed_Threshold"]          = g_M010_Config.turnState_speedKmh_HighSpeed_Threshold;
+    v_config_doc["turnState_StableDurationMs"]                      = g_M010_Config.turnState_StableDurationMs;
 
     if (serializeJson(v_config_doc, configFile) == 0) {
         dbgP1_println_F(F("config.json 직렬화 실패"));
@@ -453,37 +453,37 @@ bool M010_Config_save() {
  */
 void M010_Config_print() {
     dbgP1_println_F(F("\n---- 현재 설정값 ----"));
-    dbgP1_print_F(F("accelAlpha: "                  )); dbgP1_println(g_M010_Config.accelAlpha, 3);
-    dbgP1_print_F(F("speedForwardThresholdKmh: "    )); dbgP1_println(g_M010_Config.speedForwardThresholdKmh, 2);
-    dbgP1_print_F(F("speedReverseThresholdKmh: "    )); dbgP1_println(g_M010_Config.speedReverseThresholdKmh, 2);
-    dbgP1_print_F(F("speedStopThresholdKmh: "       )); dbgP1_println(g_M010_Config.speedStopThresholdKmh, 2);
-    dbgP1_print_F(F("accelStopThresholdMps2: "      )); dbgP1_println(g_M010_Config.accelStopThresholdMps2, 2);
-    dbgP1_print_F(F("gyroStopThresholdDps: "        )); dbgP1_println(g_M010_Config.gyroStopThresholdDps, 2);
-    dbgP1_print_F(F("stopStableDurationMs: "        )); dbgP1_println(g_M010_Config.stopStableDurationMs);
-    dbgP1_print_F(F("moveStableDurationMs: "        )); dbgP1_println(g_M010_Config.moveStableDurationMs);
-    dbgP1_print_F(F("normalMoveDurationMs: "        )); dbgP1_println(g_M010_Config.normalMoveDurationMs);
-    dbgP1_print_F(F("accelDecelThresholdMps2: "     )); dbgP1_println(g_M010_Config.accelDecelThresholdMps2, 2);
-    dbgP1_print_F(F("accelBumpThresholdMps2: "      )); dbgP1_println(g_M010_Config.accelBumpThresholdMps2, 2);
-    dbgP1_print_F(F("bumpMinSpeedKmh: "             )); dbgP1_println(g_M010_Config.bumpMinSpeedKmh, 2);
-    dbgP1_print_F(F("bumpCooldownMs: "              )); dbgP1_println(g_M010_Config.bumpCooldownMs);
-    dbgP1_print_F(F("decelHoldDurationMs: "         )); dbgP1_println(g_M010_Config.decelHoldDurationMs);
-    dbgP1_print_F(F("bumpHoldDurationMs: "          )); dbgP1_println(g_M010_Config.bumpHoldDurationMs);
-    dbgP1_print_F(F("stopGracePeriodMs: "           )); dbgP1_println(g_M010_Config.stopGracePeriodMs);
-    dbgP1_print_F(F("signalWait1Seconds: "          )); dbgP1_println(g_M010_Config.signalWait1Seconds);
-    dbgP1_print_F(F("signalWait2Seconds: "          )); dbgP1_println(g_M010_Config.signalWait2Seconds);
-    dbgP1_print_F(F("stopped1Seconds: "             )); dbgP1_println(g_M010_Config.stopped1Seconds);
-    dbgP1_print_F(F("stopped2Seconds: "             )); dbgP1_println(g_M010_Config.stopped2Seconds);
-    dbgP1_print_F(F("parkSeconds: "                 )); dbgP1_println(g_M010_Config.parkSeconds);
-    dbgP1_print_F(F("serialPrintIntervalMs: "       )); dbgP1_println(g_M010_Config.serialPrintIntervalMs);
-    dbgP1_print_F(F("turnState_Center_yawAngleVelocityDegps_Thresold: "        )); dbgP1_println(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 2);
-    dbgP1_print_F(F("turnState_LR_1_yawAngleVelocityDegps_Thresold: "      )); dbgP1_println(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 2);
-    dbgP1_print_F(F("turnState_LR_2_yawAngleVelocityDegps_Thresold: "    )); dbgP1_println(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 2);
-    dbgP1_print_F(F("turnState_LR_3_yawAngleVelocityDegps_Thresold: "       )); dbgP1_println(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 2);
-    dbgP1_print_F(F("turnMinSpeedKmh: "             )); dbgP1_println(g_M010_Config.turnMinSpeedKmh, 2);
-    dbgP1_print_F(F("turnHighSpeedThresholdKmh: "   )); dbgP1_println(g_M010_Config.turnHighSpeedThresholdKmh, 2);
-    dbgP1_print_F(F("turnStableDurationMs: "        )); dbgP1_println(g_M010_Config.turnStableDurationMs);
+    dbgP1_print_F(F("mvState_accelFilter_Alpha: "               )); dbgP1_println(g_M010_Config.mvState_accelFilter_Alpha, 3);
+    dbgP1_print_F(F("mvState_Forward_speedKmh_Threshold_Min: "  )); dbgP1_println(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 2);
+    dbgP1_print_F(F("mvState_Reverse_speedKmh_Threshold_Min: "  )); dbgP1_println(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 2);
+    dbgP1_print_F(F("mvState_Stop_speedKmh_Threshold_Max: "     )); dbgP1_println(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 2);
+    dbgP1_print_F(F("mvState_Stop_accelMps2_Threshold_Max: "    )); dbgP1_println(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 2);
+    dbgP1_print_F(F("mvState_Stop_gyroDps_Threshold_Max: "      )); dbgP1_println(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 2);
+    dbgP1_print_F(F("mvState_stop_durationMs_Stable_Min: "      )); dbgP1_println(g_M010_Config.mvState_stop_durationMs_Stable_Min);
+    dbgP1_print_F(F("mvState_move_durationMs_Stable_Min: "      )); dbgP1_println(g_M010_Config.mvState_move_durationMs_Stable_Min);
+    dbgP1_print_F(F("mvState_normalMove_durationMs: "           )); dbgP1_println(g_M010_Config.mvState_normalMove_durationMs);
+    dbgP1_print_F(F("mvState_Decel_accelMps2_Threshold: "       )); dbgP1_println(g_M010_Config.mvState_Decel_accelMps2_Threshold, 2);
+    dbgP1_print_F(F("mvState_Bump_accelMps2_Threshold: "        )); dbgP1_println(g_M010_Config.mvState_Bump_accelMps2_Threshold, 2);
+    dbgP1_print_F(F("mvState_Bump_SpeedKmh_Min: "               )); dbgP1_println(g_M010_Config.mvState_Bump_SpeedKmh_Min, 2);
+    dbgP1_print_F(F("mvState_Bump_CooldownMs: "                 )); dbgP1_println(g_M010_Config.mvState_Bump_CooldownMs);
+    dbgP1_print_F(F("mvState_Decel_durationMs_Hold: "           )); dbgP1_println(g_M010_Config.mvState_Decel_durationMs_Hold);
+    dbgP1_print_F(F("mvState_Bump_durationMs_Hold: "            )); dbgP1_println(g_M010_Config.mvState_Bump_durationMs_Hold);
+    dbgP1_print_F(F("mvState_PeriodMs_stopGrace: "              )); dbgP1_println(g_M010_Config.mvState_PeriodMs_stopGrace);
+    dbgP1_print_F(F("mvState_signalWait1_Seconds: "             )); dbgP1_println(g_M010_Config.mvState_signalWait1_Seconds);
+    dbgP1_print_F(F("mvState_signalWait2_Seconds: "             )); dbgP1_println(g_M010_Config.mvState_signalWait2_Seconds);
+    dbgP1_print_F(F("mvState_stopped1_Seconds: "                )); dbgP1_println(g_M010_Config.mvState_stopped1_Seconds);
+    dbgP1_print_F(F("mvState_stopped2_Seconds: "                )); dbgP1_println(g_M010_Config.mvState_stopped2_Seconds);
+    dbgP1_print_F(F("mvState_park_Seconds: "                    )); dbgP1_println(g_M010_Config.mvState_park_Seconds);
+    dbgP1_print_F(F("serialPrint_intervalMs: "                  )); dbgP1_println(g_M010_Config.serialPrint_intervalMs);
+    dbgP1_print_F(F("turnState_Center_yawAngleVelocityDegps_Thresold: " )); dbgP1_println(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 2);
+    dbgP1_print_F(F("turnState_LR_1_yawAngleVelocityDegps_Thresold: "   )); dbgP1_println(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 2);
+    dbgP1_print_F(F("turnState_LR_2_yawAngleVelocityDegps_Thresold: "   )); dbgP1_println(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 2);
+    dbgP1_print_F(F("turnState_LR_3_yawAngleVelocityDegps_Thresold: "   )); dbgP1_println(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 2);
+    dbgP1_print_F(F("turnState_speedKmh_MinSpeed: "                     )); dbgP1_println(g_M010_Config.turnState_speedKmh_MinSpeed, 2);
+    dbgP1_print_F(F("turnState_speedKmh_HighSpeed_Threshold: "          )); dbgP1_println(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 2);
+    dbgP1_print_F(F("turnState_StableDurationMs: "                      )); dbgP1_println(g_M010_Config.turnState_StableDurationMs);
     dbgP1_println_F(F("--------------------------"));
-    dbgP1_println_F(F("설정 변경: set <항목이름> <값> (예: set accelAlpha 0.9)"));
+    dbgP1_println_F(F("설정 변경: set <항목이름> <값> (예: set mvState_accelFilter_Alpha 0.9)"));
     dbgP1_println_F(F("설정 저장: saveconfig"));
     dbgP1_println_F(F("설정 불러오기: loadconfig"));
     dbgP1_println_F(F("설정 초기화: resetconfig"));
@@ -508,42 +508,42 @@ void M010_Config_handleSerialInput() {
                 String valueStr = v_serial_input.substring(secondSpace + 1);
                 
                 // 문자열을 적절한 타입으로 변환하여 설정값 업데이트
-                if      (paramName.equals("accelAlpha"                  )) g_M010_Config.accelAlpha = valueStr.toFloat();
-                else if (paramName.equals("speedForwardThresholdKmh"    )) g_M010_Config.speedForwardThresholdKmh = valueStr.toFloat();
-                else if (paramName.equals("speedReverseThresholdKmh"    )) g_M010_Config.speedReverseThresholdKmh = valueStr.toFloat();
-                else if (paramName.equals("speedStopThresholdKmh"       )) g_M010_Config.speedStopThresholdKmh = valueStr.toFloat();
-                else if (paramName.equals("accelStopThresholdMps2"      )) g_M010_Config.accelStopThresholdMps2 = valueStr.toFloat();
-                else if (paramName.equals("gyroStopThresholdDps"        )) g_M010_Config.gyroStopThresholdDps = valueStr.toFloat();
-                else if (paramName.equals("stopStableDurationMs"        )) g_M010_Config.stopStableDurationMs = valueStr.toInt();
-                else if (paramName.equals("moveStableDurationMs"        )) g_M010_Config.moveStableDurationMs = valueStr.toInt();
-                else if (paramName.equals("normalMoveDurationMs"        )) g_M010_Config.normalMoveDurationMs = valueStr.toInt();
-                else if (paramName.equals("accelDecelThresholdMps2"     )) g_M010_Config.accelDecelThresholdMps2 = valueStr.toFloat();
-                else if (paramName.equals("accelBumpThresholdMps2"      )) g_M010_Config.accelBumpThresholdMps2 = valueStr.toFloat();
-                else if (paramName.equals("bumpMinSpeedKmh"             )) g_M010_Config.bumpMinSpeedKmh = valueStr.toFloat();
-                else if (paramName.equals("bumpCooldownMs"              )) g_M010_Config.bumpCooldownMs = valueStr.toInt();
-                else if (paramName.equals("decelHoldDurationMs"         )) g_M010_Config.decelHoldDurationMs = valueStr.toInt();
-                else if (paramName.equals("bumpHoldDurationMs"          )) g_M010_Config.bumpHoldDurationMs = valueStr.toInt();
-                else if (paramName.equals("stopGracePeriodMs"           )) g_M010_Config.stopGracePeriodMs = valueStr.toInt();
-                else if (paramName.equals("signalWait1Seconds"          )) g_M010_Config.signalWait1Seconds = valueStr.toInt();
-                else if (paramName.equals("signalWait2Seconds"          )) g_M010_Config.signalWait2Seconds = valueStr.toInt();
-                else if (paramName.equals("stopped1Seconds"             )) g_M010_Config.stopped1Seconds = valueStr.toInt();
-                else if (paramName.equals("stopped2Seconds"             )) g_M010_Config.stopped2Seconds = valueStr.toInt();
-                else if (paramName.equals("parkSeconds"                 )) g_M010_Config.parkSeconds = valueStr.toInt();
-                else if (paramName.equals("serialPrintIntervalMs"       )) g_M010_Config.serialPrintIntervalMs = valueStr.toInt();
-                else if (paramName.equals("turnState_Center_yawAngleVelocityDegps_Thresold"        )) g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
-                else if (paramName.equals("turnState_LR_1_yawAngleVelocityDegps_Thresold"      )) g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
-                else if (paramName.equals("turnState_LR_2_yawAngleVelocityDegps_Thresold"    )) g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
-                else if (paramName.equals("turnState_LR_3_yawAngleVelocityDegps_Thresold"       )) g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
-                else if (paramName.equals("turnMinSpeedKmh"             )) g_M010_Config.turnMinSpeedKmh = valueStr.toFloat();
-                else if (paramName.equals("turnHighSpeedThresholdKmh"   )) g_M010_Config.turnHighSpeedThresholdKmh = valueStr.toFloat();
-                else if (paramName.equals("turnStableDurationMs"        )) g_M010_Config.turnStableDurationMs = valueStr.toInt();
+                if      (paramName.equals("mvState_accelFilter_Alpha"               )) g_M010_Config.mvState_accelFilter_Alpha = valueStr.toFloat();
+                else if (paramName.equals("mvState_Forward_speedKmh_Threshold_Min"  )) g_M010_Config.mvState_Forward_speedKmh_Threshold_Min = valueStr.toFloat();
+                else if (paramName.equals("mvState_Reverse_speedKmh_Threshold_Min"  )) g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min = valueStr.toFloat();
+                else if (paramName.equals("mvState_Stop_speedKmh_Threshold_Max"     )) g_M010_Config.mvState_Stop_speedKmh_Threshold_Max = valueStr.toFloat();
+                else if (paramName.equals("mvState_Stop_accelMps2_Threshold_Max"    )) g_M010_Config.mvState_Stop_accelMps2_Threshold_Max = valueStr.toFloat();
+                else if (paramName.equals("mvState_Stop_gyroDps_Threshold_Max"      )) g_M010_Config.mvState_Stop_gyroDps_Threshold_Max = valueStr.toFloat();
+                else if (paramName.equals("mvState_stop_durationMs_Stable_Min"      )) g_M010_Config.mvState_stop_durationMs_Stable_Min = valueStr.toInt();
+                else if (paramName.equals("mvState_move_durationMs_Stable_Min"      )) g_M010_Config.mvState_move_durationMs_Stable_Min = valueStr.toInt();
+                else if (paramName.equals("mvState_normalMove_durationMs"           )) g_M010_Config.mvState_normalMove_durationMs = valueStr.toInt();
+                else if (paramName.equals("mvState_Decel_accelMps2_Threshold"       )) g_M010_Config.mvState_Decel_accelMps2_Threshold = valueStr.toFloat();
+                else if (paramName.equals("mvState_Bump_accelMps2_Threshold"        )) g_M010_Config.mvState_Bump_accelMps2_Threshold = valueStr.toFloat();
+                else if (paramName.equals("mvState_Bump_SpeedKmh_Min"               )) g_M010_Config.mvState_Bump_SpeedKmh_Min = valueStr.toFloat();
+                else if (paramName.equals("mvState_Bump_CooldownMs"                 )) g_M010_Config.mvState_Bump_CooldownMs = valueStr.toInt();
+                else if (paramName.equals("mvState_Decel_durationMs_Hold"           )) g_M010_Config.mvState_Decel_durationMs_Hold = valueStr.toInt();
+                else if (paramName.equals("mvState_Bump_durationMs_Hold"            )) g_M010_Config.mvState_Bump_durationMs_Hold = valueStr.toInt();
+                else if (paramName.equals("mvState_PeriodMs_stopGrace"              )) g_M010_Config.mvState_PeriodMs_stopGrace = valueStr.toInt();
+                else if (paramName.equals("mvState_signalWait1_Seconds"             )) g_M010_Config.mvState_signalWait1_Seconds = valueStr.toInt();
+                else if (paramName.equals("mvState_signalWait2_Seconds"             )) g_M010_Config.mvState_signalWait2_Seconds = valueStr.toInt();
+                else if (paramName.equals("mvState_stopped1_Seconds"                )) g_M010_Config.mvState_stopped1_Seconds = valueStr.toInt();
+                else if (paramName.equals("mvState_stopped2_Seconds"                )) g_M010_Config.mvState_stopped2_Seconds = valueStr.toInt();
+                else if (paramName.equals("mvState_park_Seconds"                    )) g_M010_Config.mvState_park_Seconds = valueStr.toInt();
+                else if (paramName.equals("serialPrint_intervalMs"                  )) g_M010_Config.serialPrint_intervalMs = valueStr.toInt();
+                else if (paramName.equals("turnState_Center_yawAngleVelocityDegps_Thresold" )) g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
+                else if (paramName.equals("turnState_LR_1_yawAngleVelocityDegps_Thresold"   )) g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
+                else if (paramName.equals("turnState_LR_2_yawAngleVelocityDegps_Thresold"   )) g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
+                else if (paramName.equals("turnState_LR_3_yawAngleVelocityDegps_Thresold"   )) g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold = valueStr.toFloat();
+                else if (paramName.equals("turnState_speedKmh_MinSpeed"             )) g_M010_Config.turnState_speedKmh_MinSpeed = valueStr.toFloat();
+                else if (paramName.equals("turnState_speedKmh_HighSpeed_Threshold"  )) g_M010_Config.turnState_speedKmh_HighSpeed_Threshold = valueStr.toFloat();
+                else if (paramName.equals("turnState_StableDurationMs"              )) g_M010_Config.turnState_StableDurationMs = valueStr.toInt();
                 else {
                     dbgP1_printf_F(F("알 수 없는 설정 항목: %s\n"), paramName.c_str());
                     return;
                 }
                 dbgP1_printf_F(F("설정 변경됨: %s = %s\n"), paramName.c_str(), valueStr.c_str());
             } else {
-                dbgP1_println_F(F("잘못된 'set' 명령어 형식. 예: set accelAlpha 0.9"));
+                dbgP1_println_F(F("잘못된 'set' 명령어 형식. 예: set mvState_accelFilter_Alpha 0.9"));
             }
         } else if (v_serial_input.equals("saveconfig")) {
             if (M010_Config_save()) {
@@ -674,9 +674,9 @@ void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
         float v_currentAz_ms2 = (float)v_accel_linear.z * G_M010_GRAVITY_MPS2;  
 
         // 상보 필터를 사용하여 가속도 데이터 평활화
-        g_M010_filteredAx = g_M010_Config.accelAlpha * g_M010_filteredAx + (1 - g_M010_Config.accelAlpha) * v_currentAx_ms2;
-        g_M010_filteredAy = g_M010_Config.accelAlpha * g_M010_filteredAy + (1 - g_M010_Config.accelAlpha) * v_currentAy_ms2;
-        g_M010_filteredAz = g_M010_Config.accelAlpha * g_M010_filteredAz + (1 - g_M010_Config.accelAlpha) * v_currentAz_ms2;
+        g_M010_filteredAx = g_M010_Config.mvState_accelFilter_Alpha * g_M010_filteredAx + (1 - g_M010_Config.mvState_accelFilter_Alpha) * v_currentAx_ms2;
+        g_M010_filteredAy = g_M010_Config.mvState_accelFilter_Alpha * g_M010_filteredAy + (1 - g_M010_Config.mvState_accelFilter_Alpha) * v_currentAy_ms2;
+        g_M010_filteredAz = g_M010_Config.mvState_accelFilter_Alpha * g_M010_filteredAz + (1 - g_M010_Config.mvState_accelFilter_Alpha) * v_currentAz_ms2;
 
         // 필터링된 가속도 값을 자동차 상태 구조체에 저장
         g_M010_CarStatus.accelX_ms2 = g_M010_filteredAx;
@@ -697,12 +697,12 @@ void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
 
         // 정지 시 속도 드리프트 보정 강화 로직
         // 가속도 및 각속도 변화가 모두 임계값 이하로 충분히 오래 유지될 때만 속도를 0으로 설정
-        if (fabs(g_M010_CarStatus.accelY_ms2) < g_M010_Config.accelStopThresholdMps2 &&
-            fabs(g_M010_CarStatus.yawAngleVelocity_degps) < g_M010_Config.gyroStopThresholdDps) {
+        if (fabs(g_M010_CarStatus.accelY_ms2) < g_M010_Config.mvState_Stop_accelMps2_Threshold_Max &&
+            fabs(g_M010_CarStatus.yawAngleVelocity_degps) < g_M010_Config.mvState_Stop_gyroDps_Threshold_Max) {
             
             if (g_M010_CarStatus.stopStableStartTime_ms == 0) { // 정지 안정화 시작 시간 기록
 				g_M010_CarStatus.stopStableStartTime_ms = *p_currentTime_ms;
-            } else if ((*p_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
+            } else if ((*p_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.mvState_stop_durationMs_Stable_Min) {
                 g_M010_CarStatus.speed_kmh = 0.0; // 충분히 안정적인 정지 상태로 판단되면 속도 0으로 보정
             }
         } else {
@@ -729,24 +729,24 @@ void M010_defineCarState(u_int32_t p_currentTime_ms) {
     // =============================================================================================
     // 1. 과속 방지턱 감지 (일시적 플래그, 메인 상태와 독립적으로 작동)
     // =============================================================================================
-    if (fabs(v_accelZ) > g_M010_Config.accelBumpThresholdMps2 && // Z축 가속도 임계값 초과
-        fabs(v_speed_kmh) > g_M010_Config.bumpMinSpeedKmh &&         // 최소 속도 이상
-        (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > g_M010_Config.bumpCooldownMs) { // 쿨다운 시간 경과
+    if (fabs(v_accelZ) > g_M010_Config.mvState_Bump_accelMps2_Threshold && // Z축 가속도 임계값 초과
+        fabs(v_speed_kmh) > g_M010_Config.mvState_Bump_SpeedKmh_Min &&         // 최소 속도 이상
+        (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > g_M010_Config.mvState_Bump_CooldownMs) { // 쿨다운 시간 경과
         g_M010_CarStatus.isSpeedBumpDetected = true;
         g_M010_lastBumpDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
     } else if (g_M010_CarStatus.isSpeedBumpDetected &&
-               (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) >= g_M010_Config.bumpHoldDurationMs) {
+               (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) >= g_M010_Config.mvState_Bump_durationMs_Hold) {
         g_M010_CarStatus.isSpeedBumpDetected = false; // 유지 시간 후 플래그 리셋
     }
 
     // =============================================================================================
     // 2. 급감속 감지 (일시적 플래그, 메인 상태와 독립적으로 작동)
     // =============================================================================================
-    if (v_accelY < g_M010_Config.accelDecelThresholdMps2) { // Y축 가속도가 급감속 임계값 미만
+    if (v_accelY < g_M010_Config.mvState_Decel_accelMps2_Threshold) { // Y축 가속도가 급감속 임계값 미만
         g_M010_CarStatus.isEmergencyBraking = true;
         g_M010_lastDecelDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
     } else if (g_M010_CarStatus.isEmergencyBraking &&
-               (p_currentTime_ms - g_M010_lastDecelDetectionTime_ms) >= g_M010_Config.decelHoldDurationMs) {
+               (p_currentTime_ms - g_M010_lastDecelDetectionTime_ms) >= g_M010_Config.mvState_Decel_durationMs_Hold) {
         g_M010_CarStatus.isEmergencyBraking = false; // 유지 시간 후 플래그 리셋
     }
 
@@ -762,20 +762,20 @@ void M010_defineCarState(u_int32_t p_currentTime_ms) {
         case E_M010_CARMOVESTATE_STOPPED1:
         case E_M010_CARMOVESTATE_STOPPED2:
         case E_M010_CARMOVESTATE_PARKED:
-            if (v_speed_kmh > g_M010_Config.speedForwardThresholdKmh) { // 전진 시작 조건 (히스테리시스 상단)
+            if (v_speed_kmh > g_M010_Config.mvState_Forward_speedKmh_Threshold_Min) { // 전진 시작 조건 (히스테리시스 상단)
                 if (g_M010_stateTransitionStartTime_ms == 0) { // 조건 만족 시작 시간 기록
                     g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
-                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.moveStableDurationMs) {
+                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.mvState_move_durationMs_Stable_Min) {
                     // 전진 조건이 충분히 오래 지속되면 상태 전환
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_FORWARD;
                     g_M010_CarStatus.stopStartTime_ms = 0;        // 정차 시간 리셋
                     g_M010_CarStatus.lastMovementTime_ms = p_currentTime_ms; // 마지막 움직임 시간 기록
                     g_M010_stateTransitionStartTime_ms = 0;      // 전환 완료 후 리셋
                 }
-            } else if (v_speed_kmh < -g_M010_Config.speedReverseThresholdKmh) { // 후진 시작 조건 (히스테리시스 상단)
+            } else if (v_speed_kmh < -g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min) { // 후진 시작 조건 (히스테리시스 상단)
                 if (g_M010_stateTransitionStartTime_ms == 0) {
                     g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
-                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.moveStableDurationMs) {
+                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.mvState_move_durationMs_Stable_Min) {
                     // 후진 조건이 충분히 오래 지속되면 상태 전환
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_REVERSE;
                     g_M010_CarStatus.stopStartTime_ms = 0;
@@ -790,15 +790,15 @@ void M010_defineCarState(u_int32_t p_currentTime_ms) {
                 g_M010_CarStatus.currentStopTime_ms = p_currentTime_ms - g_M010_CarStatus.stopStartTime_ms;
                 u_int32_t v_stopSeconds = g_M010_CarStatus.currentStopTime_ms / 1000;
 
-                if (v_stopSeconds >= g_M010_Config.parkSeconds) {
+                if (v_stopSeconds >= g_M010_Config.mvState_park_Seconds) {
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_PARKED;
-                } else if (v_stopSeconds >= g_M010_Config.stopped2Seconds) {
+                } else if (v_stopSeconds >= g_M010_Config.mvState_stopped2_Seconds) {
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_STOPPED2;
-                } else if (v_stopSeconds >= g_M010_Config.stopped1Seconds) {
+                } else if (v_stopSeconds >= g_M010_Config.mvState_stopped1_Seconds) {
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_STOPPED1;
-                } else if (v_stopSeconds >= g_M010_Config.signalWait2Seconds) {
+                } else if (v_stopSeconds >= g_M010_Config.mvState_signalWait2_Seconds) {
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_SIGNAL_WAIT2;
-                } else if (v_stopSeconds >= g_M010_Config.signalWait1Seconds) {
+                } else if (v_stopSeconds >= g_M010_Config.mvState_signalWait1_Seconds) {
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_SIGNAL_WAIT1;
                 } 
                 // E_M010_STATE_STOPPED_INIT은 이보다 낮은 시간 기준이므로, 기본 정차 상태가 됨.
@@ -808,10 +808,10 @@ void M010_defineCarState(u_int32_t p_currentTime_ms) {
         // 현재가 '움직임' 상태일 때, '정지' 상태로의 전환 조건 확인
         case E_M010_CARMOVESTATE_FORWARD:
         case E_M010_CARMOVESTATE_REVERSE:
-            if (fabs(v_speed_kmh) < g_M010_Config.speedStopThresholdKmh) { // 정지 조건 (히스테리시스 하단)
+            if (fabs(v_speed_kmh) < g_M010_Config.mvState_Stop_speedKmh_Threshold_Max) { // 정지 조건 (히스테리시스 하단)
                 if (g_M010_stateTransitionStartTime_ms == 0) { // 조건 만족 시작 시간 기록
                     g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
-                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
+                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.mvState_stop_durationMs_Stable_Min) {
                     // 정지 조건이 충분히 오래 지속되면 상태 전환
                     v_CarMovement_nextState = E_M010_CARMOVESTATE_STOPPED_INIT; // 정차의 진입점 상태로 전환
                     g_M010_CarStatus.speed_kmh = 0.0;     // 속도 0으로 보정
@@ -852,12 +852,8 @@ void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
     float v_turnLR_2_yawAngleVelocityDegps_Thresold        = g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold;
     float v_turnLR_3_yawAngleVelocityDegps_Thresold        = g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold;
 
-    // float v_turnSlightThreshold                             = g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold;
-    // float v_turnModerateThreshold                           = g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold;
-    // float v_turnSharpThreshold                              = g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold;
-
     // 고속 주행 시 임계값을 약간 낮춰 작은 각속도 변화에도 민감하게 반응
-    if (v_speed_kmh_abs > g_M010_Config.turnHighSpeedThresholdKmh) {
+    if (v_speed_kmh_abs > g_M010_Config.turnState_speedKmh_HighSpeed_Threshold) {
         v_turnCenter_yawAngleVelocityDegps_Thresold    *= 0.8; 
         v_turnLR_1_yawAngleVelocityDegps_Thresold      *= 0.8;
         v_turnLR_2_yawAngleVelocityDegps_Thresold      *= 0.8;
@@ -865,7 +861,7 @@ void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
     } 
     // 저속 주행 시(G_M010_TURN_MIN_SPEED_KMH 에 가까울수록) 임계값을 높여 불필요한 감지 방지
     // (예: 정지 상태에서 핸들만 돌리는 경우 등)
-    else if (v_speed_kmh_abs < g_M010_Config.turnMinSpeedKmh + 3.0) { // 최소 속도 + 3km/h 범위
+    else if (v_speed_kmh_abs < g_M010_Config.turnState_speedKmh_MinSpeed + 3.0) { // 최소 속도 + 3km/h 범위
         v_turnCenter_yawAngleVelocityDegps_Thresold    *= 1.2; 
         v_turnLR_1_yawAngleVelocityDegps_Thresold      *= 1.2;
         v_turnLR_2_yawAngleVelocityDegps_Thresold      *= 1.2;
@@ -873,7 +869,7 @@ void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
     }
 
     // 최소 속도 이상일 때만 회전 감지 로직 활성화
-    if (v_speed_kmh_abs >= g_M010_Config.turnMinSpeedKmh) {
+    if (v_speed_kmh_abs >= g_M010_Config.turnState_speedKmh_MinSpeed) {
         if (v_yawAngleVelocity_degps > v_turnCenter_yawAngleVelocityDegps_Thresold) { // 우회전 감지 (양의 각속도)
             if (v_yawAngleVelocity_degps >= v_turnLR_3_yawAngleVelocityDegps_Thresold) {
                 v_currentDetectedTurnState = E_M010_CARTURNSTATE_RIGHT_3;
@@ -908,7 +904,7 @@ void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
         g_M010_turnStateStartTime_ms = p_currentTime_ms;
     } else {
         // 감지된 상태가 충분히 오래 지속되었는지 확인
-        if ((p_currentTime_ms - g_M010_turnStateStartTime_ms) >= g_M010_Config.turnStableDurationMs) {
+        if ((p_currentTime_ms - g_M010_turnStateStartTime_ms) >= g_M010_Config.turnState_StableDurationMs) {
             // 잠재적 상태가 현재 확정된 상태와 다르고 충분히 오래 지속되었다면, 상태 전환
             if (g_M010_potentialTurnState != g_M010_CarStatus.carTurnState) {
                  dbgP1_printf_F(F("Turn State transition: %d -> %d\n"), g_M010_CarStatus.carTurnState, g_M010_potentialTurnState);
@@ -929,11 +925,11 @@ void M010_printCarStatus() {
     switch (g_M010_CarStatus.carMovementState) {
         case E_M010_CARMOVESTATE_UNKNOWN:      dbgP1_println_F(F("알 수 없음")); break;
         case E_M010_CARMOVESTATE_STOPPED_INIT: dbgP1_println_F(F("정차 중 (초기)")); break;
-        case E_M010_CARMOVESTATE_SIGNAL_WAIT1: dbgP1_print_F(F("신호대기 1 ("));   dbgP1_print(g_M010_Config.signalWait1Seconds); dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_CARMOVESTATE_SIGNAL_WAIT2: dbgP1_print_F(F("신호대기 2 ("));   dbgP1_print(g_M010_Config.signalWait2Seconds); dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_CARMOVESTATE_STOPPED1:     dbgP1_print_F(F("정차 1 ("));       dbgP1_print(g_M010_Config.stopped1Seconds / 60); dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_CARMOVESTATE_STOPPED2:     dbgP1_print_F(F("정차 2 ("));      dbgP1_print(g_M010_Config.stopped2Seconds / 60); dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_CARMOVESTATE_PARKED:       dbgP1_print_F(F("주차 중 ("));     dbgP1_print(g_M010_Config.parkSeconds / 60); dbgP1_print_F(F("분 이상), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT1: dbgP1_print_F(F("신호대기 1 ("));    dbgP1_print(g_M010_Config.mvState_signalWait1_Seconds)      ; dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT2: dbgP1_print_F(F("신호대기 2 ("));    dbgP1_print(g_M010_Config.mvState_signalWait2_Seconds)      ; dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_STOPPED1:     dbgP1_print_F(F("정차 1 ("));       dbgP1_print(g_M010_Config.mvState_stopped1_Seconds / 60)     ; dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_STOPPED2:     dbgP1_print_F(F("정차 2 ("));        dbgP1_print(g_M010_Config.mvState_stopped2_Seconds / 60)    ; dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_PARKED:       dbgP1_print_F(F("주차 중 ("));       dbgP1_print(g_M010_Config.mvState_park_Seconds / 60)        ; dbgP1_print_F(F("분 이상), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
         case E_M010_CARMOVESTATE_FORWARD:      dbgP1_println_F(F("전진 중")); break;
         case E_M010_CARMOVESTATE_REVERSE:      dbgP1_println_F(F("후진 중")); break;
     }
@@ -948,14 +944,14 @@ void M010_printCarStatus() {
         case E_M010_CARTURNSTATE_RIGHT_2:           dbgP1_println_F(F("중간 우회전")); break;
         case E_M010_CARTURNSTATE_RIGHT_3:           dbgP1_println_F(F("급격한 우회전")); break;
     }
-    dbgP1_print_F(F("추정 속도: "));                dbgP1_print(g_M010_CarStatus.speed_kmh, 2); dbgP1_println_F(F(" km/h"));
+    dbgP1_print_F(F("추정 속도: "));                dbgP1_print(g_M010_CarStatus.speed_kmh, 2);         dbgP1_println_F(F(" km/h"));
     dbgP1_print_F(F("가속도(X,Y,Z): "));
     dbgP1_print(g_M010_CarStatus.accelX_ms2, 2);   dbgP1_print_F(F(" m/s^2, "));
     dbgP1_print(g_M010_CarStatus.accelY_ms2, 2);   dbgP1_print_F(F(" m/s^2, "));
     dbgP1_print(g_M010_CarStatus.accelZ_ms2, 2);   dbgP1_println_F(F(" m/s^2"));
-    dbgP1_print_F(F("Yaw 각도: "));                 dbgP1_print(g_M010_CarStatus.yawAngle_deg, 2); dbgP1_println_F(F(" 도"));
-    dbgP1_print_F(F("Pitch 각도: "));               dbgP1_print(g_M010_CarStatus.pitchAngle_deg, 2); dbgP1_println_F(F(" 도"));
-    dbgP1_print_F(F("Yaw 각속도: "));               dbgP1_print(g_M010_CarStatus.yawAngleVelocity_degps, 2); dbgP1_println_F(F(" 도/초"));
+    dbgP1_print_F(F("Yaw 각도: "));                 dbgP1_print(g_M010_CarStatus.yawAngle_deg, 2);              dbgP1_println_F(F(" 도"));
+    dbgP1_print_F(F("Pitch 각도: "));               dbgP1_print(g_M010_CarStatus.pitchAngle_deg, 2);            dbgP1_println_F(F(" 도"));
+    dbgP1_print_F(F("Yaw 각속도: "));               dbgP1_print(g_M010_CarStatus.yawAngleVelocity_degps, 2);    dbgP1_println_F(F(" 도/초"));
     dbgP1_print_F(F("급감속: "));                   dbgP1_println_F(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
     dbgP1_print_F(F("과속 방지턱: "));               dbgP1_println_F(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
     dbgP1_println_F(F("--------------------------"));
@@ -982,8 +978,8 @@ void M010_MPU_run() {
     // 시리얼 입력 처리 함수 호출
     M010_Config_handleSerialInput();
 
-    // 설정된 주기(g_M010_Config.serialPrintIntervalMs)에 따라 자동차 상태를 시리얼 출력
-    if (millis() - g_M010_lastSerialPrintTime_ms >= g_M010_Config.serialPrintIntervalMs) {
+    // 설정된 주기(g_M010_Config.serialPrint_intervalMs)에 따라 자동차 상태를 시리얼 출력
+    if (millis() - g_M010_lastSerialPrintTime_ms >= g_M010_Config.serialPrint_intervalMs) {
         M010_printCarStatus();
         g_M010_lastSerialPrintTime_ms = millis();
     }
