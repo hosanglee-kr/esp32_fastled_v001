@@ -127,7 +127,7 @@ void setup() {
 	    W010_EmbUI_init();                                     // EmbUI 초기화 및 Wi-Fi 설정
         W010_EmbUI_setupWebPages();                            // 웹페이지 UI 구성 및 설정 항목 바인딩
         W010_EmbUI_loadConfigToWebUI();
-	#ediif
+	#endif
 
 	#ifdef C100
 		C100_init();
