@@ -188,6 +188,8 @@ uint8_t     g_M010_mpu_interruptStatus;             // MPU6050 인터럽트 상�
 uint8_t     g_M010_dmp_devStatus;                   // 장치 상태 (0=성공, >0=오류 코드)
 uint16_t    g_M010_dmp_fifoCount;                   // FIFO에 저장된 바이트 수
 uint8_t     g_M010_dmp_fifoBuffer[64];              // FIFO 버퍼 (최대 64바이트)
+uint16_t    g_M010_dmp_packetSize;                  // DMP 패킷의 크기 (바이트)
+
 
 // 쿼터니언 및 오일러 각 관련 변수
 Quaternion  g_M010_Quaternion;                      // MPU6050에서 계산된 쿼터니언 데이터
