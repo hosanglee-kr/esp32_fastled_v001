@@ -1,5 +1,5 @@
 #pragma once
-// M010_main3_008.h
+// M010_main3_009.h
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
 // 설명: ESP32 + MPU6050 활용, 차량 움직임 감지 및 LED Matrix 로봇 눈 표정 표현.
@@ -39,13 +39,13 @@ MPU6050 g_M010_Mpu;
  *
  * 상태               | 진입 조건                                                          | 전이 조건 (다음 상태)
  * -------------------|--------------------------------------------------------------------|--------------------------------------------------------------------
- * E_M010_STATE_UNKNOWN | (초기 상태)                                                      | - 초기화 시 -> E_M010_STATE_STOPPED_INIT
- * E_M010_STATE_STOPPED_INIT | - 초기 진입                                                  | - 속도 > G_M010_SPEED_FORWARD_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_FORWARD
- * (and sub-states:    | - (FROM FORWARD/REVERSE): 속도 < G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 | - 속도 < -G_M010_SPEED_REVERSE_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_REVERSE
+ * E_M010_STATE_UNKNOWN | (초기 상태)                                                      | - 초기화 시 -> E_M010_CARMOVESTATE_STOPPED_INIT
+ * E_M010_CARMOVESTATE_STOPPED_INIT | - 초기 진입                                                  | - 속도 > G_M010_SPEED_FORWARD_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 -> E_M010_CARMOVESTATE_FORWARD
+ * (and sub-states:    | - (FROM FORWARD/REVERSE): 속도 < G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 | - 속도 < -G_M010_SPEED_REVERSE_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 -> E_M010_CARMOVESTATE_REVERSE
  * SIGNAL_WAIT1/2,      |                                                                    | - (내부적으로 시간 경과에 따라): SIGNAL_WAIT1/2, STOPPED1/2, PARKED
  * STOPPED1/2, PARKED) |                                                                    |
- * E_M010_STATE_FORWARD | - (FROM STOPPED_INIT): 속도 > G_M010_SPEED_FORWARD_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 | - 속도 < G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_STOPPED_INIT
- * E_M010_STATE_REVERSE | - (FROM STOPPED_INIT): 속도 < -G_M010_SPEED_REVERSE_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 | - 속도 > -G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 -> E_M010_STATE_STOPPED_INIT
+ * E_M010_CARMOVESTATE_FORWARD | - (FROM STOPPED_INIT): 속도 > G_M010_SPEED_FORWARD_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 | - 속도 < G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 -> E_M010_CARMOVESTATE_STOPPED_INIT
+ * E_M010_CARMOVESTATE_REVERSE | - (FROM STOPPED_INIT): 속도 < -G_M010_SPEED_REVERSE_THRESHOLD_KMH가 G_M010_MOVE_STABLE_DURATION_MS 이상 지속 | - 속도 > -G_M010_SPEED_STOP_THRESHOLD_KMH가 G_M010_STOP_STABLE_DURATION_MS 이상 지속 -> E_M010_CARMOVESTATE_STOPPED_INIT
  *
  * 특수 감지 플래그 (메인 상태와 독립적으로 동작하며, 해당 조건이 만족될 때만 True):
  * - isSpeedBumpDetected: Z축 가속도 임계값 초과 & 최소 속도 이상 & 쿨다운 시간 경과 시 True. G_M010_BUMP_HOLD_DURATION_MS 동안 유지.
@@ -59,10 +59,12 @@ const int   G_M010_MPU_INTERRUPT_PIN    = 4; // MPU6050 INT 핀이 ESP32 GPIO 4�
 #define     G_M010_CONFIG_JSON_FILE     "M010_config_001.json"
 
 
+const float G_M010_GRAVITY_MPS2         = 9.80665; // 중력 가속도 (m/s^2)
+
 // 설정값을 담을 구조체 정의
 typedef struct {
     float       accelAlpha;                 // 가속도 필터링을 위한 상보 필터 계수
-    float       gravityMps2;                // 중력 가속도 값 (m/s^2)
+    // float       gravityMps2;                // 중력 가속도 값 (m/s^2)
 
     // 자동차 움직임 상태 감지 임계값 (상태 머신 전이 조건)
     float       speedForwardThresholdKmh;   // 정지 상태에서 전진 상태로 전환하기 위한 최소 속도 (km/h)
@@ -112,36 +114,36 @@ T_M010_Config g_M010_Config;
 // 자동차 움직임 상태 열거형 (State Machine State) 정의
 // ====================================================================================================
 typedef enum {
-    E_M010_STATE_UNKNOWN,       // 초기/알 수 없는 상태
-    E_M010_STATE_STOPPED_INIT,  // 기본 정차 상태 (다른 정차 세부 상태 진입점)
-    E_M010_STATE_SIGNAL_WAIT1,  // 신호대기 1 (정차 시간 60초 미만)
-    E_M010_STATE_SIGNAL_WAIT2,  // 신호대기 2 (120초 미만)
-    E_M010_STATE_STOPPED1,      // 정차 1 (정차 시간 5분 미만)
-    E_M010_STATE_STOPPED2,      // 정차 2 (10분 미만)
-    E_M010_STATE_PARKED,        // 주차 (정차 시간 10분 이상)
-    E_M010_STATE_FORWARD,       // 전진 중
-    E_M010_STATE_REVERSE,       // 후진 중
+    E_M010_STATE_UNKNOWN,               // 초기/알 수 없는 상태
+    E_M010_CARMOVESTATE_STOPPED_INIT,   // 기본 정차 상태 (다른 정차 세부 상태 진입점)
+    E_M010_CARMOVESTATE_SIGNAL_WAIT1,   // 신호대기 1 (정차 시간 60초 미만)
+    E_M010_CARMOVESTATE_SIGNAL_WAIT2,   // 신호대기 2 (120초 미만)
+    E_M010_CARMOVESTATE_STOPPED1,       // 정차 1 (정차 시간 5분 미만)
+    E_M010_CARMOVESTATE_STOPPED2,       // 정차 2 (10분 미만)
+    E_M010_CARMOVESTATE_PARKED,         // 주차 (정차 시간 10분 이상)
+    E_M010_CARMOVESTATE_FORWARD,        // 전진 중
+    E_M010_CARMOVESTATE_REVERSE,        // 후진 중
 } T_M010_CarMovementState;
 
 // ====================================================================================================
 // 새로운 자동차 회전 상태 열거형 정의
 // ====================================================================================================
 typedef enum {
-    E_M010_TURN_CENTER,           // 회전 없음 또는 미미한 회전
-    E_M010_TURN_LEFT_1,    // 약간 좌회전
-    E_M010_TURN_LEFT_2,  // 중간 좌회전
-    E_M010_TURN_LEFT_3,     // 급격한 좌회전
-    E_M010_TURN_RIGHT_1,   // 약간 우회전
-    E_M010_TURN_RIGHT_2, // 중간 우회전
-    E_M010_TURN_RIGHT_3     // 급격한 우회전
+    E_M010_CARTURNSTATE_CENTER,           // 회전 없음 또는 미미한 회전
+    E_M010_CARTURNSTATE_LEFT_1,    // 약간 좌회전
+    E_M010_CARTURNSTATE_LEFT_2,  // 중간 좌회전
+    E_M010_CARTURNSTATE_LEFT_3,     // 급격한 좌회전
+    E_M010_CARTURNSTATE_RIGHT_1,   // 약간 우회전
+    E_M010_CARTURNSTATE_RIGHT_2, // 중간 우회전
+    E_M010_CARTURNSTATE_RIGHT_3     // 급격한 우회전
 } T_M010_CarTurnState;
 
 // ====================================================================================================
 // 자동차 상태 정보 구조체 정의
 // ====================================================================================================
 typedef struct {
-    T_M010_CarMovementState movementState;  // 현재 움직임 상태
-    T_M010_CarTurnState     turnState;      // 현재 회전 상태 (새로 추가)
+    T_M010_CarMovementState carMovementState;  // 현재 움직임 상태
+    T_M010_CarTurnState     carTurnState;      // 현재 회전 상태 (새로 추가)
 
     float       speed_kmh;                  // 현재 속도 (km/h, 가속도 적분 추정)
     float       accelX_ms2;                 // X축 가속도 (m/s^2)
@@ -197,7 +199,7 @@ u_int32_t   g_M010_lastDecelDetectionTime_ms    = 0; // 마지막 급감속 감�
 u_int32_t   g_M010_stateTransitionStartTime_ms = 0; // 메인 상태 전환 조건이 만족되기 시작한 시간 (ms)
 
 // 회전 상태 안정화를 위한 전역 변수 (static으로 선언하여 파일 내에서만 유효)
-static T_M010_CarTurnState  g_M010_potentialTurnState    = E_M010_TURN_CENTER;   // 잠재적 회전 상태
+static T_M010_CarTurnState  g_M010_potentialTurnState    = E_M010_CARTURNSTATE_CENTER;   // 잠재적 회전 상태
 static u_int32_t            g_M010_turnStateStartTime_ms = 0;                    // 잠재적 회전 상태가 시작된 시간 (ms)
 
 // MPU6050 인터럽트 발생 여부 플래그 및 인터럽트 서비스 루틴 (ISR)
@@ -209,6 +211,7 @@ void M010_dmpDataReady() {
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
+void M010_updateCarStatus(u_int32_t* p_currentTime_ms);
 void M010_defineCarState(u_int32_t p_currentTime_ms);     // 차량 움직임 상태 정의 함수
 void M010_defineCarTurnState(u_int32_t p_currentTime_ms); // 차량 회전 상태 정의 함수 (새로 추가)
 
@@ -259,344 +262,13 @@ void M010_MPU6050_init() {
 }
 
 /**
- * @brief MPU6050 데이터를 읽고 자동차 상태를 업데이트합니다.
- * 주기적으로 호출되어 센서 데이터를 처리하고 차량의 상태를 갱신합니다.
- */
-void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
-    if (!g_M010_dmp_isReady) return; // DMP가 준비되지 않았으면 함수 종료
-
-    // 인터럽트가 발생하지 않았거나 FIFO에 충분한 데이터가 없으면 종료
-    if (!g_M010_mpu_isInterrupt && g_M010_dmp_fifoCount < g_M010_dmp_packetSize) {
-        return; 
-    }
-    
-    g_M010_mpu_isInterrupt = false; // 인터럽트 플래그 초기화
-
-    // DMP FIFO에서 최신 패킷을 읽어옴
-    if (g_M010_Mpu.dmpGetCurrentFIFOPacket(g_M010_dmp_fifoBuffer)) { 
-		*p_currentTime_ms           = millis(); // 현재 시간 가져오기
-        // u_int32_t v_currentTime_ms = millis(); // 현재 시간 가져오기
-		
-        // 샘플링 시간 간격 계산 (이전 샘플링 시간과 현재 시간의 차이)
-		float v_deltaTime_s         = (*p_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
-        g_M010_lastSampleTime_ms    = *p_currentTime_ms; // 마지막 샘플링 시간 업데이트
-        // float v_deltaTime_s = (v_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
-        // g_M010_lastSampleTime_ms = v_currentTime_ms; // 마지막 샘플링 시간 업데이트
-
-        // 쿼터니언, Yaw/Pitch/Roll 및 중력 벡터 계산
-        g_M010_Mpu.dmpGetQuaternion(&g_M010_Quaternion, g_M010_dmp_fifoBuffer);
-        g_M010_Mpu.dmpGetGravity(&g_M010_gravity, &g_M010_Quaternion); 
-        g_M010_Mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_Quaternion, &g_M010_gravity);
-
-        // Yaw, Pitch 각도를 도로 변환하여 저장
-        g_M010_CarStatus.yawAngle_deg   = g_M010_ypr[0] * 180 / M_PI;
-        g_M010_CarStatus.pitchAngle_deg = g_M010_ypr[1] * 180 / M_PI;
-
-        // 선형 가속도 (중력분 제거) 계산 및 필터링
-        VectorInt16 v_accel_raw; // Raw 가속도 (MPU6050 내부 데이터 형식)
-        VectorInt16 v_accel_linear; // 중력분이 제거된 선형 가속도 결과
-
-        g_M010_Mpu.dmpGetAccel(&v_accel_raw, g_M010_dmp_fifoBuffer);                    // Raw 가속도 얻기
-        g_M010_Mpu.dmpGetLinearAccel(&v_accel_linear, &v_accel_raw, &g_M010_gravity);   // 선형 가속도 계산
-
-        // 계산된 선형 가속도를 m/s^2 단위로 변환
-        float v_currentAx_ms2 = (float)v_accel_linear.x * g_M010_Config.gravityMps2;
-        float v_currentAy_ms2 = (float)v_accel_linear.y * g_M010_Config.gravityMps2;
-        float v_currentAz_ms2 = (float)v_accel_linear.z * g_M010_Config.gravityMps2;
-
-        // 상보 필터를 사용하여 가속도 데이터 평활화
-        g_M010_filteredAx = g_M010_Config.accelAlpha * g_M010_filteredAx + (1 - g_M010_Config.accelAlpha) * v_currentAx_ms2;
-        g_M010_filteredAy = g_M010_Config.accelAlpha * g_M010_filteredAy + (1 - g_M010_Config.accelAlpha) * v_currentAy_ms2;
-        g_M010_filteredAz = g_M010_Config.accelAlpha * g_M010_filteredAz + (1 - g_M010_Config.accelAlpha) * v_currentAz_ms2;
-
-        // 필터링된 가속도 값을 자동차 상태 구조체에 저장
-        g_M010_CarStatus.accelX_ms2 = g_M010_filteredAx;
-        g_M010_CarStatus.accelY_ms2 = g_M010_filteredAy;
-        g_M010_CarStatus.accelZ_ms2 = g_M010_filteredAz;
-
-        // Yaw 각속도 (Z축 자이로 데이터) 계산
-        VectorInt16 v_Gyro_raw; // 자이로 데이터
-        g_M010_Mpu.dmpGetGyro(&v_Gyro_raw, g_M010_dmp_fifoBuffer); // Raw 자이로 데이터 얻기
-
-        // 자이로 스케일 팩터(131.0f)를 이용하여 deg/s 단위로 변환
-        g_M010_yawAngleVelocity_degps           = (float)v_Gyro_raw.z / 131.0f; 
-        g_M010_CarStatus.yawAngleVelocity_degps = g_M010_yawAngleVelocity_degps;
-
-        // 속도 추정 (Y축 가속도 적분, 오차 누적 가능성에 유의)
-        float v_speedChange_mps     = g_M010_CarStatus.accelY_ms2 * v_deltaTime_s;
-        g_M010_CarStatus.speed_kmh += (v_speedChange_mps * 3.6);                    // m/s를 km/h로 변환하여 누적
-
-        // 정지 시 속도 드리프트 보정 강화 로직
-        // 가속도 및 각속도 변화가 모두 임계값 이하로 충분히 오래 유지될 때만 속도를 0으로 설정
-        if (fabs(g_M010_CarStatus.accelY_ms2) < g_M010_Config.accelStopThresholdMps2 &&
-            fabs(g_M010_CarStatus.yawAngleVelocity_degps) < g_M010_Config.gyroStopThresholdDps) {
-            
-            if (g_M010_CarStatus.stopStableStartTime_ms == 0) { // 정지 안정화 시작 시간 기록
-				g_M010_CarStatus.stopStableStartTime_ms = *p_currentTime_ms;
-                // g_M010_CarStatus.stopStableStartTime_ms = v_currentTime_ms;
-            } else if ((*p_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
-			// } else if ((v_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
-                g_M010_CarStatus.speed_kmh = 0.0; // 충분히 안정적인 정지 상태로 판단되면 속도 0으로 보정
-            }
-        } else {
-            g_M010_CarStatus.stopStableStartTime_ms = 0; // 움직임 감지 시 안정화 시작 시간 리셋
-        }
-
-		g_M010_mpu_isDataReady = true;
-    }
-}
-
-/**
- * @brief MPU6050 데이터 기반 자동차 움직임 상태를 정의합니다. (주요 상태 머신 로직)
- * 히스테리시스와 시간 지연을 통해 안정적인 상태 전환을 수행합니다.
- * @param p_currentTime_ms 현재 시간 (millis() 값)
- */
-void M010_defineCarState(u_int32_t p_currentTime_ms) {
-    float v_speed = g_M010_CarStatus.speed_kmh;
-    float v_accelY = g_M010_CarStatus.accelY_ms2;
-    float v_accelZ = g_M010_CarStatus.accelZ_ms2;
-
-    // 다음 상태를 예측 (기본적으로 현재 상태를 유지)
-    T_M010_CarMovementState v_nextState = g_M010_CarStatus.movementState;
-
-    // =============================================================================================
-    // 1. 과속 방지턱 감지 (일시적 플래그, 메인 상태와 독립적으로 작동)
-    // =============================================================================================
-    if (fabs(v_accelZ) > g_M010_Config.accelBumpThresholdMps2 && // Z축 가속도 임계값 초과
-        fabs(v_speed) > g_M010_Config.bumpMinSpeedKmh &&         // 최소 속도 이상
-        (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > g_M010_Config.bumpCooldownMs) { // 쿨다운 시간 경과
-        g_M010_CarStatus.isSpeedBumpDetected = true;
-        g_M010_lastBumpDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
-    } else if (g_M010_CarStatus.isSpeedBumpDetected &&
-               (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) >= g_M010_Config.bumpHoldDurationMs) {
-        g_M010_CarStatus.isSpeedBumpDetected = false; // 유지 시간 후 플래그 리셋
-    }
-
-    // =============================================================================================
-    // 2. 급감속 감지 (일시적 플래그, 메인 상태와 독립적으로 작동)
-    // =============================================================================================
-    if (v_accelY < g_M010_Config.accelDecelThresholdMps2) { // Y축 가속도가 급감속 임계값 미만
-        g_M010_CarStatus.isEmergencyBraking = true;
-        g_M010_lastDecelDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
-    } else if (g_M010_CarStatus.isEmergencyBraking &&
-               (p_currentTime_ms - g_M010_lastDecelDetectionTime_ms) >= g_M010_Config.decelHoldDurationMs) {
-        g_M010_CarStatus.isEmergencyBraking = false; // 유지 시간 후 플래그 리셋
-    }
-
-    // =============================================================================================
-    // 3. 메인 움직임 상태 머신 로직
-    // =============================================================================================
-    switch (g_M010_CarStatus.movementState) {
-        // 현재가 '정지' 관련 상태일 때, '움직임' 상태로의 전환 조건 확인
-        case E_M010_STATE_UNKNOWN:
-        case E_M010_STATE_STOPPED_INIT:
-        case E_M010_STATE_SIGNAL_WAIT1:
-        case E_M010_STATE_SIGNAL_WAIT2:
-        case E_M010_STATE_STOPPED1:
-        case E_M010_STATE_STOPPED2:
-        case E_M010_STATE_PARKED:
-            if (v_speed > g_M010_Config.speedForwardThresholdKmh) { // 전진 시작 조건 (히스테리시스 상단)
-                if (g_M010_stateTransitionStartTime_ms == 0) { // 조건 만족 시작 시간 기록
-                    g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
-                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.moveStableDurationMs) {
-                    // 전진 조건이 충분히 오래 지속되면 상태 전환
-                    v_nextState = E_M010_STATE_FORWARD;
-                    g_M010_CarStatus.stopStartTime_ms = 0;        // 정차 시간 리셋
-                    g_M010_CarStatus.lastMovementTime_ms = p_currentTime_ms; // 마지막 움직임 시간 기록
-                    g_M010_stateTransitionStartTime_ms = 0;      // 전환 완료 후 리셋
-                }
-            } else if (v_speed < -g_M010_Config.speedReverseThresholdKmh) { // 후진 시작 조건 (히스테리시스 상단)
-                if (g_M010_stateTransitionStartTime_ms == 0) {
-                    g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
-                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.moveStableDurationMs) {
-                    // 후진 조건이 충분히 오래 지속되면 상태 전환
-                    v_nextState = E_M010_STATE_REVERSE;
-                    g_M010_CarStatus.stopStartTime_ms = 0;
-                    g_M010_CarStatus.lastMovementTime_ms = p_currentTime_ms;
-                    g_M010_stateTransitionStartTime_ms = 0;
-                }
-            } else {
-                // 전진/후진 조건 불충족 시 전환 시작 시간 리셋
-                g_M010_stateTransitionStartTime_ms = 0;
-
-                // 정차 상태 내에서의 세부 시간 기반 상태 전환 (정지 상태가 유지될 때만 갱신)
-                g_M010_CarStatus.currentStopTime_ms = p_currentTime_ms - g_M010_CarStatus.stopStartTime_ms;
-                u_int32_t v_stopSeconds = g_M010_CarStatus.currentStopTime_ms / 1000;
-
-                if (v_stopSeconds >= g_M010_Config.parkSeconds) {
-                    v_nextState = E_M010_STATE_PARKED;
-                } else if (v_stopSeconds >= g_M010_Config.stopped2Seconds) {
-                    v_nextState = E_M010_STATE_STOPPED2;
-                } else if (v_stopSeconds >= g_M010_Config.stopped1Seconds) {
-                    v_nextState = E_M010_STATE_STOPPED1;
-                } else if (v_stopSeconds >= g_M010_Config.signalWait2Seconds) {
-                    v_nextState = E_M010_STATE_SIGNAL_WAIT2;
-                } else if (v_stopSeconds >= g_M010_Config.signalWait1Seconds) {
-                    v_nextState = E_M010_STATE_SIGNAL_WAIT1;
-                } 
-                // E_M010_STATE_STOPPED_INIT은 이보다 낮은 시간 기준이므로, 기본 정차 상태가 됨.
-            }
-            break;
-
-        // 현재가 '움직임' 상태일 때, '정지' 상태로의 전환 조건 확인
-        case E_M010_STATE_FORWARD:
-        case E_M010_STATE_REVERSE:
-            if (fabs(v_speed) < g_M010_Config.speedStopThresholdKmh) { // 정지 조건 (히스테리시스 하단)
-                if (g_M010_stateTransitionStartTime_ms == 0) { // 조건 만족 시작 시간 기록
-                    g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
-                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
-                    // 정지 조건이 충분히 오래 지속되면 상태 전환
-                    v_nextState = E_M010_STATE_STOPPED_INIT; // 정차의 진입점 상태로 전환
-                    g_M010_CarStatus.speed_kmh = 0.0;     // 속도 0으로 보정
-                    g_M010_CarStatus.stopStartTime_ms = p_currentTime_ms; // 정차 시작 시간 기록
-                    g_M010_CarStatus.lastMovementTime_ms = 0; // 움직임 없음
-                    g_M010_stateTransitionStartTime_ms = 0; // 전환 완료 후 리셋
-                }
-            } else {
-                // 정지 조건 불충족 시 전환 시작 시간 리셋
-                g_M010_stateTransitionStartTime_ms = 0;
-            }
-            break;
-    }
-    
-    // 최종 상태 업데이트 (상태가 실제로 변경될 때만 디버그 출력)
-    if (v_nextState != g_M010_CarStatus.movementState) {
-        dbgP1_printf_F(F("State transition: %d -> %d\n"), g_M010_CarStatus.movementState, v_nextState);
-        g_M010_CarStatus.movementState = v_nextState;
-    }
-}
-
-/**
- * @brief Yaw 각속도와 차량 이동 속도를 기반으로 자동차의 회전 상태를 정의합니다.
- * 속도에 따라 회전 감지 임계값을 동적으로 조정하여 정확도를 높입니다.
- * @param p_currentTime_ms 현재 시간 (millis() 값)
- */
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
-    float v_speed = fabs(g_M010_CarStatus.speed_kmh); // 속도는 항상 양수 절댓값으로 처리
-    float v_yawRate = g_M010_CarStatus.yawAngleVelocity_degps; // 현재 Yaw 각속도
-    
-    // 현재 프레임에서 감지된 회전 상태를 저장할 임시 변수
-    T_M010_CarTurnState v_currentDetectedTurnState = E_M010_TURN_CENTER;
-
-    // 속도에 따른 Yaw 각속도 임계값 동적 조정
-    float v_turnNoneThreshold = g_M010_Config.turnNoneThresholdDps;
-    float v_turnSlightThreshold = g_M010_Config.turnSlightThresholdDps;
-    float v_turnModerateThreshold = g_M010_Config.turnModerateThresholdDps;
-    float v_turnSharpThreshold = g_M010_Config.turnSharpThresholdDps;
-
-    // 고속 주행 시 임계값을 약간 낮춰 작은 각속도 변화에도 민감하게 반응
-    if (v_speed > g_M010_Config.turnHighSpeedThresholdKmh) {
-        v_turnNoneThreshold *= 0.8; 
-        v_turnSlightThreshold *= 0.8;
-        v_turnModerateThreshold *= 0.8;
-        v_turnSharpThreshold *= 0.8;
-    } 
-    // 저속 주행 시(G_M010_TURN_MIN_SPEED_KMH 에 가까울수록) 임계값을 높여 불필요한 감지 방지
-    // (예: 정지 상태에서 핸들만 돌리는 경우 등)
-    else if (v_speed < g_M010_Config.turnMinSpeedKmh + 3.0) { // 최소 속도 + 3km/h 범위
-        v_turnNoneThreshold *= 1.2; 
-        v_turnSlightThreshold *= 1.2;
-        v_turnModerateThreshold *= 1.2;
-        v_turnSharpThreshold *= 1.2;
-    }
-
-    // 최소 속도 이상일 때만 회전 감지 로직 활성화
-    if (v_speed >= g_M010_Config.turnMinSpeedKmh) {
-        if (v_yawRate > v_turnNoneThreshold) { // 우회전 감지 (양의 각속도)
-            if (v_yawRate >= v_turnSharpThreshold) {
-                v_currentDetectedTurnState = E_M010_TURN_RIGHT_3;
-            } else if (v_yawRate >= v_turnModerateThreshold) {
-                v_currentDetectedTurnState = E_M010_TURN_RIGHT_2;
-            } else if (v_yawRate >= v_turnSlightThreshold) {
-                v_currentDetectedTurnState = E_M010_TURN_RIGHT_1;
-            } else { // 임계값 이지만 0이 아니므로 미미한 회전
-                v_currentDetectedTurnState = E_M010_TURN_CENTER; 
-            }
-        } else if (v_yawRate < -v_turnNoneThreshold) { // 좌회전 감지 (음의 각속도)
-            if (v_yawRate <= -v_turnSharpThreshold) {
-                v_currentDetectedTurnState = E_M010_TURN_LEFT_3;
-            } else if (v_yawRate <= -v_turnModerateThreshold) {
-                v_currentDetectedTurnState = E_M010_TURN_LEFT_2;
-            } else if (v_yawRate <= -v_turnSlightThreshold) {
-                v_currentDetectedTurnState = E_M010_TURN_LEFT_1;
-            } else { // 임계값 이지만 0이 아니므로 미미한 회전
-                v_currentDetectedTurnState = E_M010_TURN_CENTER; 
-            }
-        } else { // 각속도가 '회전 없음' 임계값 범위 내에 있을 경우
-            v_currentDetectedTurnState = E_M010_TURN_CENTER;
-        }
-    } else { // 속도가 최소 회전 감지 속도보다 낮으면 무조건 회전 없음으로 간주
-        v_currentDetectedTurnState = E_M010_TURN_CENTER;
-    }
-
-    // 회전 상태 안정화 로직 (히스테리시스 적용)
-    if (v_currentDetectedTurnState != g_M010_potentialTurnState) {
-        // 감지된 상태가 이전 잠재적 상태와 다르면, 새로운 잠재적 상태로 설정하고 시간 기록 리셋
-        g_M010_potentialTurnState = v_currentDetectedTurnState;
-        g_M010_turnStateStartTime_ms = p_currentTime_ms;
-    } else {
-        // 감지된 상태가 충분히 오래 지속되었는지 확인
-        if ((p_currentTime_ms - g_M010_turnStateStartTime_ms) >= g_M010_Config.turnStableDurationMs) {
-            // 잠재적 상태가 현재 확정된 상태와 다르고 충분히 오래 지속되었다면, 상태 전환
-            if (g_M010_potentialTurnState != g_M010_CarStatus.turnState) {
-                 dbgP1_printf_F(F("Turn State transition: %d -> %d\n"), g_M010_CarStatus.turnState, g_M010_potentialTurnState);
-            }
-            g_M010_CarStatus.turnState = g_M010_potentialTurnState; // 회전 상태 확정
-        }
-    }
-}
-
-
-/**
- * @brief 자동차 상태 정보를 시리얼 모니터로 출력합니다.
- * 디버깅 및 현재 상태 확인을 위해 사용됩니다.
- */
-void M010_printCarStatus() {
-    dbgP1_println_F(F("\n---- 자동차 현재 상태 ----"));
-    dbgP1_print_F(F("상태: "));
-    switch (g_M010_CarStatus.movementState) {
-        case E_M010_STATE_UNKNOWN:      dbgP1_println_F(F("알 수 없음")); break;
-        case E_M010_STATE_STOPPED_INIT: dbgP1_println_F(F("정차 중 (초기)")); break;
-        case E_M010_STATE_SIGNAL_WAIT1: dbgP1_print_F(F("신호대기 1 ("));   dbgP1_print(g_M010_Config.signalWait1Seconds); dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_STATE_SIGNAL_WAIT2: dbgP1_print_F(F("신호대기 2 ("));   dbgP1_print(g_M010_Config.signalWait2Seconds); dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_STATE_STOPPED1:     dbgP1_print_F(F("정차 1 ("));      dbgP1_print(g_M010_Config.stopped1Seconds / 60); dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_STATE_STOPPED2:     dbgP1_print_F(F("정차 2 ("));      dbgP1_print(g_M010_Config.stopped2Seconds / 60); dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_STATE_PARKED:       dbgP1_print_F(F("주차 중 ("));     dbgP1_print(g_M010_Config.parkSeconds / 60); dbgP1_print_F(F("분 이상), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
-        case E_M010_STATE_FORWARD:      dbgP1_println_F(F("전진 중")); break;
-        case E_M010_STATE_REVERSE:      dbgP1_println_F(F("후진 중")); break;
-    }
-    // 새로 추가된 회전 상태 출력
-    dbgP1_print_F(F("회전 상태: "));
-    switch (g_M010_CarStatus.turnState) {
-        case E_M010_TURN_CENTER:              dbgP1_println_F(F("직진 또는 정지")); break;
-        case E_M010_TURN_LEFT_1:            dbgP1_println_F(F("약간 좌회전")); break;
-        case E_M010_TURN_LEFT_2:            dbgP1_println_F(F("중간 좌회전")); break;
-        case E_M010_TURN_LEFT_3:            dbgP1_println_F(F("급격한 좌회전")); break;
-        case E_M010_TURN_RIGHT_1:           dbgP1_println_F(F("약간 우회전")); break;
-        case E_M010_TURN_RIGHT_2:           dbgP1_println_F(F("중간 우회전")); break;
-        case E_M010_TURN_RIGHT_3:           dbgP1_println_F(F("급격한 우회전")); break;
-    }
-    dbgP1_print_F(F("추정 속도: "));                dbgP1_print(g_M010_CarStatus.speed_kmh, 2); dbgP1_println_F(F(" km/h"));
-    dbgP1_print_F(F("가속도(X,Y,Z): "));
-    dbgP1_print(g_M010_CarStatus.accelX_ms2, 2);   dbgP1_print_F(F(" m/s^2, "));
-    dbgP1_print(g_M010_CarStatus.accelY_ms2, 2);   dbgP1_print_F(F(" m/s^2, "));
-    dbgP1_print(g_M010_CarStatus.accelZ_ms2, 2);   dbgP1_println_F(F(" m/s^2"));
-    dbgP1_print_F(F("Yaw 각도: "));                 dbgP1_print(g_M010_CarStatus.yawAngle_deg, 2); dbgP1_println_F(F(" 도"));
-    dbgP1_print_F(F("Pitch 각도: "));               dbgP1_print(g_M010_CarStatus.pitchAngle_deg, 2); dbgP1_println_F(F(" 도"));
-    dbgP1_print_F(F("Yaw 각속도: "));               dbgP1_print(g_M010_CarStatus.yawAngleVelocity_degps, 2); dbgP1_println_F(F(" 도/초"));
-    dbgP1_print_F(F("급감속: "));                   dbgP1_println_F(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
-    dbgP1_print_F(F("과속 방지턱: "));               dbgP1_println_F(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
-    dbgP1_println_F(F("--------------------------"));
-}
-
-/**
  * @brief 설정값 구조체에 기본값을 초기화합니다.
  * config.json 파일이 없거나 로드에 실패할 경우 이 기본값이 사용됩니다.
  */
 void M010_Config_initDefaults() {
     dbgP1_println_F(F("설정 기본값 초기화 중..."));
     g_M010_Config.accelAlpha                = 0.8;
-    g_M010_Config.gravityMps2               = 9.80665;
+    // g_M010_Config.gravityMps2            = 9.80665;
 
     g_M010_Config.speedForwardThresholdKmh  = 0.8;
     g_M010_Config.speedReverseThresholdKmh  = 0.8;
@@ -646,7 +318,6 @@ bool M010_Config_load() {
 
     
     File configFile = LittleFS.open("/" + G_M010_CONFIG_JSON_FILE, "r");
-    //File configFile = LittleFS.open("/config.json", "r");
     if (!configFile) {
         dbgP1_println_F(F("config.json 파일 없음, 기본값 로드."));
         LittleFS.end();
@@ -668,7 +339,7 @@ bool M010_Config_load() {
 
     // JSON 문서에서 값을 읽어 g_M010_Config 구조체에 저장
     g_M010_Config.accelAlpha = v_config_doc["accelAlpha"] | g_M010_Config.accelAlpha; // 기본값과 OR 연산하여 없으면 기본값 유지
-    g_M010_Config.gravityMps2 = v_config_doc["gravityMps2"] | g_M010_Config.gravityMps2;
+    // g_M010_Config.gravityMps2 = v_config_doc["gravityMps2"] | g_M010_Config.gravityMps2;
 
     g_M010_Config.speedForwardThresholdKmh = v_config_doc["speedForwardThresholdKmh"] | g_M010_Config.speedForwardThresholdKmh;
     g_M010_Config.speedReverseThresholdKmh = v_config_doc["speedReverseThresholdKmh"] | g_M010_Config.speedReverseThresholdKmh;
@@ -720,7 +391,6 @@ bool M010_Config_save() {
 
     
     File configFile = LittleFS.open("/" + G_M010_CONFIG_JSON_FILE, "w"); // 쓰기 모드로 열기 (기존 파일 덮어쓰기)
-    // File configFile = LittleFS.open("/config.json", "w"); // 쓰기 모드로 열기 (기존 파일 덮어쓰기)
     if (!configFile) {
         dbgP1_println_F(F("config.json 파일 생성 실패"));
         LittleFS.end();
@@ -731,7 +401,7 @@ bool M010_Config_save() {
 
     // g_M010_Config 구조체에서 JSON 문서로 값을 복사
     v_config_doc["accelAlpha"]                   = g_M010_Config.accelAlpha;
-    v_config_doc["gravityMps2"]                  = g_M010_Config.gravityMps2;
+    // v_config_doc["gravityMps2"]                  = g_M010_Config.gravityMps2;
 
     v_config_doc["speedForwardThresholdKmh"]     = g_M010_Config.speedForwardThresholdKmh;
     v_config_doc["speedReverseThresholdKmh"]     = g_M010_Config.speedReverseThresholdKmh;
@@ -787,7 +457,7 @@ bool M010_Config_save() {
 void M010_Config_print() {
     dbgP1_println_F(F("\n---- 현재 설정값 ----"));
     dbgP1_print_F(F("accelAlpha: "                  )); dbgP1_println(g_M010_Config.accelAlpha, 3);
-    dbgP1_print_F(F("gravityMps2: "                 )); dbgP1_println(g_M010_Config.gravityMps2, 3);
+    // dbgP1_print_F(F("gravityMps2: "                 )); dbgP1_println(g_M010_Config.gravityMps2, 3);
     dbgP1_print_F(F("speedForwardThresholdKmh: "    )); dbgP1_println(g_M010_Config.speedForwardThresholdKmh, 2);
     dbgP1_print_F(F("speedReverseThresholdKmh: "    )); dbgP1_println(g_M010_Config.speedReverseThresholdKmh, 2);
     dbgP1_print_F(F("speedStopThresholdKmh: "       )); dbgP1_println(g_M010_Config.speedStopThresholdKmh, 2);
@@ -830,20 +500,20 @@ void M010_Config_print() {
  */
 void M010_Config_handleSerialInput() {
     if (Serial.available()) {
-        String input = Serial.readStringUntil('\n');
-        input.trim(); // 공백 제거
-        dbgP1_printf_F(F("시리얼 입력: %s\n"), input.c_str());
+        String v_serial_input = Serial.readStringUntil('\n');
+        v_serial_input.trim(); // 공백 제거
+        dbgP1_printf_F(F("시리얼 입력: %s\n"), v_serial_input.c_str());
 
-        if (input.startsWith("set ")) {
-            int firstSpace = input.indexOf(' ');
-            int secondSpace = input.indexOf(' ', firstSpace + 1);
+        if (v_serial_input.startsWith("set ")) {
+            int firstSpace = v_serial_input.indexOf(' ');
+            int secondSpace = v_serial_input.indexOf(' ', firstSpace + 1);
             if (firstSpace != -1 && secondSpace != -1) {
-                String paramName = input.substring(firstSpace + 1, secondSpace);
-                String valueStr = input.substring(secondSpace + 1);
+                String paramName = v_serial_input.substring(firstSpace + 1, secondSpace);
+                String valueStr = v_serial_input.substring(secondSpace + 1);
                 
                 // 문자열을 적절한 타입으로 변환하여 설정값 업데이트
                 if      (paramName.equals("accelAlpha"                  )) g_M010_Config.accelAlpha = valueStr.toFloat();
-                else if (paramName.equals("gravityMps2"                 )) g_M010_Config.gravityMps2 = valueStr.toFloat();
+                // else if (paramName.equals("gravityMps2"                 )) g_M010_Config.gravityMps2 = valueStr.toFloat();
                 else if (paramName.equals("speedForwardThresholdKmh"    )) g_M010_Config.speedForwardThresholdKmh = valueStr.toFloat();
                 else if (paramName.equals("speedReverseThresholdKmh"    )) g_M010_Config.speedReverseThresholdKmh = valueStr.toFloat();
                 else if (paramName.equals("speedStopThresholdKmh"       )) g_M010_Config.speedStopThresholdKmh = valueStr.toFloat();
@@ -880,13 +550,13 @@ void M010_Config_handleSerialInput() {
             } else {
                 dbgP1_println_F(F("잘못된 'set' 명령어 형식. 예: set accelAlpha 0.9"));
             }
-        } else if (input.equals("saveconfig")) {
+        } else if (v_serial_input.equals("saveconfig")) {
             if (M010_Config_save()) {
                 dbgP1_println_F(F("설정값이 LittleFS에 저장되었습니다."));
             } else {
                 dbgP1_println_F(F("설정값 저장 실패!"));
             }
-        } else if (input.equals("loadconfig")) {
+        } else if (v_serial_input.equals("loadconfig")) {
             if (M010_Config_load()) {
                 dbgP1_println_F(F("설정값이 LittleFS에서 로드되었습니다."));
                 M010_Config_print(); // 로드 후 현재 설정값 출력
@@ -895,9 +565,9 @@ void M010_Config_handleSerialInput() {
                 M010_Config_initDefaults();
                 M010_Config_print();
             }
-        } else if (input.equals("printconfig")) {
+        } else if (v_serial_input.equals("printconfig")) {
             M010_Config_print();
-        } else if (input.equals("resetconfig")) {
+        } else if (v_serial_input.equals("resetconfig")) {
             M010_Config_initDefaults();
             if (M010_Config_save()) {
                  dbgP1_println_F(F("설정값이 기본값으로 초기화되고 저장되었습니다."));
@@ -914,8 +584,8 @@ void M010_Config_handleSerialInput() {
 
 void M010_GlobalVar_init(){
     // 자동차 상태 구조체 초기화
-    g_M010_CarStatus.movementState          = E_M010_STATE_UNKNOWN; // 초기 움직임 상태를 알 수 없음으로 설정
-    g_M010_CarStatus.turnState              = E_M010_TURN_CENTER;         // 초기 회전 상태를 회전 없음으로 설정 (새로 추가)
+    g_M010_CarStatus.carMovementState       = E_M010_STATE_UNKNOWN; // 초기 움직임 상태를 알 수 없음으로 설정
+    g_M010_CarStatus.carTurnState           = E_M010_CARTURNSTATE_CENTER;         // 초기 회전 상태를 회전 없음으로 설정 (새로 추가)
     g_M010_CarStatus.speed_kmh              = 0.0;
     g_M010_CarStatus.accelX_ms2             = 0.0;
     g_M010_CarStatus.accelY_ms2             = 0.0;
@@ -938,7 +608,7 @@ void M010_GlobalVar_init(){
     g_M010_stateTransitionStartTime_ms      = 0; 
     
     // 회전 상태 안정화를 위한 전역 변수 초기화
-    g_M010_potentialTurnState               = E_M010_TURN_CENTER;
+    g_M010_potentialTurnState               = E_M010_CARTURNSTATE_CENTER;
     g_M010_turnStateStartTime_ms            = 0;
 
 }
@@ -948,8 +618,7 @@ void M010_GlobalVar_init(){
  * MPU6050 초기화 및 모든 전역 상태 변수를 설정합니다.
  */
 void M010_MPU_init() {
-    // 설정값 로드 시도
-    // config.json 파일이 없거나 로드에 실패하면 기본값으로 초기화합니다.
+    // 설정값 로드 시도 config.json 파일이 없거나 로드에 실패하면 기본값으로 초기화합니다.
     if (!M010_Config_load()) {
         M010_Config_initDefaults();
         M010_Config_save(); // 기본값을 파일에 저장
@@ -963,6 +632,337 @@ void M010_MPU_init() {
     dbgP1_println_F(F("Setup 완료!"));
 }
 
+
+
+/**
+ * @brief MPU6050 데이터를 읽고 자동차 상태를 업데이트합니다.
+ * 주기적으로 호출되어 센서 데이터를 처리하고 차량의 상태를 갱신합니다.
+ */
+void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
+    if (!g_M010_dmp_isReady) return; // DMP가 준비되지 않았으면 함수 종료
+
+    // 인터럽트가 발생하지 않았거나 FIFO에 충분한 데이터가 없으면 종료
+    if (!g_M010_mpu_isInterrupt && g_M010_dmp_fifoCount < g_M010_dmp_packetSize) {
+        return; 
+    }
+    
+    g_M010_mpu_isInterrupt = false; // 인터럽트 플래그 초기화
+
+    // DMP FIFO에서 최신 패킷을 읽어옴
+    if (g_M010_Mpu.dmpGetCurrentFIFOPacket(g_M010_dmp_fifoBuffer)) { 
+		*p_currentTime_ms           = millis(); // 현재 시간 가져오기
+		
+        // 샘플링 시간 간격 계산 (이전 샘플링 시간과 현재 시간의 차이)
+		float v_deltaTime_s         = (*p_currentTime_ms - g_M010_lastSampleTime_ms) / 1000.0f;
+        g_M010_lastSampleTime_ms    = *p_currentTime_ms; // 마지막 샘플링 시간 업데이트
+
+        // 쿼터니언, Yaw/Pitch/Roll 및 중력 벡터 계산
+        g_M010_Mpu.dmpGetQuaternion(&g_M010_Quaternion, g_M010_dmp_fifoBuffer);
+        g_M010_Mpu.dmpGetGravity(&g_M010_gravity, &g_M010_Quaternion); 
+        g_M010_Mpu.dmpGetYawPitchRoll(g_M010_ypr, &g_M010_Quaternion, &g_M010_gravity);
+
+        // Yaw, Pitch 각도를 도로 변환하여 저장
+        g_M010_CarStatus.yawAngle_deg   = g_M010_ypr[0] * 180 / M_PI;
+        g_M010_CarStatus.pitchAngle_deg = g_M010_ypr[1] * 180 / M_PI;
+
+        // 선형 가속도 (중력분 제거) 계산 및 필터링
+        VectorInt16 v_accel_raw; // Raw 가속도 (MPU6050 내부 데이터 형식)
+        VectorInt16 v_accel_linear; // 중력분이 제거된 선형 가속도 결과
+
+        g_M010_Mpu.dmpGetAccel(&v_accel_raw, g_M010_dmp_fifoBuffer);                    // Raw 가속도 얻기
+        g_M010_Mpu.dmpGetLinearAccel(&v_accel_linear, &v_accel_raw, &g_M010_gravity);   // 선형 가속도 계산
+
+        // 계산된 선형 가속도를 m/s^2 단위로 변환
+
+        float v_currentAx_ms2 = (float)v_accel_linear.x * G_M010_GRAVITY_MPS2;  // g_M010_Config.gravityMps2;
+        float v_currentAy_ms2 = (float)v_accel_linear.y * G_M010_GRAVITY_MPS2;  // g_M010_Config.gravityMps2;
+        float v_currentAz_ms2 = (float)v_accel_linear.z * G_M010_GRAVITY_MPS2;  // g_M010_Config.gravityMps2;
+
+        // 상보 필터를 사용하여 가속도 데이터 평활화
+        g_M010_filteredAx = g_M010_Config.accelAlpha * g_M010_filteredAx + (1 - g_M010_Config.accelAlpha) * v_currentAx_ms2;
+        g_M010_filteredAy = g_M010_Config.accelAlpha * g_M010_filteredAy + (1 - g_M010_Config.accelAlpha) * v_currentAy_ms2;
+        g_M010_filteredAz = g_M010_Config.accelAlpha * g_M010_filteredAz + (1 - g_M010_Config.accelAlpha) * v_currentAz_ms2;
+
+        // 필터링된 가속도 값을 자동차 상태 구조체에 저장
+        g_M010_CarStatus.accelX_ms2 = g_M010_filteredAx;
+        g_M010_CarStatus.accelY_ms2 = g_M010_filteredAy;
+        g_M010_CarStatus.accelZ_ms2 = g_M010_filteredAz;
+
+        // Yaw 각속도 (Z축 자이로 데이터) 계산
+        VectorInt16 v_Gyro_raw; // 자이로 데이터
+        g_M010_Mpu.dmpGetGyro(&v_Gyro_raw, g_M010_dmp_fifoBuffer); // Raw 자이로 데이터 얻기
+
+        // 자이로 스케일 팩터(131.0f)를 이용하여 deg/s 단위로 변환
+        g_M010_yawAngleVelocity_degps           = (float)v_Gyro_raw.z / 131.0f; 
+        g_M010_CarStatus.yawAngleVelocity_degps = g_M010_yawAngleVelocity_degps;
+
+        // 속도 추정 (Y축 가속도 적분, 오차 누적 가능성에 유의)
+        float v_speedChange_mps     = g_M010_CarStatus.accelY_ms2 * v_deltaTime_s;
+        g_M010_CarStatus.speed_kmh += (v_speedChange_mps * 3.6);                    // m/s를 km/h로 변환하여 누적
+
+        // 정지 시 속도 드리프트 보정 강화 로직
+        // 가속도 및 각속도 변화가 모두 임계값 이하로 충분히 오래 유지될 때만 속도를 0으로 설정
+        if (fabs(g_M010_CarStatus.accelY_ms2) < g_M010_Config.accelStopThresholdMps2 &&
+            fabs(g_M010_CarStatus.yawAngleVelocity_degps) < g_M010_Config.gyroStopThresholdDps) {
+            
+            if (g_M010_CarStatus.stopStableStartTime_ms == 0) { // 정지 안정화 시작 시간 기록
+				g_M010_CarStatus.stopStableStartTime_ms = *p_currentTime_ms;
+            } else if ((*p_currentTime_ms - g_M010_CarStatus.stopStableStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
+                g_M010_CarStatus.speed_kmh = 0.0; // 충분히 안정적인 정지 상태로 판단되면 속도 0으로 보정
+            }
+        } else {
+            g_M010_CarStatus.stopStableStartTime_ms = 0; // 움직임 감지 시 안정화 시작 시간 리셋
+        }
+
+		g_M010_mpu_isDataReady = true;
+    }
+}
+
+/**
+ * @brief MPU6050 데이터 기반 자동차 움직임 상태를 정의합니다. (주요 상태 머신 로직)
+ * 히스테리시스와 시간 지연을 통해 안정적인 상태 전환을 수행합니다.
+ * @param p_currentTime_ms 현재 시간 (millis() 값)
+ */
+void M010_defineCarState(u_int32_t p_currentTime_ms) {
+    float v_speed_kmh   = g_M010_CarStatus.speed_kmh;
+    float v_accelY      = g_M010_CarStatus.accelY_ms2;
+    float v_accelZ      = g_M010_CarStatus.accelZ_ms2;
+
+    // 다음 상태를 예측 (기본적으로 현재 상태를 유지)
+    T_M010_CarMovementState v_CarMovement_nextState = g_M010_CarStatus.carMovementState;
+
+    // =============================================================================================
+    // 1. 과속 방지턱 감지 (일시적 플래그, 메인 상태와 독립적으로 작동)
+    // =============================================================================================
+    if (fabs(v_accelZ) > g_M010_Config.accelBumpThresholdMps2 && // Z축 가속도 임계값 초과
+        fabs(v_speed_kmh) > g_M010_Config.bumpMinSpeedKmh &&         // 최소 속도 이상
+        (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) > g_M010_Config.bumpCooldownMs) { // 쿨다운 시간 경과
+        g_M010_CarStatus.isSpeedBumpDetected = true;
+        g_M010_lastBumpDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
+    } else if (g_M010_CarStatus.isSpeedBumpDetected &&
+               (p_currentTime_ms - g_M010_lastBumpDetectionTime_ms) >= g_M010_Config.bumpHoldDurationMs) {
+        g_M010_CarStatus.isSpeedBumpDetected = false; // 유지 시간 후 플래그 리셋
+    }
+
+    // =============================================================================================
+    // 2. 급감속 감지 (일시적 플래그, 메인 상태와 독립적으로 작동)
+    // =============================================================================================
+    if (v_accelY < g_M010_Config.accelDecelThresholdMps2) { // Y축 가속도가 급감속 임계값 미만
+        g_M010_CarStatus.isEmergencyBraking = true;
+        g_M010_lastDecelDetectionTime_ms = p_currentTime_ms; // 감지 시간 업데이트
+    } else if (g_M010_CarStatus.isEmergencyBraking &&
+               (p_currentTime_ms - g_M010_lastDecelDetectionTime_ms) >= g_M010_Config.decelHoldDurationMs) {
+        g_M010_CarStatus.isEmergencyBraking = false; // 유지 시간 후 플래그 리셋
+    }
+
+    // =============================================================================================
+    // 3. 메인 움직임 상태 머신 로직
+    // =============================================================================================
+    switch (g_M010_CarStatus.carMovementState) {
+        // 현재가 '정지' 관련 상태일 때, '움직임' 상태로의 전환 조건 확인
+        case E_M010_STATE_UNKNOWN:
+        case E_M010_CARMOVESTATE_STOPPED_INIT:
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT1:
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT2:
+        case E_M010_CARMOVESTATE_STOPPED1:
+        case E_M010_CARMOVESTATE_STOPPED2:
+        case E_M010_CARMOVESTATE_PARKED:
+            if (v_speed_kmh > g_M010_Config.speedForwardThresholdKmh) { // 전진 시작 조건 (히스테리시스 상단)
+                if (g_M010_stateTransitionStartTime_ms == 0) { // 조건 만족 시작 시간 기록
+                    g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
+                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.moveStableDurationMs) {
+                    // 전진 조건이 충분히 오래 지속되면 상태 전환
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_FORWARD;
+                    g_M010_CarStatus.stopStartTime_ms = 0;        // 정차 시간 리셋
+                    g_M010_CarStatus.lastMovementTime_ms = p_currentTime_ms; // 마지막 움직임 시간 기록
+                    g_M010_stateTransitionStartTime_ms = 0;      // 전환 완료 후 리셋
+                }
+            } else if (v_speed_kmh < -g_M010_Config.speedReverseThresholdKmh) { // 후진 시작 조건 (히스테리시스 상단)
+                if (g_M010_stateTransitionStartTime_ms == 0) {
+                    g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
+                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.moveStableDurationMs) {
+                    // 후진 조건이 충분히 오래 지속되면 상태 전환
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_REVERSE;
+                    g_M010_CarStatus.stopStartTime_ms = 0;
+                    g_M010_CarStatus.lastMovementTime_ms = p_currentTime_ms;
+                    g_M010_stateTransitionStartTime_ms = 0;
+                }
+            } else {
+                // 전진/후진 조건 불충족 시 전환 시작 시간 리셋
+                g_M010_stateTransitionStartTime_ms = 0;
+
+                // 정차 상태 내에서의 세부 시간 기반 상태 전환 (정지 상태가 유지될 때만 갱신)
+                g_M010_CarStatus.currentStopTime_ms = p_currentTime_ms - g_M010_CarStatus.stopStartTime_ms;
+                u_int32_t v_stopSeconds = g_M010_CarStatus.currentStopTime_ms / 1000;
+
+                if (v_stopSeconds >= g_M010_Config.parkSeconds) {
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_PARKED;
+                } else if (v_stopSeconds >= g_M010_Config.stopped2Seconds) {
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_STOPPED2;
+                } else if (v_stopSeconds >= g_M010_Config.stopped1Seconds) {
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_STOPPED1;
+                } else if (v_stopSeconds >= g_M010_Config.signalWait2Seconds) {
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_SIGNAL_WAIT2;
+                } else if (v_stopSeconds >= g_M010_Config.signalWait1Seconds) {
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_SIGNAL_WAIT1;
+                } 
+                // E_M010_STATE_STOPPED_INIT은 이보다 낮은 시간 기준이므로, 기본 정차 상태가 됨.
+            }
+            break;
+
+        // 현재가 '움직임' 상태일 때, '정지' 상태로의 전환 조건 확인
+        case E_M010_CARMOVESTATE_FORWARD:
+        case E_M010_CARMOVESTATE_REVERSE:
+            if (fabs(v_speed_kmh) < g_M010_Config.speedStopThresholdKmh) { // 정지 조건 (히스테리시스 하단)
+                if (g_M010_stateTransitionStartTime_ms == 0) { // 조건 만족 시작 시간 기록
+                    g_M010_stateTransitionStartTime_ms = p_currentTime_ms;
+                } else if ((p_currentTime_ms - g_M010_stateTransitionStartTime_ms) >= g_M010_Config.stopStableDurationMs) {
+                    // 정지 조건이 충분히 오래 지속되면 상태 전환
+                    v_CarMovement_nextState = E_M010_CARMOVESTATE_STOPPED_INIT; // 정차의 진입점 상태로 전환
+                    g_M010_CarStatus.speed_kmh = 0.0;     // 속도 0으로 보정
+                    g_M010_CarStatus.stopStartTime_ms = p_currentTime_ms; // 정차 시작 시간 기록
+                    g_M010_CarStatus.lastMovementTime_ms = 0; // 움직임 없음
+                    g_M010_stateTransitionStartTime_ms = 0; // 전환 완료 후 리셋
+                }
+            } else {
+                // 정지 조건 불충족 시 전환 시작 시간 리셋
+                g_M010_stateTransitionStartTime_ms = 0;
+            }
+            break;
+    }
+    
+    // 최종 상태 업데이트 (상태가 실제로 변경될 때만 디버그 출력)
+    if (v_CarMovement_nextState != g_M010_CarStatus.carMovementState) {
+        dbgP1_printf_F(F("State transition: %d -> %d\n"), g_M010_CarStatus.carMovementState, v_CarMovement_nextState);
+        g_M010_CarStatus.carMovementState = v_CarMovement_nextState;
+    }
+}
+
+/**
+ * @brief Yaw 각속도와 차량 이동 속도를 기반으로 자동차의 회전 상태를 정의합니다.
+ * 속도에 따라 회전 감지 임계값을 동적으로 조정하여 정확도를 높입니다.
+ * @param p_currentTime_ms 현재 시간 (millis() 값)
+ */
+void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
+
+    float v_speed_kmh_abs   = fabs(g_M010_CarStatus.speed_kmh); // 속도는 항상 양수 절댓값으로 처리
+    float v_yawRate         = g_M010_CarStatus.yawAngleVelocity_degps; // 현재 Yaw 각속도
+    
+    // 현재 프레임에서 감지된 회전 상태를 저장할 임시 변수
+    T_M010_CarTurnState v_currentDetectedTurnState = E_M010_CARTURNSTATE_CENTER;
+
+    // 속도에 따른 Yaw 각속도 임계값 동적 조정
+    float v_turnNoneThreshold       = g_M010_Config.turnNoneThresholdDps;
+    float v_turnSlightThreshold     = g_M010_Config.turnSlightThresholdDps;
+    float v_turnModerateThreshold   = g_M010_Config.turnModerateThresholdDps;
+    float v_turnSharpThreshold      = g_M010_Config.turnSharpThresholdDps;
+
+    // 고속 주행 시 임계값을 약간 낮춰 작은 각속도 변화에도 민감하게 반응
+    if (v_speed_kmh_abs > g_M010_Config.turnHighSpeedThresholdKmh) {
+        v_turnNoneThreshold     *= 0.8; 
+        v_turnSlightThreshold   *= 0.8;
+        v_turnModerateThreshold *= 0.8;
+        v_turnSharpThreshold    *= 0.8;
+    } 
+    // 저속 주행 시(G_M010_TURN_MIN_SPEED_KMH 에 가까울수록) 임계값을 높여 불필요한 감지 방지
+    // (예: 정지 상태에서 핸들만 돌리는 경우 등)
+    else if (v_speed_kmh_abs < g_M010_Config.turnMinSpeedKmh + 3.0) { // 최소 속도 + 3km/h 범위
+        v_turnNoneThreshold     *= 1.2; 
+        v_turnSlightThreshold   *= 1.2;
+        v_turnModerateThreshold *= 1.2;
+        v_turnSharpThreshold    *= 1.2;
+    }
+
+    // 최소 속도 이상일 때만 회전 감지 로직 활성화
+    if (v_speed_kmh_abs >= g_M010_Config.turnMinSpeedKmh) {
+        if (v_yawRate > v_turnNoneThreshold) { // 우회전 감지 (양의 각속도)
+            if (v_yawRate >= v_turnSharpThreshold) {
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_RIGHT_3;
+            } else if (v_yawRate >= v_turnModerateThreshold) {
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_RIGHT_2;
+            } else if (v_yawRate >= v_turnSlightThreshold) {
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_RIGHT_1;
+            } else { // 임계값 이지만 0이 아니므로 미미한 회전
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_CENTER; 
+            }
+        } else if (v_yawRate < -v_turnNoneThreshold) { // 좌회전 감지 (음의 각속도)
+            if (v_yawRate <= -v_turnSharpThreshold) {
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_LEFT_3;
+            } else if (v_yawRate <= -v_turnModerateThreshold) {
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_LEFT_2;
+            } else if (v_yawRate <= -v_turnSlightThreshold) {
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_LEFT_1;
+            } else { // 임계값 이지만 0이 아니므로 미미한 회전
+                v_currentDetectedTurnState = E_M010_CARTURNSTATE_CENTER; 
+            }
+        } else { // 각속도가 '회전 없음' 임계값 범위 내에 있을 경우
+            v_currentDetectedTurnState = E_M010_CARTURNSTATE_CENTER;
+        }
+    } else { // 속도가 최소 회전 감지 속도보다 낮으면 무조건 회전 없음으로 간주
+        v_currentDetectedTurnState = E_M010_CARTURNSTATE_CENTER;
+    }
+
+    // 회전 상태 안정화 로직 (히스테리시스 적용)
+    if (v_currentDetectedTurnState != g_M010_potentialTurnState) {
+        // 감지된 상태가 이전 잠재적 상태와 다르면, 새로운 잠재적 상태로 설정하고 시간 기록 리셋
+        g_M010_potentialTurnState = v_currentDetectedTurnState;
+        g_M010_turnStateStartTime_ms = p_currentTime_ms;
+    } else {
+        // 감지된 상태가 충분히 오래 지속되었는지 확인
+        if ((p_currentTime_ms - g_M010_turnStateStartTime_ms) >= g_M010_Config.turnStableDurationMs) {
+            // 잠재적 상태가 현재 확정된 상태와 다르고 충분히 오래 지속되었다면, 상태 전환
+            if (g_M010_potentialTurnState != g_M010_CarStatus.carTurnState) {
+                 dbgP1_printf_F(F("Turn State transition: %d -> %d\n"), g_M010_CarStatus.carTurnState, g_M010_potentialTurnState);
+            }
+            g_M010_CarStatus.carTurnState = g_M010_potentialTurnState; // 회전 상태 확정
+        }
+    }
+}
+
+
+/**
+ * @brief 자동차 상태 정보를 시리얼 모니터로 출력합니다.
+ * 디버깅 및 현재 상태 확인을 위해 사용됩니다.
+ */
+void M010_printCarStatus() {
+    dbgP1_println_F(F("\n---- 자동차 현재 상태 ----"));
+    dbgP1_print_F(F("상태: "));
+    switch (g_M010_CarStatus.carMovementState) {
+        case E_M010_STATE_UNKNOWN:      dbgP1_println_F(F("알 수 없음")); break;
+        case E_M010_CARMOVESTATE_STOPPED_INIT: dbgP1_println_F(F("정차 중 (초기)")); break;
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT1: dbgP1_print_F(F("신호대기 1 ("));   dbgP1_print(g_M010_Config.signalWait1Seconds); dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT2: dbgP1_print_F(F("신호대기 2 ("));   dbgP1_print(g_M010_Config.signalWait2Seconds); dbgP1_print_F(F("s 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_STOPPED1:     dbgP1_print_F(F("정차 1 ("));       dbgP1_print(g_M010_Config.stopped1Seconds / 60); dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_STOPPED2:     dbgP1_print_F(F("정차 2 ("));      dbgP1_print(g_M010_Config.stopped2Seconds / 60); dbgP1_print_F(F("분 미만), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_PARKED:       dbgP1_print_F(F("주차 중 ("));     dbgP1_print(g_M010_Config.parkSeconds / 60); dbgP1_print_F(F("분 이상), 시간: ")); dbgP1_print(g_M010_CarStatus.currentStopTime_ms / 1000); dbgP1_println_F(F("s")); break;
+        case E_M010_CARMOVESTATE_FORWARD:      dbgP1_println_F(F("전진 중")); break;
+        case E_M010_CARMOVESTATE_REVERSE:      dbgP1_println_F(F("후진 중")); break;
+    }
+    // 새로 추가된 회전 상태 출력
+    dbgP1_print_F(F("회전 상태: "));
+    switch (g_M010_CarStatus.carTurnState) {
+        case E_M010_CARTURNSTATE_CENTER:            dbgP1_println_F(F("직진 또는 정지")); break;
+        case E_M010_CARTURNSTATE_LEFT_1:            dbgP1_println_F(F("약간 좌회전")); break;
+        case E_M010_CARTURNSTATE_LEFT_2:            dbgP1_println_F(F("중간 좌회전")); break;
+        case E_M010_CARTURNSTATE_LEFT_3:            dbgP1_println_F(F("급격한 좌회전")); break;
+        case E_M010_CARTURNSTATE_RIGHT_1:           dbgP1_println_F(F("약간 우회전")); break;
+        case E_M010_CARTURNSTATE_RIGHT_2:           dbgP1_println_F(F("중간 우회전")); break;
+        case E_M010_CARTURNSTATE_RIGHT_3:           dbgP1_println_F(F("급격한 우회전")); break;
+    }
+    dbgP1_print_F(F("추정 속도: "));                dbgP1_print(g_M010_CarStatus.speed_kmh, 2); dbgP1_println_F(F(" km/h"));
+    dbgP1_print_F(F("가속도(X,Y,Z): "));
+    dbgP1_print(g_M010_CarStatus.accelX_ms2, 2);   dbgP1_print_F(F(" m/s^2, "));
+    dbgP1_print(g_M010_CarStatus.accelY_ms2, 2);   dbgP1_print_F(F(" m/s^2, "));
+    dbgP1_print(g_M010_CarStatus.accelZ_ms2, 2);   dbgP1_println_F(F(" m/s^2"));
+    dbgP1_print_F(F("Yaw 각도: "));                 dbgP1_print(g_M010_CarStatus.yawAngle_deg, 2); dbgP1_println_F(F(" 도"));
+    dbgP1_print_F(F("Pitch 각도: "));               dbgP1_print(g_M010_CarStatus.pitchAngle_deg, 2); dbgP1_println_F(F(" 도"));
+    dbgP1_print_F(F("Yaw 각속도: "));               dbgP1_print(g_M010_CarStatus.yawAngleVelocity_degps, 2); dbgP1_println_F(F(" 도/초"));
+    dbgP1_print_F(F("급감속: "));                   dbgP1_println_F(g_M010_CarStatus.isEmergencyBraking ? F("감지됨") : F("아님"));
+    dbgP1_print_F(F("과속 방지턱: "));               dbgP1_println_F(g_M010_CarStatus.isSpeedBumpDetected ? F("감지됨") : F("아님"));
+    dbgP1_println_F(F("--------------------------"));
+}
+
+
 /**
  * @brief ESP32 메인 루프에서 반복적으로 실행되는 함수입니다.
  * MPU6050 데이터를 지속적으로 업데이트하고, 주기적으로 상태를 시리얼 출력합니다.
@@ -972,7 +972,7 @@ void M010_MPU_run() {
 	
     M010_updateCarStatus(&v_currentTime_ms); // MPU6050 데이터 읽기 및 자동차 상태 업데이트
 
-	if(g_M010_mpu_isDataReady==true){
+	if(g_M010_mpu_isDataReady == true){
 		//u_int32_t v_currentTime_ms = millis(); 
 		// 자동차 움직임 상태 및 회전 상태 정의 함수 호출
         M010_defineCarState(v_currentTime_ms);
@@ -990,5 +990,5 @@ void M010_MPU_run() {
     }
 
     // 이 위치에 LED Matrix 업데이트 등 추가 작업을 구현할 수 있습니다.
-    // 예: M010_updateLEDMatrix(g_M010_CarStatus.movementState, g_M010_CarStatus.turnState);
+    // 예: M010_updateLEDMatrix(g_M010_CarStatus.carMovementState, g_M010_CarStatus.carTurnState);
 }
