@@ -36,8 +36,8 @@ EmbUI embui; // EmbUI 객체 생성
 void W010_EmbUI_init();                                     // EmbUI 초기화 및 Wi-Fi 설정
 void W010_EmbUI_setupWebPages();                            // 웹페이지 UI 구성 및 설정 항목 바인딩
 void W010_EmbUI_loadConfigToWebUI();                        // g_M010_Config 값을 웹 UI로 로드
-void W010_EmbUI_handleConfigSave(String name, String value); // 웹 UI에서 설정 변경 시 호출되는 콜백
-void W010_EmbUI_handleCommand(String cmd);                  // 웹 UI에서 특정 명령어 수신 시 처리
+void W010_EmbUI_handleConfigSave(const String& name, const String& value); // 웹 UI에서 설정 변경 시 호출되는 콜백
+void W010_EmbUI_handleCommand(const String& cmd);                  // 웹 UI에서 특정 명령어 수신 시 처리
 void W010_EmbUI_updateCarStatusWeb();                       // 자동차 상태를 웹페이지에 주기적으로 업데이트
 void W010_EmbUI_run();                                      // EmbUI 메인 루프 함수
 
@@ -199,7 +199,7 @@ void W010_EmbUI_loadConfigToWebUI() {
  * @param name 변경된 설정 항목의 이름 (param 속성)
  * @param value 변경된 값 (문자열)
  */
-void W010_EmbUI_handleConfigSave(String name, String value) {
+void W010_EmbUI_handleConfigSave(const String& name, const String& value) {
     dbgP1_printf_F(F("웹 UI에서 설정 변경 감지: %s = %s\n"), name.c_str(), value.c_str());
 
     // ArduinoJson을 사용하여 임시 JsonDocument 생성 및 값 업데이트
@@ -312,7 +312,7 @@ void W010_EmbUI_handleConfigSave(String name, String value) {
  * 해당 명령에 따라 M010_main3_010.h에 정의된 설정 관리 함수들을 호출합니다.
  * @param cmd 수신된 명령어 문자열
  */
-void W010_EmbUI_handleCommand(String cmd) {
+void W010_EmbUI_handleCommand(const String& cmd) {
     dbgP1_printf_F(F("웹 UI 명령 수신: %s\n"), cmd.c_str());
 
     if (cmd.equals("save_config")) {
