@@ -56,7 +56,7 @@ MPU6050 g_M010_Mpu;
 // MPU6050 관련 상수 (핀 번호는 하드웨어적이므로 const 유지)
 const int   G_M010_MPU_INTERRUPT_PIN    = 4; // MPU6050 INT 핀이 ESP32 GPIO 4에 연결
 
-#define     G_M010_CONFIG_JSON_FILE     "M010_config_001.json"
+#define     G_M010_CONFIG_JSON_FILE     "/M010_config_001.json"
 
 
 const float G_M010_GRAVITY_MPS2         = 9.80665; // 중력 가속도 (m/s^2)
@@ -317,7 +317,7 @@ bool M010_Config_load() {
     }
 
     
-    File configFile = LittleFS.open("/" + G_M010_CONFIG_JSON_FILE, "r");
+    File configFile = LittleFS.open(G_M010_CONFIG_JSON_FILE, "r");
     if (!configFile) {
         dbgP1_println_F(F("config.json 파일 없음, 기본값 로드."));
         LittleFS.end();
@@ -390,7 +390,7 @@ bool M010_Config_save() {
     }
 
     
-    File configFile = LittleFS.open("/" + G_M010_CONFIG_JSON_FILE, "w"); // 쓰기 모드로 열기 (기존 파일 덮어쓰기)
+    File configFile = LittleFS.open(G_M010_CONFIG_JSON_FILE, "w"); // 쓰기 모드로 열기 (기존 파일 덮어쓰기)
     if (!configFile) {
         dbgP1_println_F(F("config.json 파일 생성 실패"));
         LittleFS.end();
