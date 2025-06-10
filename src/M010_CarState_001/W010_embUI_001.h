@@ -29,6 +29,12 @@
 // ====================================================================================================
 EmbUI embui; // EmbUI 객체 생성
 
+// EmbUI 4.x에서 페이지는 전역으로 선언되어야 합니다.
+// setupWebPages() 함수 내에서 지역적으로 생성하지 않습니다.
+Page configPage("config", "시스템 설정");
+Page statusPage("status", "자동차 현재 상태");
+
+
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
@@ -65,135 +71,119 @@ void W010_EmbUI_init() {
 void W010_EmbUI_setupWebPages() {
     dbgP1_println_F(F("EmbUI 웹페이지 UI 설정 중..."));
 
-    embui.page("config", [](Page& page){
-        page.title = "시스템 설정";
+    // 'configPage'에 컨트롤 추가
+    configPage.addControl("number", "mvState_accelFilter_Alpha", "가속도 필터 Alpha")
+        .value(g_M010_Config.mvState_accelFilter_Alpha)
+        .min(0.0).max(1.0).step(0.01);
 
-        // 가속도 필터 Alpha
-        page.addControl("number", "mvState_accelFilter_Alpha", "가속도 필터 Alpha")
-            .value(g_M010_Config.mvState_accelFilter_Alpha)
-            .min(0.0).max(1.0).step(0.01);
+    configPage.addControl("number", "mvState_Forward_speedKmh_Threshold_Min", "전진 시작 속도 (km/h)")
+        .value(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min)
+        .min(0.0).max(10.0).step(0.1);
+    configPage.addControl("number", "mvState_Reverse_speedKmh_Threshold_Min", "후진 시작 속도 (km/h)")
+        .value(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min)
+        .min(0.0).max(10.0).step(0.1);
+    configPage.addControl("number", "mvState_Stop_speedKmh_Threshold_Max", "정지 판단 최대 속도 (km/h)")
+        .value(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max)
+        .min(0.0).max(5.0).step(0.1);
+    configPage.addControl("number", "mvState_Stop_accelMps2_Threshold_Max", "정지 판단 Y Accel (m/s^2)")
+        .value(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max)
+        .min(0.0).max(1.0).step(0.01);
+    configPage.addControl("number", "mvState_Stop_gyroDps_Threshold_Max", "정지 판단 Yaw Gyro (deg/s)")
+        .value(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max)
+        .min(0.0).max(2.0).step(0.01);
 
-        // 자동차 움직임 상태 감지 임계값
-        page.addControl("number", "mvState_Forward_speedKmh_Threshold_Min", "전진 시작 속도 (km/h)")
-            .value(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min)
-            .min(0.0).max(10.0).step(0.1);
-        page.addControl("number", "mvState_Reverse_speedKmh_Threshold_Min", "후진 시작 속도 (km/h)")
-            .value(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min)
-            .min(0.0).max(10.0).step(0.1);
-        page.addControl("number", "mvState_Stop_speedKmh_Threshold_Max", "정지 판단 최대 속도 (km/h)")
-            .value(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max)
-            .min(0.0).max(5.0).step(0.1);
-        page.addControl("number", "mvState_Stop_accelMps2_Threshold_Max", "정지 판단 Y Accel (m/s^2)")
-            .value(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max)
-            .min(0.0).max(1.0).step(0.01);
-        page.addControl("number", "mvState_Stop_gyroDps_Threshold_Max", "정지 판단 Yaw Gyro (deg/s)")
-            .value(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max)
-            .min(0.0).max(2.0).step(0.01);
+    configPage.addControl("number", "mvState_stop_durationMs_Stable_Min", "정지 안정 최소 시간 (ms)")
+        .value(g_M010_Config.mvState_stop_durationMs_Stable_Min)
+        .min(50).max(1000).step(10);
+    configPage.addControl("number", "mvState_move_durationMs_Stable_Min", "움직임 안정 최소 시간 (ms)")
+        .value(g_M010_Config.mvState_move_durationMs_Stable_Min)
+        .min(50).max(1000).step(10);
 
-        // 상태 지속 시간 (ms)
-        page.addControl("number", "mvState_stop_durationMs_Stable_Min", "정지 안정 최소 시간 (ms)")
-            .value(g_M010_Config.mvState_stop_durationMs_Stable_Min)
-            .min(50).max(1000).step(10);
-        page.addControl("number", "mvState_move_durationMs_Stable_Min", "움직임 안정 최소 시간 (ms)")
-            .value(g_M010_Config.mvState_move_durationMs_Stable_Min)
-            .min(50).max(1000).step(10);
+    configPage.addControl("number", "mvState_Decel_accelMps2_Threshold", "급감속 Accel Y (m/s^2)")
+        .value(g_M010_Config.mvState_Decel_accelMps2_Threshold)
+        .min(-10.0).max(-1.0).step(0.1);
+    configPage.addControl("number", "mvState_Bump_accelMps2_Threshold", "방지턱 Accel Z (m/s^2)")
+        .value(g_M010_Config.mvState_Bump_accelMps2_Threshold)
+        .min(1.0).max(10.0).step(0.1);
+    configPage.addControl("number", "mvState_Bump_SpeedKmh_Min", "방지턱 최소 속도 (km/h)")
+        .value(g_M010_Config.mvState_Bump_SpeedKmh_Min)
+        .min(0.0).max(30.0).step(0.1);
 
-        // 급감속/방지턱 감지 관련 임계값
-        page.addControl("number", "mvState_Decel_accelMps2_Threshold", "급감속 Accel Y (m/s^2)")
-            .value(g_M010_Config.mvState_Decel_accelMps2_Threshold)
-            .min(-10.0).max(-1.0).step(0.1);
-        page.addControl("number", "mvState_Bump_accelMps2_Threshold", "방지턱 Accel Z (m/s^2)")
-            .value(g_M010_Config.mvState_Bump_accelMps2_Threshold)
-            .min(1.0).max(10.0).step(0.1);
-        page.addControl("number", "mvState_Bump_SpeedKmh_Min", "방지턱 최소 속도 (km/h)")
-            .value(g_M010_Config.mvState_Bump_SpeedKmh_Min)
-            .min(0.0).max(30.0).step(0.1);
+    configPage.addControl("number", "mvState_Bump_CooldownMs", "방지턱 쿨다운 (ms)")
+        .value(g_M010_Config.mvState_Bump_CooldownMs)
+        .min(100).max(5000).step(100);
+    configPage.addControl("number", "mvState_Decel_durationMs_Hold", "급감속 유지 시간 (ms)")
+        .value(g_M010_Config.mvState_Decel_durationMs_Hold)
+        .min(100).max(30000).step(100);
+    configPage.addControl("number", "mvState_Bump_durationMs_Hold", "방지턱 유지 시간 (ms)")
+        .value(g_M010_Config.mvState_Bump_durationMs_Hold)
+        .min(100).max(30000).step(100);
 
-        // 감지 지속 및 쿨다운 시간
-        page.addControl("number", "mvState_Bump_CooldownMs", "방지턱 쿨다운 (ms)")
-            .value(g_M010_Config.mvState_Bump_CooldownMs)
-            .min(100).max(5000).step(100);
-        page.addControl("number", "mvState_Decel_durationMs_Hold", "급감속 유지 시간 (ms)")
-            .value(g_M010_Config.mvState_Decel_durationMs_Hold)
-            .min(100).max(30000).step(100);
-        page.addControl("number", "mvState_Bump_durationMs_Hold", "방지턱 유지 시간 (ms)")
-            .value(g_M010_Config.mvState_Bump_durationMs_Hold)
-            .min(100).max(30000).step(100);
+    configPage.addControl("number", "mvState_signalWait1_Seconds", "신호대기1 (초)")
+        .value(g_M010_Config.mvState_signalWait1_Seconds)
+        .min(5).max(300).step(1);
+    configPage.addControl("number", "mvState_signalWait2_Seconds", "신호대기2 (초)")
+        .value(g_M010_Config.mvState_signalWait2_Seconds)
+        .min(5).max(600).step(1);
+    configPage.addControl("number", "mvState_stopped1_Seconds", "정차1 (초)")
+        .value(g_M010_Config.mvState_stopped1_Seconds)
+        .min(30).max(1800).step(1);
+    configPage.addControl("number", "mvState_stopped2_Seconds", "정차2 (초)")
+        .value(g_M010_Config.mvState_stopped2_Seconds)
+        .min(60).max(3600).step(1);
+    configPage.addControl("number", "mvState_park_Seconds", "주차 (초)")
+        .value(g_M010_Config.mvState_park_Seconds)
+        .min(120).max(7200).step(1);
 
-        // 정차/주차 시간 기준 (초)
-        page.addControl("number", "mvState_signalWait1_Seconds", "신호대기1 (초)")
-            .value(g_M010_Config.mvState_signalWait1_Seconds)
-            .min(5).max(300).step(1);
-        page.addControl("number", "mvState_signalWait2_Seconds", "신호대기2 (초)")
-            .value(g_M010_Config.mvState_signalWait2_Seconds)
-            .min(5).max(600).step(1);
-        page.addControl("number", "mvState_stopped1_Seconds", "정차1 (초)")
-            .value(g_M010_Config.mvState_stopped1_Seconds)
-            .min(30).max(1800).step(1);
-        page.addControl("number", "mvState_stopped2_Seconds", "정차2 (초)")
-            .value(g_M010_Config.mvState_stopped2_Seconds)
-            .min(60).max(3600).step(1);
-        page.addControl("number", "mvState_park_Seconds", "주차 (초)")
-            .value(g_M010_Config.mvState_park_Seconds)
-            .min(120).max(7200).step(1);
+    configPage.addControl("number", "serialPrint_intervalMs", "시리얼 출력 간격 (ms)")
+        .value(g_M010_Config.serialPrint_intervalMs)
+        .min(100).max(10000).step(100);
 
-        // 시리얼 출력 간격
-        page.addControl("number", "serialPrint_intervalMs", "시리얼 출력 간격 (ms)")
-            .value(g_M010_Config.serialPrint_intervalMs)
-            .min(100).max(10000).step(100);
+    configPage.addControl("number", "turnState_Center_yawAngleVelocityDegps_Thresold", "직진 Yaw Thres (deg/s)")
+        .value(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold)
+        .min(0.1).max(10.0).step(0.1);
+    configPage.addControl("number", "turnState_LR_1_yawAngleVelocityDegps_Thresold", "LR1 Yaw Thres (deg/s)")
+        .value(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold)
+        .min(5.0).max(30.0).step(0.5);
+    configPage.addControl("number", "turnState_LR_2_yawAngleVelocityDegps_Thresold", "LR2 Yaw Thres (deg/s)")
+        .value(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold)
+        .min(10.0).max(60.0).step(0.5);
+    configPage.addControl("number", "turnState_LR_3_yawAngleVelocityDegps_Thresold", "LR3 Yaw Thres (deg/s)")
+        .value(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold)
+        .min(20.0).max(90.0).step(0.5);
+    configPage.addControl("number", "turnState_speedKmh_MinSpeed", "회전 최소 속도 (km/h)")
+        .value(g_M010_Config.turnState_speedKmh_MinSpeed)
+        .min(0.0).max(10.0).step(0.1);
+    configPage.addControl("number", "turnState_speedKmh_HighSpeed_Threshold", "고속 회전 임계 (km/h)")
+        .value(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold)
+        .min(10.0).max(100.0).step(1.0);
+    configPage.addControl("number", "turnState_StableDurationMs", "회전 안정 시간 (ms)")
+        .value(g_M010_Config.turnState_StableDurationMs)
+        .min(50).max(500).step(10);
 
-        // 회전 감지 관련 상수 (Yaw 각속도 기반)
-        page.addControl("number", "turnState_Center_yawAngleVelocityDegps_Thresold", "직진 Yaw Thres (deg/s)")
-            .value(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold)
-            .min(0.1).max(10.0).step(0.1);
-        page.addControl("number", "turnState_LR_1_yawAngleVelocityDegps_Thresold", "LR1 Yaw Thres (deg/s)")
-            .value(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold)
-            .min(5.0).max(30.0).step(0.5);
-        page.addControl("number", "turnState_LR_2_yawAngleVelocityDegps_Thresold", "LR2 Yaw Thres (deg/s)")
-            .value(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold)
-            .min(10.0).max(60.0).step(0.5);
-        page.addControl("number", "turnState_LR_3_yawAngleVelocityDegps_Thresold", "LR3 Yaw Thres (deg/s)")
-            .value(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold)
-            .min(20.0).max(90.0).step(0.5);
-        page.addControl("number", "turnState_speedKmh_MinSpeed", "회전 최소 속도 (km/h)")
-            .value(g_M010_Config.turnState_speedKmh_MinSpeed)
-            .min(0.0).max(10.0).step(0.1);
-        page.addControl("number", "turnState_speedKmh_HighSpeed_Threshold", "고속 회전 임계 (km/h)")
-            .value(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold)
-            .min(10.0).max(100.0).step(1.0);
-        page.addControl("number", "turnState_StableDurationMs", "회전 안정 시간 (ms)")
-            .value(g_M010_Config.turnState_StableDurationMs)
-            .min(50).max(500).step(10);
+    configPage.addControl("button", "save_config_btn", "설정 저장")
+        .value("save_config")
+        .style("btn success");
+    configPage.addControl("button", "load_config_btn", "설정 불러오기")
+        .value("load_config")
+        .style("btn info");
+    configPage.addControl("button", "reset_config_btn", "설정 초기화")
+        .value("reset_config")
+        .style("btn danger");
 
-        // 설정 저장, 로드, 초기화 버튼 추가
-        page.addControl("button", "save_config_btn", "설정 저장")
-            .value("save_config")
-            .style("btn success");
-        page.addControl("button", "load_config_btn", "설정 불러오기")
-            .value("load_config")
-            .style("btn info");
-        page.addControl("button", "reset_config_btn", "설정 초기화")
-            .value("reset_config")
-            .style("btn danger");
-    });
-
-    // "상태" 섹션 추가 - 실시간 데이터 표시용
-    embui.page("status", [](Page& page){
-        page.title = "자동차 현재 상태";
-
-        page.addControl("label", "carMovementState", "움직임 상태:");
-        page.addControl("label", "carTurnState", "회전 상태:");
-        page.addControl("label", "speed_kmh", "추정 속도:");
-        page.addControl("label", "accelX_ms2", "AccelX (m/s^2):");
-        page.addControl("label", "accelY_ms2", "AccelY (m/s^2):");
-        page.addControl("label", "accelZ_ms2", "AccelZ (m/s^2):");
-        page.addControl("label", "yawAngle_deg", "Yaw (도):");
-        page.addControl("label", "pitchAngle_deg", "Pitch (도):");
-        page.addControl("label", "yawAngleVelocity_degps", "Yaw 속도 (도/초):");
-        page.addControl("label", "isEmergencyBraking", "급감속 감지:");
-        page.addControl("label", "isSpeedBumpDetected", "방지턱 감지:");
-        page.addControl("label", "currentStopTime_sec", "정차 지속 시간:");
-    });
+    // 'statusPage'에 컨트롤 추가
+    statusPage.addControl("label", "carMovementState", "움직임 상태:");
+    statusPage.addControl("label", "carTurnState", "회전 상태:");
+    statusPage.addControl("label", "speed_kmh", "추정 속도:");
+    statusPage.addControl("label", "accelX_ms2", "AccelX (m/s^2):");
+    statusPage.addControl("label", "accelY_ms2", "AccelY (m/s^2):");
+    statusPage.addControl("label", "accelZ_ms2", "AccelZ (m/s^2):");
+    statusPage.addControl("label", "yawAngle_deg", "Yaw (도):");
+    statusPage.addControl("label", "pitchAngle_deg", "Pitch (도):");
+    statusPage.addControl("label", "yawAngleVelocity_degps", "Yaw 속도 (도/초):");
+    statusPage.addControl("label", "isEmergencyBraking", "급감속 감지:");
+    statusPage.addControl("label", "isSpeedBumpDetected", "방지턱 감지:");
+    statusPage.addControl("label", "currentStopTime_sec", "정차 지속 시간:");
 
     // EmbUI 콜백 함수 등록
     embui.onChanged(W010_EmbUI_handleConfigSave);
