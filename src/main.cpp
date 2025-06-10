@@ -60,7 +60,7 @@
 #endif
 
 #ifdef W010
-    #include "M010_CarState_001/W010_embUI_001.h"
+    #include "M010_CarState_001/W010_embUI_002.h"
 #endif
 
 

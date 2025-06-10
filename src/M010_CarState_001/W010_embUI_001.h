@@ -27,7 +27,7 @@
 // ====================================================================================================
 // 전역 변수 선언
 // ====================================================================================================
-EmbUI embui; // EmbUI 객체 생성
+EmbUI g_W010_embUI; // EmbUI 객체 생성
 
 // EmbUI 4.x에서 페이지는 전역으로 선언되어야 합니다.
 // setupWebPages() 함수 내에서 지역적으로 생성하지 않습니다.
@@ -57,10 +57,10 @@ void W010_EmbUI_run();
  */
 void W010_EmbUI_init() {
     dbgP1_println_F(F("EmbUI 초기화 중..."));
-    embui.begin(); // EmbUI 시작 (Serial.begin()은 setup()에서 먼저 호출되어야 함)
+    g_W010_embUI.begin(); // EmbUI 시작 (Serial.begin()은 setup()에서 먼저 호출되어야 함)
     // AP 모드 설정 (선택 사항)
-    //embui.setApPass("your_ap_password");
-    //embui.setHostname("robot_eye_car");
+    //g_W010_embUI.setApPass("your_ap_password");
+    //g_W010_embUI.setHostname("robot_eye_car");
     dbgP1_println_F(F("EmbUI 초기화 완료. 웹 인터페이스 접근 가능."));
 }
 
@@ -186,8 +186,8 @@ void W010_EmbUI_setupWebPages() {
     statusPage.addControl("label", "currentStopTime_sec", "정차 지속 시간:");
 
     // EmbUI 콜백 함수 등록
-    embui.onChanged(W010_EmbUI_handleConfigSave);
-    embui.onCommand(W010_EmbUI_handleCommand);
+    g_W010_embUI.onChanged(W010_EmbUI_handleConfigSave);
+    g_W010_embUI.onCommand(W010_EmbUI_handleCommand);
 
     dbgP1_println_F(F("EmbUI 웹페이지 UI 설정 완료."));
 }
@@ -199,33 +199,33 @@ void W010_EmbUI_setupWebPages() {
 void W010_EmbUI_loadConfigToWebUI() {
     dbgP1_println_F(F("웹 UI에 설정값 로드 중..."));
 
-    embui.setValue("mvState_accelFilter_Alpha", String(g_M010_Config.mvState_accelFilter_Alpha, 3));
-    embui.setValue("mvState_Forward_speedKmh_Threshold_Min", String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 2));
-    embui.setValue("mvState_Reverse_speedKmh_Threshold_Min", String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 2));
-    embui.setValue("mvState_Stop_speedKmh_Threshold_Max", String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 2));
-    embui.setValue("mvState_Stop_accelMps2_Threshold_Max", String(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 2));
-    embui.setValue("mvState_Stop_gyroDps_Threshold_Max", String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 2));
-    embui.setValue("mvState_stop_durationMs_Stable_Min", String(g_M010_Config.mvState_stop_durationMs_Stable_Min));
-    embui.setValue("mvState_move_durationMs_Stable_Min", String(g_M010_Config.mvState_move_durationMs_Stable_Min));
-    embui.setValue("mvState_Decel_accelMps2_Threshold", String(g_M010_Config.mvState_Decel_accelMps2_Threshold, 2));
-    embui.setValue("mvState_Bump_accelMps2_Threshold", String(g_M010_Config.mvState_Bump_accelMps2_Threshold, 2));
-    embui.setValue("mvState_Bump_SpeedKmh_Min", String(g_M010_Config.mvState_Bump_SpeedKmh_Min, 2));
-    embui.setValue("mvState_Bump_CooldownMs", String(g_M010_Config.mvState_Bump_CooldownMs));
-    embui.setValue("mvState_Decel_durationMs_Hold", String(g_M010_Config.mvState_Decel_durationMs_Hold));
-    embui.setValue("mvState_Bump_durationMs_Hold", String(g_M010_Config.mvState_Bump_durationMs_Hold));
-    embui.setValue("mvState_signalWait1_Seconds", String(g_M010_Config.mvState_signalWait1_Seconds));
-    embui.setValue("mvState_signalWait2_Seconds", String(g_M010_Config.mvState_signalWait2_Seconds));
-    embui.setValue("mvState_stopped1_Seconds", String(g_M010_Config.mvState_stopped1_Seconds));
-    embui.setValue("mvState_stopped2_Seconds", String(g_M010_Config.mvState_stopped2_Seconds));
-    embui.setValue("mvState_park_Seconds", String(g_M010_Config.mvState_park_Seconds));
-    embui.setValue("serialPrint_intervalMs", String(g_M010_Config.serialPrint_intervalMs));
-    embui.setValue("turnState_Center_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 2));
-    embui.setValue("turnState_LR_1_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 2));
-    embui.setValue("turnState_LR_2_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 2));
-    embui.setValue("turnState_LR_3_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 2));
-    embui.setValue("turnState_speedKmh_MinSpeed", String(g_M010_Config.turnState_speedKmh_MinSpeed, 2));
-    embui.setValue("turnState_speedKmh_HighSpeed_Threshold", String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 2));
-    embui.setValue("turnState_StableDurationMs", String(g_M010_Config.turnState_StableDurationMs));
+    g_W010_embUI.setValue("mvState_accelFilter_Alpha", String(g_M010_Config.mvState_accelFilter_Alpha, 3));
+    g_W010_embUI.setValue("mvState_Forward_speedKmh_Threshold_Min", String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 2));
+    g_W010_embUI.setValue("mvState_Reverse_speedKmh_Threshold_Min", String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 2));
+    g_W010_embUI.setValue("mvState_Stop_speedKmh_Threshold_Max", String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 2));
+    g_W010_embUI.setValue("mvState_Stop_accelMps2_Threshold_Max", String(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 2));
+    g_W010_embUI.setValue("mvState_Stop_gyroDps_Threshold_Max", String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 2));
+    g_W010_embUI.setValue("mvState_stop_durationMs_Stable_Min", String(g_M010_Config.mvState_stop_durationMs_Stable_Min));
+    g_W010_embUI.setValue("mvState_move_durationMs_Stable_Min", String(g_M010_Config.mvState_move_durationMs_Stable_Min));
+    g_W010_embUI.setValue("mvState_Decel_accelMps2_Threshold", String(g_M010_Config.mvState_Decel_accelMps2_Threshold, 2));
+    g_W010_embUI.setValue("mvState_Bump_accelMps2_Threshold", String(g_M010_Config.mvState_Bump_accelMps2_Threshold, 2));
+    g_W010_embUI.setValue("mvState_Bump_SpeedKmh_Min", String(g_M010_Config.mvState_Bump_SpeedKmh_Min, 2));
+    g_W010_embUI.setValue("mvState_Bump_CooldownMs", String(g_M010_Config.mvState_Bump_CooldownMs));
+    g_W010_embUI.setValue("mvState_Decel_durationMs_Hold", String(g_M010_Config.mvState_Decel_durationMs_Hold));
+    g_W010_embUI.setValue("mvState_Bump_durationMs_Hold", String(g_M010_Config.mvState_Bump_durationMs_Hold));
+    g_W010_embUI.setValue("mvState_signalWait1_Seconds", String(g_M010_Config.mvState_signalWait1_Seconds));
+    g_W010_embUI.setValue("mvState_signalWait2_Seconds", String(g_M010_Config.mvState_signalWait2_Seconds));
+    g_W010_embUI.setValue("mvState_stopped1_Seconds", String(g_M010_Config.mvState_stopped1_Seconds));
+    g_W010_embUI.setValue("mvState_stopped2_Seconds", String(g_M010_Config.mvState_stopped2_Seconds));
+    g_W010_embUI.setValue("mvState_park_Seconds", String(g_M010_Config.mvState_park_Seconds));
+    g_W010_embUI.setValue("serialPrint_intervalMs", String(g_M010_Config.serialPrint_intervalMs));
+    g_W010_embUI.setValue("turnState_Center_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 2));
+    g_W010_embUI.setValue("turnState_LR_1_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 2));
+    g_W010_embUI.setValue("turnState_LR_2_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 2));
+    g_W010_embUI.setValue("turnState_LR_3_yawAngleVelocityDegps_Thresold", String(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 2));
+    g_W010_embUI.setValue("turnState_speedKmh_MinSpeed", String(g_M010_Config.turnState_speedKmh_MinSpeed, 2));
+    g_W010_embUI.setValue("turnState_speedKmh_HighSpeed_Threshold", String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 2));
+    g_W010_embUI.setValue("turnState_StableDurationMs", String(g_M010_Config.turnState_StableDurationMs));
 
     dbgP1_println_F(F("웹 UI에 설정값 로드 완료."));
 }
@@ -338,7 +338,7 @@ void W010_EmbUI_handleConfigSave(const String& name, const String& value) {
     g_M010_Config.turnState_speedKmh_HighSpeed_Threshold           = v_config_doc["turnState_speedKmh_HighSpeed_Threshold"];
     g_M010_Config.turnState_StableDurationMs                       = v_config_doc["turnState_StableDurationMs"];
 
-    embui.setPrintInterval(g_M010_Config.serialPrint_intervalMs);
+    g_W010_embUI.setPrintInterval(g_M010_Config.serialPrint_intervalMs);
 }
 
 /**
@@ -352,31 +352,31 @@ void W010_EmbUI_handleCommand(const String& cmd) {
     if (cmd.equals("save_config")) {
         if (M010_Config_save()) {
             dbgP1_println_F(F("웹 UI: 설정값이 LittleFS에 저장되었습니다."));
-            embui.displayMessage("설정 저장 완료", "설정값이 성공적으로 저장되었습니다.", 2000);
+            g_W010_embUI.displayMessage("설정 저장 완료", "설정값이 성공적으로 저장되었습니다.", 2000);
         } else {
             dbgP1_println_F(F("웹 UI: 설정값 저장 실패!"));
-            embui.displayMessage("설정 저장 실패", "파일 시스템에 설정값을 저장할 수 없습니다.", 3000, true);
+            g_W010_embUI.displayMessage("설정 저장 실패", "파일 시스템에 설정값을 저장할 수 없습니다.", 3000, true);
         }
     } else if (cmd.equals("load_config")) {
         if (M010_Config_load()) {
             dbgP1_println_F(F("웹 UI: 설정값이 LittleFS에서 로드되었습니다."));
             W010_EmbUI_loadConfigToWebUI(); // 웹 UI에도 로드된 값 반영
-            embui.displayMessage("설정 불러오기 완료", "설정값이 성공적으로 불러와졌습니다.", 2000);
+            g_W010_embUI.displayMessage("설정 불러오기 완료", "설정값이 성공적으로 불러와졌습니다.", 2000);
         } else {
             dbgP1_println_F(F("웹 UI: 설정값 로드 실패! 기본값이 사용됩니다."));
             M010_Config_initDefaults(); // 로드 실패 시 기본값으로 초기화
             W010_EmbUI_loadConfigToWebUI(); // 웹 UI에도 기본값 반영
-            embui.displayMessage("설정 불러오기 실패", "설정 파일을 찾을 수 없습니다. 기본값이 적용됩니다.", 3000, true);
+            g_W010_embUI.displayMessage("설정 불러오기 실패", "설정 파일을 찾을 수 없습니다. 기본값이 적용됩니다.", 3000, true);
         }
     } else if (cmd.equals("reset_config")) {
         M010_Config_initDefaults(); // 설정값을 기본값으로 초기화
         if (M010_Config_save()) { // 초기화된 기본값을 파일에 저장
             dbgP1_println_F(F("웹 UI: 설정값이 기본값으로 초기화되고 저장되었습니다."));
             W010_EmbUI_loadConfigToWebUI(); // 웹 UI에도 기본값 반영
-            embui.displayMessage("설정 초기화 완료", "설정값이 기본값으로 초기화되었습니다.", 2000);
+            g_W010_embUI.displayMessage("설정 초기화 완료", "설정값이 기본값으로 초기화되었습니다.", 2000);
         } else {
             dbgP1_println_F(F("웹 UI: 설정 초기화 후 저장 실패!"));
-            embui.displayMessage("설정 초기화 실패", "기본값 저장 중 오류가 발생했습니다.", 3000, true);
+            g_W010_embUI.displayMessage("설정 초기화 실패", "기본값 저장 중 오류가 발생했습니다.", 3000, true);
         }
     } else {
         dbgP1_printf_F(F("웹 UI: 알 수 없는 명령: %s\n"), cmd.c_str());
@@ -412,18 +412,18 @@ void W010_EmbUI_updateCarStatusWeb() {
         case E_M010_CARTURNSTATE_RIGHT_3:   turnStateStr = "급격한 우회전"; break;
     }
 
-    embui.setValue("carMovementState",     movementStateStr);
-    embui.setValue("carTurnState",         turnStateStr);
-    embui.setValue("speed_kmh",            String(g_M010_CarStatus.speed_kmh, 2) + " km/h");
-    embui.setValue("accelX_ms2",           String(g_M010_CarStatus.accelX_ms2, 2) + " m/s^2");
-    embui.setValue("accelY_ms2",           String(g_M010_CarStatus.accelY_ms2, 2) + " m/s^2");
-    embui.setValue("accelZ_ms2",           String(g_M010_CarStatus.accelZ_ms2, 2) + " m/s^2");
-    embui.setValue("yawAngle_deg",         String(g_M010_CarStatus.yawAngle_deg, 2) + " 도");
-    embui.setValue("pitchAngle_deg",       String(g_M010_CarStatus.pitchAngle_deg, 2) + " 도");
-    embui.setValue("yawAngleVelocity_degps", String(g_M010_CarStatus.yawAngleVelocity_degps, 2) + " 도/초");
-    embui.setValue("isEmergencyBraking",   g_M010_CarStatus.isEmergencyBraking ? "감지됨" : "아님");
-    embui.setValue("isSpeedBumpDetected",  g_M010_CarStatus.isSpeedBumpDetected ? "감지됨" : "아님");
-    embui.setValue("currentStopTime_sec",  String(g_M010_CarStatus.currentStopTime_ms / 1000) + " 초");
+    g_W010_embUI.setValue("carMovementState",     movementStateStr);
+    g_W010_embUI.setValue("carTurnState",         turnStateStr);
+    g_W010_embUI.setValue("speed_kmh",            String(g_M010_CarStatus.speed_kmh, 2) + " km/h");
+    g_W010_embUI.setValue("accelX_ms2",           String(g_M010_CarStatus.accelX_ms2, 2) + " m/s^2");
+    g_W010_embUI.setValue("accelY_ms2",           String(g_M010_CarStatus.accelY_ms2, 2) + " m/s^2");
+    g_W010_embUI.setValue("accelZ_ms2",           String(g_M010_CarStatus.accelZ_ms2, 2) + " m/s^2");
+    g_W010_embUI.setValue("yawAngle_deg",         String(g_M010_CarStatus.yawAngle_deg, 2) + " 도");
+    g_W010_embUI.setValue("pitchAngle_deg",       String(g_M010_CarStatus.pitchAngle_deg, 2) + " 도");
+    g_W010_embUI.setValue("yawAngleVelocity_degps", String(g_M010_CarStatus.yawAngleVelocity_degps, 2) + " 도/초");
+    g_W010_embUI.setValue("isEmergencyBraking",   g_M010_CarStatus.isEmergencyBraking ? "감지됨" : "아님");
+    g_W010_embUI.setValue("isSpeedBumpDetected",  g_M010_CarStatus.isSpeedBumpDetected ? "감지됨" : "아님");
+    g_W010_embUI.setValue("currentStopTime_sec",  String(g_M010_CarStatus.currentStopTime_ms / 1000) + " 초");
 }
 
 /**
@@ -431,7 +431,7 @@ void W010_EmbUI_updateCarStatusWeb() {
  * Arduino의 `loop()` 함수에서 이 함수를 호출해야 합니다.
  */
 void W010_EmbUI_run() {
-    embui.loop(); // EmbUI의 내부 루프 실행
+    g_W010_embUI.loop(); // EmbUI의 내부 루프 실행
 
     static u_int32_t v_lastWebUpdateTime_ms = 0;
     if (millis() - v_lastWebUpdateTime_ms >= g_M010_Config.serialPrint_intervalMs) {
