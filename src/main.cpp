@@ -52,10 +52,19 @@
 #endif
 
 #ifdef M010
-    #include "M010_CarState_001/M010_main3_008.h"
+    #include "M010_CarState_001/M010_main3_010.h"
+    // #include "M010_CarState_001/M010_main3_009.h"
+    // #include "M010_CarState_001/M010_main3_008.h"
 	// #include "M010_CarState_001/M010_main2_007.h"
     // #include "M010_CarState_001/M010_main_005.h"
 #endif
+
+#ifdef W010
+	#include "M010_CarState_001/W010_ESPUI_003.h"
+    //#include "M010_CarState_001/W010_embUI_002.h"
+#endif
+
+
 
 #ifdef C100
     #include "C100_CarEyes_v003/C100_CarEyes_Main_001.h"
@@ -115,6 +124,12 @@ void setup() {
 	#ifdef M010
 	    M010_MPU_init();
 	#endif
+	
+	#ifdef W010
+	    W010_EmbUI_init();                                     // EmbUI 초기화 및 Wi-Fi 설정
+        W010_EmbUI_setupWebPages();                            // 웹페이지 UI 구성 및 설정 항목 바인딩
+        W010_EmbUI_loadConfigToWebUI();
+	#endif
 
 	#ifdef C100
 		C100_init();
@@ -172,6 +187,10 @@ void loop() {
 
 	#ifdef M010
 	    M010_MPU_run();
+	#endif
+
+	#ifdef W010
+	    W010_EmbUI_run();
 	#endif
 	
 	#ifdef C100
