@@ -350,12 +350,7 @@ void W010_ESPUI_callback(Control* control, int type, void* userData) {
 
         if (cmd.equals("save_config")) {
             if (M010_Config_save()) {
-                dbgP1_println_F(F("웹 UI: 설정값이 LittleFS에 저장되었습니다."));
-
-                
-                g_AlaramId = ESPUI.addControl(ControlType::Label, "알림", "", ControlColor::Wetasphalt, g_statusPageId);
-                g_ErrorId = ESPUI.addControl(ControlType::Label, "오류", "", ControlColor::Wetasphalt, g_statusPageId);
-                
+                dbgP1_println_F(F("웹 UI: 설정값이 LittleFS에 저장되었습니다."));                
                 ESPUI.print(g_AlaramId, "설정값이 성공적으로 저장되었습니다."); // ESPUI 메시지
                 // ESPUI.print("알림", "설정값이 성공적으로 저장되었습니다.", "lime"); // ESPUI 메시지
             } else {
