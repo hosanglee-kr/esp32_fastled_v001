@@ -13,6 +13,13 @@
 // 정적 데이터 테이블 헤더 파일 포함
 #include "R310_data2_014.h"
 
+#define G_R310_BUFFEREDSERIAL_USE
+
+#ifdef G_R310_BUFFEREDSERIAL_USE
+    #include <StreamUtils.h>
+    ReadBufferingStream g_R310_BufferedSerial{Serial, 64};
+#endif
+
 // --- 글로벌 변수 정의 (g_R310_ 로 시작) ---
 
 CRGB			   g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];       // FastLED CRGB 배열
@@ -542,17 +549,29 @@ void R310_run() {
     else if (g_R310_robotState == R_STATE_SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP) {
          R310_set_RobotState(R_STATE_AWAKE); // R_STATE_AWAKE 상태로 변경 (잠 깨는 애니메이션 트리거)
     }
+	
+    #ifdef G_R310_BUFFEREDSERIAL_USE	
+        // 시리얼 입력 처리 (옵션: 명령 수신 테스트)
+    	if (g_R310_BufferedSerial.available()) {
+            String v_command_string = g_R310_BufferedSerial.readStringUntil('\n'); // 줄바꿈까지 문자열 읽기
+            v_command_string.trim(); // 앞뒤 공백 제거
+            Serial.print("Received command: "); // 수신 명령 출력
+            Serial.println(v_command_string);
 
-    // 시리얼 입력 처리 (옵션: 명령 수신 테스트)
-    if (Serial.available()) {
-        String v_command_string = Serial.readStringUntil('\n'); // 줄바꿈까지 문자열 읽기
-        v_command_string.trim(); // 앞뒤 공백 제거
-        Serial.print("Received command: "); // 수신 명령 출력
-        Serial.println(v_command_string);
+            R310_processCommand(v_command_string.c_str()); // 명령 처리
+            g_R310_lastCommandTime = millis(); // 활동 시간 업데이트
+         }
+	#elif
+        if (Serial.available()) {
+            String v_command_string = Serial.readStringUntil('\n'); // 줄바꿈까지 문자열 읽기
+            v_command_string.trim(); // 앞뒤 공백 제거
+            Serial.print("Received command: "); // 수신 명령 출력
+            Serial.println(v_command_string);
 
-        R310_processCommand(v_command_string.c_str()); // 명령 처리
-        g_R310_lastCommandTime = millis(); // 활동 시간 업데이트
-    }
+            R310_processCommand(v_command_string.c_str()); // 명령 처리
+            g_R310_lastCommandTime = millis(); // 활동 시간 업데이트
+        }
+	#endif
 
     #ifdef R310_DEB
         Serial.println("R310_run - 120");
