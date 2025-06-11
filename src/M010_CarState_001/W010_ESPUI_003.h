@@ -178,6 +178,8 @@ void W010_EmbUI_setupWebPages() {
 
     // 'statusPage' 생성 및 컨트롤 추가
     g_statusPageId = ESPUI.addControl(ControlType::Tab, "자동차 현재 상태", "", ControlColor::Wetasphalt);
+    ESPUI.setVertical(g_statusPageId, true);
+
     ///// g_statusPageId = ESPUI.addControl(Control::Type::Page, "자동차 현재 상태", "", ControlColor::Wetasphalt, Control::Vertical);
 
     // 이제 g_statusPageId를 부모 ID로 사용하여 해당 페이지에 컨트롤을 추가합니다.
