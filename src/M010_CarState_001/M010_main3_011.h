@@ -236,16 +236,16 @@ void M010_Config_handleSerialInput();                       // 시리얼 입력 
 
 void M010_GlobalVar_init();                                 // 전역 변수 초기화
 
-void M010_dmpDataReady() ;
+void M010_dmpDataReady_cb() ;
 void M010_MPU6050_init() ;
-void M010_MPU_init();
+void M010_init();
 
 
 void M010_updateCarStatus(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
 void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
 void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
 
-void M010_MPU_run() ;
+void M010_run() ;
 
 // ====================================================================================================
 // 함수 정의 (M010_으로 시작)
@@ -256,7 +256,7 @@ void M010_MPU_run() ;
  * MPU6050에서 새로운 데이터가 준비되면 호출됩니다.
  * 이 함수는 가능한 한 짧고 빠르게 g_M010_mpu_isInterrupt 플래그만 설정합니다.
  */
-void M010_dmpDataReady() {
+void M010_dmpDataReady_cb() {
     g_M010_mpu_isInterrupt = true; // 인터럽트 발생 시 플래그 설정
 }
 
@@ -286,7 +286,7 @@ void M010_MPU6050_init() {
         // MPU6050 인터럽트 핀 설정 및 ISR 연결
         // RISING 모드는 MPU6050의 INT 핀이 High로 올라갈 때 인터럽트를 발생시킵니다.
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
-        attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
+        attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady_cb, RISING);
         g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus(); // 현재 인터럽트 상태 가져오기
 
         g_M010_dmp_packetSize = G_M010_DMP_PACKET_SIZE; // DMP에서 출력하는 FIFO 패킷의 크기 (MotionApps612 기준, 상수 사용)
