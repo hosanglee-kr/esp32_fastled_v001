@@ -358,7 +358,7 @@ bool M010_Config_load() {
     JsonDocument v_config_doc; 
 
     #ifdef G_M010_STREAM_USE
-        Buffer v_buffered_configFile(v_configFile, 256);
+        ReadBufferingStream v_buffered_configFile(v_configFile, 256);
         //StaticJsonDocument<256> readDoc;
         Serial.println("Reading JSON with buffering...");
         DeserializationError error = deserializeJson(v_config_doc, v_buffered_configFile);
