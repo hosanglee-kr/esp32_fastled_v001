@@ -66,21 +66,21 @@ unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상�
 // ====================================================================================================
 
 uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uint8_t p_col);
-void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) ;
-void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left);
-uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx);
-void R310_loadFrame(T_R310_animFrame_t* p_pBuf) ;
+void     R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) ;
+void     R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left);
+uint8_t  R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx);
+void     R310_loadFrame(T_R310_animFrame_t* p_pBuf) ;
 
-void R310_clearText();
-void R310_showText(bool p_bInit);
+void     R310_clearText();
+void     R310_showText(bool p_bInit);
 
-void R310_setAnimation(T_R310_emotion_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force);
-void R310_set_RobotState(T_R310_RobotState_t p_robotState);
-void R310_processCommand(const char* p_command);
+void     R310_setAnimation(T_R310_emotion_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force);
+void     R310_set_RobotState(T_R310_RobotState_t p_robotState);
+void     R310_processCommand(const char* p_command);
 
-bool R310_runAnimation(void);
-void R310_init() ;
-void R310_run() ;
+bool     R310_runAnimation(void);
+void     R310_init() ;
+void     R310_run() ;
 
 // ====================================================================================================
 // 함수 정의 (R310_ 로 시작)
