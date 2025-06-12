@@ -242,9 +242,9 @@ void M010_init();
 
 
 void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
-void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
-
+void M010_CarMoveState_Recognize(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
+void M010_CarTurnState_Recognize(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
+coid M010_CarStatus_print();
 void M010_run() ;
 
 // ====================================================================================================
@@ -814,7 +814,7 @@ void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms) {
  * 히스테리시스 (임계값 차등)와 시간 지연 (조건 지속 시간)을 통해 노이즈에 강인한 상태 전환을 수행합니다.
  * @param p_currentTime_ms 현재 시간 (millis() 값)
  */
-void M010_defineCarState(u_int32_t p_currentTime_ms) {
+void M010_CarMoveState_Recognize(u_int32_t p_currentTime_ms) {
     float v_speed_kmh   = g_M010_CarStatus.speed_kmh;
     float v_accelY      = g_M010_CarStatus.accelY_ms2;
     float v_accelZ      = g_M010_CarStatus.accelZ_ms2;
@@ -943,7 +943,7 @@ void M010_defineCarState(u_int32_t p_currentTime_ms) {
  * 회전 상태 전이에도 히스테리시스가 적용되어 안정적인 감지를 목표로 합니다.
  * @param p_currentTime_ms 현재 시간 (millis() 값)
  */
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
+void M010_CarTurnState_Recognize(u_int32_t p_currentTime_ms) {
 
     float v_speed_kmh_abs               = fabs(g_M010_CarStatus.speed_kmh); // 속도는 항상 양수 절댓값으로 처리
     float v_yawAngleVelocity_degps      = g_M010_CarStatus.yawAngleVelocity_degps; // 현재 Yaw 각속도 (deg/s)
@@ -1025,7 +1025,7 @@ void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
  * @brief 자동차 상태 정보를 시리얼 모니터로 자세히 출력합니다.
  * 디버깅 및 현재 차량의 움직임, 회전, 감지 상태를 실시간으로 확인하는 데 사용됩니다.
  */
-void M010_printCarStatus() {
+void M010_CarStatus_print() {
     dbgP1_println_F(F("\n---- 자동차 현재 상태 ----"));
     dbgP1_print_F(F("상태: "));
     switch (g_M010_CarStatus.carMovementState) {
@@ -1080,9 +1080,9 @@ void M010_run() {
     // 새로운 MPU 데이터가 준비되었을 때만 상태 정의 함수들을 호출
     if(g_M010_mpu_isDataReady == true){
         // 자동차 움직임 상태 정의 함수 호출
-        M010_defineCarState(v_currentTime_ms);
+        M010_CarMoveState_Recognize(v_currentTime_ms);
         // 자동차 회전 상태 정의 함수 호출
-        M010_defineCarTurnState(v_currentTime_ms); 
+        M010_CarTurnState_Recognize(v_currentTime_ms); 
         g_M010_mpu_isDataReady = false; // 데이터 처리 완료 플래그 리셋
     }
     
@@ -1091,7 +1091,7 @@ void M010_run() {
 
     // 설정된 주기(g_M010_Config.serialPrint_intervalMs)에 따라 자동차 상태를 시리얼 출력
     if (millis() - g_M010_lastSerialPrintTime_ms >= g_M010_Config.serialPrint_intervalMs) {
-        M010_printCarStatus();
+        M010_CarStatus_print();
         g_M010_lastSerialPrintTime_ms = millis(); // 마지막 출력 시간 업데이트
     }
 
