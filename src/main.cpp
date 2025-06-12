@@ -123,7 +123,7 @@ void setup() {
 
 	
 	#ifdef M010
-	    M010_MPU_init();
+	    M010_init();
 	#endif
 	
 	#ifdef W010
@@ -187,7 +187,7 @@ void loop() {
 	#endif
 
 	#ifdef M010
-	    M010_MPU_run();
+	    M010_run();
 	#endif
 
 	#ifdef W010
