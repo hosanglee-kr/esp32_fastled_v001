@@ -241,7 +241,7 @@ void M010_MPU6050_init() ;
 void M010_init();
 
 
-void M010_updateCarStatus(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
+void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
 void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
 void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
 
@@ -721,7 +721,7 @@ void M010_init() {
  * 상보 필터 및 속도 드리프트 보정 로직이 적용됩니다.
  * @param p_currentTime_ms 현재 시간을 저장할 u_int32_t 포인터 (millis() 값으로 업데이트 됨)
  */
-void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
+void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms) {
     if (!g_M010_dmp_isReady) return; // DMP가 준비되지 않았으면 데이터 처리 스킵
 
     // MPU6050 인터럽트가 발생했거나, FIFO 버퍼에 최소 한 개 이상의 완전한 DMP 패킷이 있는지 확인
@@ -1075,7 +1075,7 @@ void M010_run() {
 
     // MPU6050 데이터 읽기 및 자동차 상태 업데이트
     // 이 함수 내에서 v_currentTime_ms 값이 갱신됩니다.
-    M010_updateCarStatus(&v_currentTime_ms); 
+    M010_MPU_Read_Data(&v_currentTime_ms); 
 
     // 새로운 MPU 데이터가 준비되었을 때만 상태 정의 함수들을 호출
     if(g_M010_mpu_isDataReady == true){
