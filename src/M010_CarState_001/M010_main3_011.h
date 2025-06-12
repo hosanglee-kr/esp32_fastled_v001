@@ -244,7 +244,7 @@ void M010_init();
 void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
 void M010_CarMoveState_Recognize(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
 void M010_CarTurnState_Recognize(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
-coid M010_CarStatus_print();
+void M010_CarStatus_print();
 void M010_run() ;
 
 // ====================================================================================================
