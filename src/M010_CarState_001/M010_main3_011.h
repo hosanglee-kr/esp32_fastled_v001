@@ -484,7 +484,7 @@ bool M010_Config_save() {
 
         Serial.println("Reading JSON with buffering...");
         
-        if(SerializeJson(v_config_doc, v_buffered_configFile) == 0){
+        if(serializeJson(v_config_doc, v_buffered_configFile) == 0){
             dbgP1_println_F(F("config.json 직렬화 실패"));
             
             v_configFile.close();
@@ -507,7 +507,7 @@ bool M010_Config_save() {
 
     v_configFile.close();
     LittleFS.end();
-    
+
     dbgP1_println_F(F("config.json 저장 성공."));
     return true;
 }
