@@ -699,7 +699,7 @@ void M010_GlobalVar_init(){
  * LittleFS를 통한 설정값 로드 및 MPU6050 센서 초기화를 담당합니다.
  * `setup()` 함수에서 호출되어야 합니다.
  */
-void M010_MPU_init() {
+void M010_init() {
     // 설정값 로드 시도. config.json 파일이 없거나 로드에 실패하면 기본값으로 초기화합니다.
     if (!M010_Config_load()) {
         dbgP1_println_F(F("설정 파일 로드 실패. 기본값으로 초기화 후 저장합니다."));
@@ -1070,7 +1070,7 @@ void M010_printCarStatus() {
  * 또한 시리얼 명령어를 처리하고, 설정된 주기에 따라 현재 상태를 시리얼 출력합니다.
  * `loop()` 함수에서 호출되어야 합니다.
  */
-void M010_MPU_run() {
+void M010_run() {
 	u_int32_t v_currentTime_ms = 0; // 현재 시간을 저장할 변수
 
     // MPU6050 데이터 읽기 및 자동차 상태 업데이트
