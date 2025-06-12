@@ -2,26 +2,26 @@
 
 //#define F100
 #ifdef F100
-	#include "F100_fxWave2D_003.h"
+	#include "Fxx_basicExample/F100_fxWave2D_003.h"
 #endif
 	
 //#define F110
 #ifdef F110
-	#include "F110_wave2D_002.h"
+	#include "Fxx_basicExample/F110_wave2D_002.h"
 #endif
 
 //#define F120
 #ifdef F120
-	#include "F120_Blur2d_001.h"
+	#include "Fxx_basicExample/F120_Blur2d_001.h"
 #endif
 
 //#define F130
 #ifdef F130
-	#include "F130_Wave2d_001.h"
+	#include "Fxx_basicExample/F130_Wave2d_001.h"
 #endif
 
 #ifdef F140
-	#include "F140_fxWater_001.h"
+	#include "Fxx_basicExample/F140_fxWater_001.h"
 #endif
 
 #ifdef R100
