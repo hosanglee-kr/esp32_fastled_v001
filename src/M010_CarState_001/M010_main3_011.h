@@ -221,21 +221,11 @@ static u_int32_t            g_M010_turnStateStartTime_ms = 0;                   
 
 // MPU6050 인터럽트 발생 여부 플래그 및 인터럽트 서비스 루틴 (ISR)
 volatile bool g_M010_mpu_isInterrupt = false; // MPU6050 인터럽트 발생 여부 (true = 데이터 준비됨)
-/**
- * @brief MPU6050 데이터 준비 인터럽트 서비스 루틴 (ISR).
- * MPU6050에서 새로운 데이터가 준비되면 호출됩니다.
- * 이 함수는 가능한 한 짧고 빠르게 g_M010_mpu_isInterrupt 플래그만 설정합니다.
- */
-void M010_dmpDataReady() {
-    g_M010_mpu_isInterrupt = true; // 인터럽트 발생 시 플래그 설정
-}
+
 
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
-void M010_updateCarStatus(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
-void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
 
 // 설정 관련 함수 선언
 void M010_Config_initDefaults();                            // 설정값 기본값 초기화
@@ -246,9 +236,30 @@ void M010_Config_handleSerialInput();                       // 시리얼 입력 
 
 void M010_GlobalVar_init();                                 // 전역 변수 초기화
 
+void M010_dmpDataReady() ;
+void M010_MPU6050_init() ;
+void M010_MPU_init();
+
+
+void M010_updateCarStatus(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
+void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
+void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
+
+void M010_MPU_run() ;
+
 // ====================================================================================================
 // 함수 정의 (M010_으로 시작)
 // ====================================================================================================
+
+/**
+ * @brief MPU6050 데이터 준비 인터럽트 서비스 루틴 (ISR).
+ * MPU6050에서 새로운 데이터가 준비되면 호출됩니다.
+ * 이 함수는 가능한 한 짧고 빠르게 g_M010_mpu_isInterrupt 플래그만 설정합니다.
+ */
+void M010_dmpDataReady() {
+    g_M010_mpu_isInterrupt = true; // 인터럽트 발생 시 플래그 설정
+}
+
 
 /**
  * @brief MPU6050 센서 및 DMP (Digital Motion Processor)를 초기화합니다.
