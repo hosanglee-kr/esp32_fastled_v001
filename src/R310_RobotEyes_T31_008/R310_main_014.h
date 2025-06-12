@@ -64,6 +64,39 @@ unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상�
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
+ // R310_Main_013.h 내부 함수 호출 관계 트리 
+
+// main.cpp 
+// ├── R310_init()
+// │   └── R310_setAnimation()
+// │
+// └── R310_run()
+//     ├── R310_runAnimation()
+//     │   ├── R310_clearText()
+//     │   ├── R310_setAnimation()
+//     │   ├── R310_loadSequence()
+//     │   ├── R310_loadFrame()
+//     │   ├── R310_drawEyes()
+//     │       ├── R310_drawEye()
+//     │           └── R310_mapEyePixel()
+//     │
+//     ├── R310_set_RobotState()
+//     │   └── R310_setAnimation()
+//     │
+//     ├── R310_processCommand()
+//         ├── R310_clearText()
+//         ├── R310_setAnimation()
+//         ├── R310_set_RobotState()
+
+
+
+/*
+ * 독립적으로 호출될 수 있는 함수:
+ */
+// R310_showText()
+// ├── R310_clearText()
+// ├── R310_drawEye()
+// └── (외부 함수 호출: FastLED.clear(), FastLED.show())
 
 uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uint8_t p_col);
 void     R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) ;
