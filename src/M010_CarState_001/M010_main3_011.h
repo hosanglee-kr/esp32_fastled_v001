@@ -359,9 +359,10 @@ bool M010_Config_load() {
 
     #ifdef G_M010_STREAM_USE
         ReadBufferingStream v_buffered_configFile(v_configFile, 256);
-        //StaticJsonDocument<256> readDoc;
         Serial.println("Reading JSON with buffering...");
         DeserializationError error = deserializeJson(v_config_doc, v_buffered_configFile);
+        //StaticJsonDocument<256> readDoc;
+
         //DeserializationError error = deserializeJson(readDoc, bufferedFile);
     #elif
         DeserializationError error = deserializeJson(v_config_doc, v_configFile);
@@ -430,8 +431,8 @@ bool M010_Config_save() {
         return false;
     }
 
-    File configFile = LittleFS.open(G_M010_CONFIG_JSON_FILE, "w"); // 쓰기 모드로 열기 (기존 파일 덮어쓰기)
-    if (!configFile) {
+    File v_configFile = LittleFS.open(G_M010_CONFIG_JSON_FILE, "w"); // 쓰기 모드로 열기 (기존 파일 덮어쓰기)
+    if (!v_configFile) {
         dbgP1_println_F(F("config.json 파일 생성 실패"));
         LittleFS.end();
         return false;
@@ -477,16 +478,36 @@ bool M010_Config_save() {
     v_config_doc["turnState_speedKmh_HighSpeed_Threshold"]          = g_M010_Config.turnState_speedKmh_HighSpeed_Threshold;
     v_config_doc["turnState_StableDurationMs"]                      = g_M010_Config.turnState_StableDurationMs;
 
-    // JSON 문서를 파일에 직렬화하여 저장
-    if (serializeJson(v_config_doc, configFile) == 0) {
-        dbgP1_println_F(F("config.json 직렬화 실패"));
-        configFile.close();
-        LittleFS.end();
-        return false;
-    }
 
-    configFile.close();
+    #ifdef G_M010_STREAM_USE
+        WriteBufferingStream v_buffered_configFile(v_configFile, 256);
+
+        Serial.println("Reading JSON with buffering...");
+        
+        if(SerializeJson(v_config_doc, v_buffered_configFile) == 0){
+            dbgP1_println_F(F("config.json 직렬화 실패"));
+            
+            v_configFile.close();
+            LittleFS.end();
+
+            return false;
+        }
+
+    #elif
+        // JSON 문서를 파일에 직렬화하여 저장
+        if (serializeJson(v_config_doc, v_configFile) == 0) {
+            dbgP1_println_F(F("config.json 직렬화 실패"));
+            v_configFile.close();
+            LittleFS.end();
+            return false;
+        }
+    #endif
+
+
+
+    v_configFile.close();
     LittleFS.end();
+    
     dbgP1_println_F(F("config.json 저장 성공."));
     return true;
 }
