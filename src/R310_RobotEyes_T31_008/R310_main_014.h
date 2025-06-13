@@ -198,7 +198,7 @@ void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
 // 지정된 감정에 해당하는 애니메이션 시퀀스 로드
 // @param p_eyeEmotion_idx 로드할 감정 종류
 // @return 시퀀스 프레임 개수. 찾지 못하면 1 반환 (기본값 중립).
-uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
+uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx) {
     bool v_found = false;
 
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_ani_Table); v_i++) {
