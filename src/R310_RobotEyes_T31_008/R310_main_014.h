@@ -22,44 +22,42 @@
 
 // --- 글로벌 변수 정의 (g_R310_ 로 시작) ---
 
-CRGB			   g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];       // FastLED CRGB 배열
+CRGB			        g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];          // FastLED CRGB 배열
 
-CRGB*			   g_R310_leds_ptr			= nullptr;	        // CRGB 배열 포인터
+CRGB*			        g_R310_leds_ptr			    = nullptr;	        // CRGB 배열 포인터
 
 
-T_R310_RobotState_t	   g_R310_robotState				= R_STATE_AWAKE;            // 현재 로봇 상태
+T_R310_RobotState_t	    g_R310_robotState		    = R_STATE_AWAKE;    // 현재 로봇 상태
 
 // 애니메이션 실행 및 시간 관리 변수
 // 현재 애니메이션 프레임 표시 시작 시간
 /// uint32_t g_R310_timeStartPause = 0;
 
+uint32_t		        g_R310_timeLastAnimation    = 0;                // 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
 
-uint32_t		   g_R310_timeLastAnimation = 0;                        // 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
+uint16_t		        g_R310_timeBlinkMinimum	    = 5000;	            // 자동 깜빡임 최소 대기 시간 (밀리초) 기본값 5초
 
-uint16_t		   g_R310_timeBlinkMinimum	= 5000;	 // 기본값 5초      // 자동 깜빡임 최소 대기 시간 (밀리초)
+T_R310_animState_t      g_R310_animState			= S_IDLE;           // 애니메이션 상태 머신 현재 상태
+     
+bool			        g_R310_autoBlink			= true;             // 자동 깜빡임 기능 활성화 여부
 
-T_R310_animState_t g_R310_animState			= S_IDLE;               // 애니메이션 상태 머신 현재 상태
+T_R310_animTable_t      g_R310_animEntry;                               // 현재 실행 중인 애니메이션 시퀀스 정보
 
-//bool			   g_R310_autoBlink			= false;                // 자동 깜빡임 기능 활성화 여부
-bool			   g_R310_autoBlink			= true;
-
-T_R310_animTable_t g_R310_animEntry;                                // 현재 실행 중인 애니메이션 시퀀스 정보
-
-int8_t			   g_R310_animIndex		 = 0;                       // 현재 시퀀스 내 프레임 인덱스
+int8_t			        g_R310_animIndex		    = 0;                // 현재 시퀀스 내 프레임 인덱스
   
-EMTP_PlyDirect_t	 g_R310_animReverse	 = EMTP_PLY_DIR_FIRST;                   // 애니메이션 시퀀스 역방향 재생 여부
-EMTP_AutoReverse_t	 g_R310_autoReverse	 = EMTP_AUTO_REVERSE_OFF;                   // 시퀀스 완료 후 자동 역방향 재생 여부
+EMTP_PlyDirect_t	    g_R310_animReverse	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
+EMTP_AutoReverse_t	    g_R310_autoReverse	        = EMTP_AUTO_REVERSE_OFF;  // 시퀀스 완료 후 자동 역방향 재생 여부
 
-T_R310_emotion_t   g_R310_nextEmotion	 = EMT_NONE;             // 다음에 재생할 애니메이션 감정 종류
+T_R310_emotion_t        g_R310_nextEmotion	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
 
-T_R310_emotion_t   g_R310_currentEmotion = EMT_NONE;             // 현재 화면에 표시되는 애니메이션 감정 종류
+T_R310_emotion_t        g_R310_currentEmotion       = EMT_NONE;         // 현재 화면에 표시되는 애니메이션 감정 종류
 
-char			   g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];   // 표시할 텍스트 문자열 고정 크기 버퍼
+char			        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];  // 표시할 텍스트 문자열 고정 크기 버퍼
 
-char*			   g_R310_pText			  = nullptr;                // 표시할 텍스트 문자열 포인터 (g_R310_textBuffer 시작 주소)
+char*			        g_R310_pText			    = nullptr;          // 표시할 텍스트 문자열 포인터 (g_R310_textBuffer 시작 주소)
 
 
-unsigned long	   g_R310_lastCommandTime = 0;                      // 로봇 상태 관리를 위한 마지막 활동 시간 기록
+unsigned long	        g_R310_lastCommandTime = 0;                     // 로봇 상태 관리를 위한 마지막 활동 시간 기록
 
 // ====================================================================================================
 // 함수 선언 (프로토타입)
