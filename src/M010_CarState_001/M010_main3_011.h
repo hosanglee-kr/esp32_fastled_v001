@@ -221,21 +221,11 @@ static u_int32_t            g_M010_turnStateStartTime_ms = 0;                   
 
 // MPU6050 인터럽트 발생 여부 플래그 및 인터럽트 서비스 루틴 (ISR)
 volatile bool g_M010_mpu_isInterrupt = false; // MPU6050 인터럽트 발생 여부 (true = 데이터 준비됨)
-/**
- * @brief MPU6050 데이터 준비 인터럽트 서비스 루틴 (ISR).
- * MPU6050에서 새로운 데이터가 준비되면 호출됩니다.
- * 이 함수는 가능한 한 짧고 빠르게 g_M010_mpu_isInterrupt 플래그만 설정합니다.
- */
-void M010_dmpDataReady() {
-    g_M010_mpu_isInterrupt = true; // 인터럽트 발생 시 플래그 설정
-}
+
 
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
-void M010_updateCarStatus(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
-void M010_defineCarState(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
 
 // 설정 관련 함수 선언
 void M010_Config_initDefaults();                            // 설정값 기본값 초기화
@@ -246,9 +236,30 @@ void M010_Config_handleSerialInput();                       // 시리얼 입력 
 
 void M010_GlobalVar_init();                                 // 전역 변수 초기화
 
+void M010_dmpDataReady_cb() ;
+void M010_MPU6050_init() ;
+void M010_init();
+
+
+void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms);     // MPU6050 데이터를 읽고 자동차 상태를 업데이트하는 함수
+void M010_CarMoveState_Recognize(u_int32_t p_currentTime_ms);       // 차량 움직임 상태 정의 함수 (정지, 전진, 후진 등)
+void M010_CarTurnState_Recognize(u_int32_t p_currentTime_ms);   // 차량 회전 상태 정의 함수 (직진, 좌/우회전 정도)
+void M010_CarStatus_print();
+void M010_run() ;
+
 // ====================================================================================================
 // 함수 정의 (M010_으로 시작)
 // ====================================================================================================
+
+/**
+ * @brief MPU6050 데이터 준비 인터럽트 서비스 루틴 (ISR).
+ * MPU6050에서 새로운 데이터가 준비되면 호출됩니다.
+ * 이 함수는 가능한 한 짧고 빠르게 g_M010_mpu_isInterrupt 플래그만 설정합니다.
+ */
+void M010_dmpDataReady_cb() {
+    g_M010_mpu_isInterrupt = true; // 인터럽트 발생 시 플래그 설정
+}
+
 
 /**
  * @brief MPU6050 센서 및 DMP (Digital Motion Processor)를 초기화합니다.
@@ -275,7 +286,7 @@ void M010_MPU6050_init() {
         // MPU6050 인터럽트 핀 설정 및 ISR 연결
         // RISING 모드는 MPU6050의 INT 핀이 High로 올라갈 때 인터럽트를 발생시킵니다.
         pinMode(G_M010_MPU_INTERRUPT_PIN, INPUT);
-        attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady, RISING);
+        attachInterrupt(digitalPinToInterrupt(G_M010_MPU_INTERRUPT_PIN), M010_dmpDataReady_cb, RISING);
         g_M010_mpu_interruptStatus = g_M010_Mpu.getIntStatus(); // 현재 인터럽트 상태 가져오기
 
         g_M010_dmp_packetSize = G_M010_DMP_PACKET_SIZE; // DMP에서 출력하는 FIFO 패킷의 크기 (MotionApps612 기준, 상수 사용)
@@ -688,7 +699,7 @@ void M010_GlobalVar_init(){
  * LittleFS를 통한 설정값 로드 및 MPU6050 센서 초기화를 담당합니다.
  * `setup()` 함수에서 호출되어야 합니다.
  */
-void M010_MPU_init() {
+void M010_init() {
     // 설정값 로드 시도. config.json 파일이 없거나 로드에 실패하면 기본값으로 초기화합니다.
     if (!M010_Config_load()) {
         dbgP1_println_F(F("설정 파일 로드 실패. 기본값으로 초기화 후 저장합니다."));
@@ -710,7 +721,7 @@ void M010_MPU_init() {
  * 상보 필터 및 속도 드리프트 보정 로직이 적용됩니다.
  * @param p_currentTime_ms 현재 시간을 저장할 u_int32_t 포인터 (millis() 값으로 업데이트 됨)
  */
-void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
+void M010_MPU_Read_Data(u_int32_t* p_currentTime_ms) {
     if (!g_M010_dmp_isReady) return; // DMP가 준비되지 않았으면 데이터 처리 스킵
 
     // MPU6050 인터럽트가 발생했거나, FIFO 버퍼에 최소 한 개 이상의 완전한 DMP 패킷이 있는지 확인
@@ -803,7 +814,7 @@ void M010_updateCarStatus(u_int32_t* p_currentTime_ms) {
  * 히스테리시스 (임계값 차등)와 시간 지연 (조건 지속 시간)을 통해 노이즈에 강인한 상태 전환을 수행합니다.
  * @param p_currentTime_ms 현재 시간 (millis() 값)
  */
-void M010_defineCarState(u_int32_t p_currentTime_ms) {
+void M010_CarMoveState_Recognize(u_int32_t p_currentTime_ms) {
     float v_speed_kmh   = g_M010_CarStatus.speed_kmh;
     float v_accelY      = g_M010_CarStatus.accelY_ms2;
     float v_accelZ      = g_M010_CarStatus.accelZ_ms2;
@@ -932,7 +943,7 @@ void M010_defineCarState(u_int32_t p_currentTime_ms) {
  * 회전 상태 전이에도 히스테리시스가 적용되어 안정적인 감지를 목표로 합니다.
  * @param p_currentTime_ms 현재 시간 (millis() 값)
  */
-void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
+void M010_CarTurnState_Recognize(u_int32_t p_currentTime_ms) {
 
     float v_speed_kmh_abs               = fabs(g_M010_CarStatus.speed_kmh); // 속도는 항상 양수 절댓값으로 처리
     float v_yawAngleVelocity_degps      = g_M010_CarStatus.yawAngleVelocity_degps; // 현재 Yaw 각속도 (deg/s)
@@ -1014,7 +1025,7 @@ void M010_defineCarTurnState(u_int32_t p_currentTime_ms) {
  * @brief 자동차 상태 정보를 시리얼 모니터로 자세히 출력합니다.
  * 디버깅 및 현재 차량의 움직임, 회전, 감지 상태를 실시간으로 확인하는 데 사용됩니다.
  */
-void M010_printCarStatus() {
+void M010_CarStatus_print() {
     dbgP1_println_F(F("\n---- 자동차 현재 상태 ----"));
     dbgP1_print_F(F("상태: "));
     switch (g_M010_CarStatus.carMovementState) {
@@ -1059,19 +1070,19 @@ void M010_printCarStatus() {
  * 또한 시리얼 명령어를 처리하고, 설정된 주기에 따라 현재 상태를 시리얼 출력합니다.
  * `loop()` 함수에서 호출되어야 합니다.
  */
-void M010_MPU_run() {
+void M010_run() {
 	u_int32_t v_currentTime_ms = 0; // 현재 시간을 저장할 변수
 
     // MPU6050 데이터 읽기 및 자동차 상태 업데이트
     // 이 함수 내에서 v_currentTime_ms 값이 갱신됩니다.
-    M010_updateCarStatus(&v_currentTime_ms); 
+    M010_MPU_Read_Data(&v_currentTime_ms); 
 
     // 새로운 MPU 데이터가 준비되었을 때만 상태 정의 함수들을 호출
     if(g_M010_mpu_isDataReady == true){
         // 자동차 움직임 상태 정의 함수 호출
-        M010_defineCarState(v_currentTime_ms);
+        M010_CarMoveState_Recognize(v_currentTime_ms);
         // 자동차 회전 상태 정의 함수 호출
-        M010_defineCarTurnState(v_currentTime_ms); 
+        M010_CarTurnState_Recognize(v_currentTime_ms); 
         g_M010_mpu_isDataReady = false; // 데이터 처리 완료 플래그 리셋
     }
     
@@ -1080,7 +1091,7 @@ void M010_MPU_run() {
 
     // 설정된 주기(g_M010_Config.serialPrint_intervalMs)에 따라 자동차 상태를 시리얼 출력
     if (millis() - g_M010_lastSerialPrintTime_ms >= g_M010_Config.serialPrint_intervalMs) {
-        M010_printCarStatus();
+        M010_CarStatus_print();
         g_M010_lastSerialPrintTime_ms = millis(); // 마지막 출력 시간 업데이트
     }
 
