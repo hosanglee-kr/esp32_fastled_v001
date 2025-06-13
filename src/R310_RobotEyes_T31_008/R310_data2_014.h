@@ -17,23 +17,24 @@ const unsigned long G_R310_TIME_TO_SLEEP = 10000; // 밀리초 단위 (10초)
 
 ///////////////////////////////////
 
-// 로봇 상태 관리를 위한 열거형
-typedef enum {
-    R_STATE_AWAKE,   // 깨어있는 상태
-    R_STATE_SLEEPING // 잠자는 상태
-} T_R310_RobotState_t;
-
 // 애니메이션 상태 머신(FSM) 상태
 typedef enum {
-    S_IDLE,      // 유휴 상태
-    S_RESTART,   // 재시작 준비 상태
-    S_ANIMATE,   // 애니메이션 실행 상태
-    S_PAUSE,     // 프레임 대기 상태
-    S_TEXT,      // 텍스트 표시 상태
-} T_R310_animState_t;
+    ANI_PLY_STATE_IDLE,      // 유휴 상태
+    ANI_PLY_STATE_RESTART,   // 재시작 준비 상태
+    ANI_PLY_STATE_ANIMATE,   // 애니메이션 실행 상태
+    ANI_PLY_STATE_PAUSE,     // 프레임 대기 상태
+    ANI_PLY_STATE_TEXT,      // 텍스트 표시 상태
+} T_R310_ani_ply_state_t;
+
+
+// 로봇 상태 관리를 위한 열거형
+typedef enum {
+    R_STATE_AWAKE,           // 깨어있는 상태
+    R_STATE_SLEEPING         // 잠자는 상태
+} T_R310_RobotState_t;
 
 typedef enum {
-    EMTP_AUTO_REVERSE_OFF,  // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
+    EMTP_AUTO_REVERSE_OFF,      // p_r 시퀀스 완료 후 자동 역재생 여부  g_R310_autoReverse
     EMTP_AUTO_REVERSE_ON,
 } EMTP_AutoReverse_t;
 
@@ -48,14 +49,10 @@ typedef enum {
 } EMTP_ForcePly_t;
 
 
-
-
-
-// --- 폰트 문자 하나를 나타내는 구조체 정의 ---
-// 8x8 픽셀 이미지를 저장하는 데 사용됩니다.
+// --- 폰트 문자 하나를 나타내는 구조체 정의 8x8 픽셀 이미지를 저장하는 데 사용
 typedef struct {
-    uint8_t width; // 문자의 너비 (여기서는 모든 이미지가 8픽셀이므로 8)
-    uint8_t data[8]; // 문자의 픽셀 데이터 (각 바이트가 한 행을 나타냅니다)
+    uint8_t width;      // 문자의 너비 (여기서는 모든 이미지가 8픽셀이므로 8)
+    uint8_t data[8];    // 문자의 픽셀 데이터 (각 바이트가 한 행을 나타냅니다)
 } T_R310_FontChar;
 
 
@@ -66,8 +63,7 @@ typedef enum {
 } T_R310_EyeSide_Idx_t;
 
 
-// --- 로봇 눈 모양 폰트 인덱스를 위한 열거형 정의 ---
-// 각 폰트 인덱스는 특정 눈 모양에 대한 의미 있는 이름을 가집니다.
+// --- 로봇 눈 모양 폰트 인덱스를 위한 열거형 정의 --- 각 폰트 인덱스는 특정 눈 모양에 대한 의미 있는 이름을 가집니다.
 typedef enum {
     // 기본 눈 모양 (인덱스 0-4)
     EYE_NEUTRAL = 0,           // 중립/행복한 눈
@@ -191,17 +187,16 @@ typedef enum {
 
 // 애니메이션 시퀀스 단일 프레임
 typedef struct {
-    uint8_t     eyeData[2];  // [0] = 오른쪽 눈 폰트 인덱스, [1] = 왼쪽 눈 폰트 인덱스
-    uint16_t    timeFrame;  // 프레임 표시 시간 (밀리초)
+    uint8_t         eyeData[2];     // [0] = 오른쪽 눈 폰트 인덱스, [1] = 왼쪽 눈 폰트 인덱스
+    uint16_t        timeFrame;      // 프레임 표시 시간 (밀리초)
 } T_R310_animFrame_t;
 
 // 감정 애니메이션 시퀀스 조회 테이블 항목
 typedef struct {
-    T_R310_emotion_t            e;          // 감정 종류
-    const T_R310_animFrame_t* seq;        // 시퀀스 데이터 PROGMEM 주소
-    uint8_t                     size;       // 시퀀스 총 프레임 개수
-} T_R310_animTable_t;
-
+    T_R310_emotion_t            emotion_idx;        // 감정 종류
+    const T_R310_animFrame_t*   seq;                // 시퀀스 데이터 PROGMEM 주소
+    uint8_t                     seq_size;               // 시퀀스 총 프레임 개수
+} T_R310_ani_Table_t;
 
 
 
@@ -397,7 +392,7 @@ const T_R310_animFrame_t g_R310_seqHeart[] PROGMEM = {
 
 
 // 감정 애니메이션 조회 테이블
-const T_R310_animTable_t g_R310_lookupTable[] PROGMEM = {
+const T_R310_ani_Table_t g_R310_ani_Table[] PROGMEM = {
     {EMT_NEUTRAL      , g_R310_seqBlink        , 1                                  }, // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
     
 	{EMT_BLINK        , g_R310_seqBlink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
