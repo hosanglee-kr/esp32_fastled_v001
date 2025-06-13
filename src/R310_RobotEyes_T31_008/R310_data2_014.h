@@ -17,8 +17,6 @@ const unsigned long G_R310_TIME_TO_SLEEP = 10000; // 밀리초 단위 (10초)
 
 ///////////////////////////////////
 
-
-
 // 애니메이션 상태 머신(FSM) 상태
 typedef enum {
     ANI_PLY_STATE_IDLE,      // 유휴 상태
