@@ -37,20 +37,20 @@ uint32_t		        g_R310_timeLastAnimation    = 0;                // 마지막 �
 
 uint16_t		        g_R310_timeBlinkMinimum	    = 5000;	            // 자동 깜빡임 최소 대기 시간 (밀리초) 기본값 5초
 
-T_R310_animState_t      g_R310_animState			= S_IDLE;           // 애니메이션 상태 머신 현재 상태
+T_R310_ani_ply_state_t  g_R310_ani_ply_state	    = ANI_PLY_STATE_IDLE; // 애니메이션 상태 머신 현재 상태
      
-bool			        g_R310_autoBlink			= true;             // 자동 깜빡임 기능 활성화 여부
+bool			        g_R310_ani_ply_autoBlink_on			= true;             // 자동 깜빡임 기능 활성화 여부
 
-T_R310_animTable_t      g_R310_animEntry;                               // 현재 실행 중인 애니메이션 시퀀스 정보
+T_R310_ani_Table_t      g_R310_animEntry;                               // 현재 실행 중인 애니메이션 시퀀스 정보
 
 int8_t			        g_R310_animIndex		    = 0;                // 현재 시퀀스 내 프레임 인덱스
   
 EMTP_PlyDirect_t	    g_R310_animReverse	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
 EMTP_AutoReverse_t	    g_R310_autoReverse	        = EMTP_AUTO_REVERSE_OFF;  // 시퀀스 완료 후 자동 역방향 재생 여부
 
-T_R310_emotion_t        g_R310_nextEmotion	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
+T_R310_emotion_t        g_R310_emotion_next	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
 
-T_R310_emotion_t        g_R310_currentEmotion       = EMT_NONE;         // 현재 화면에 표시되는 애니메이션 감정 종류
+T_R310_emotion_t        g_R310_emotion_current       = EMT_NONE;         // 현재 화면에 표시되는 애니메이션 감정 종류
 
 char			        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];  // 표시할 텍스트 문자열 고정 크기 버퍼
 
@@ -201,10 +201,10 @@ void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
 uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
     bool v_found = false;
 
-    for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_lookupTable); v_i++) {
-        T_R310_animTable_t v_entry;
-        memcpy_P(&v_entry, &g_R310_lookupTable[v_i], sizeof(T_R310_animTable_t));
-        if (v_entry.e == p_eyeEmotion_idx) {
+    for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_ani_Table); v_i++) {
+        T_R310_ani_Table_t v_entry;
+        memcpy_P(&v_entry, &g_R310_ani_Table[v_i], sizeof(T_R310_ani_Table_t));
+        if (v_entry.emotion_idx == p_eyeEmotion_idx) {
             g_R310_animEntry = v_entry;
             v_found = true;
             break;
@@ -220,18 +220,18 @@ uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
 
     // 애니메이션 시작 인덱스 설정 (정방향 또는 역방향)
     if (g_R310_animReverse == EMTP_PLY_DIR_LAST)
-        g_R310_animIndex = g_R310_animEntry.size - 1;
+        g_R310_animIndex = g_R310_animEntry.seq_size - 1;
     else
         g_R310_animIndex = 0;
 
-    return (g_R310_animEntry.size);
+    return (g_R310_animEntry.seq_size);
 }
 
 // 현재 시퀀스에서 특정 인덱스의 프레임 데이터 로드
 // @param p_pBuf 로드된 프레임 데이터를 저장할 구조체 포인터
 void R310_loadFrame(T_R310_animFrame_t* p_pBuf) {
     // 애니메이션 인덱스 유효 범위 확인
-    if (g_R310_animIndex >= 0 && g_R310_animIndex < g_R310_animEntry.size) {
+    if (g_R310_animIndex >= 0 && g_R310_animIndex < g_R310_animEntry.seq_size) {
         // PROGMEM에서 프레임 데이터 읽어오기
         memcpy_P(p_pBuf, &g_R310_animEntry.seq[g_R310_animIndex], sizeof(T_R310_animFrame_t));
     } else {
@@ -256,7 +256,7 @@ void R310_showText(bool p_bInit) {
     // 표시할 텍스트 없으면 종료
     if (g_R310_pText == nullptr || g_R310_textBuffer[0] == '\0') {
          R310_clearText();
-         g_R310_animState = S_IDLE; // 유휴 상태 복귀
+         g_R310_ani_ply_state = ANI_PLY_STATE_IDLE; // 유휴 상태 복귀
          g_R310_timeLastAnimation = millis(); // 타이머 리셋
          return;
     }
@@ -284,14 +284,14 @@ void R310_setAnimation(T_R310_emotion_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDir
     if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_force) return;
 
     // 현재 감정과 다르거나 강제 시작 시 처리
-    if (p_e != g_R310_currentEmotion || p_force) {
-        g_R310_nextEmotion = p_e;     // 다음에 재생할 감정 설정
+    if (p_e != g_R310_emotion_current || p_force) {
+        g_R310_emotion_next = p_e;     // 다음에 재생할 감정 설정
         g_R310_autoReverse = p_r;     // 자동 역재생 여부 설정
         g_R310_animReverse = p_b;     // 시작 방향 설정
 
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
-        if (p_force == EMTP_FORCE_PLY_ON || g_R310_animState == S_IDLE) {
-             g_R310_animState = S_RESTART;
+        if (p_force == EMTP_FORCE_PLY_ON || g_R310_ani_ply_state == ANI_PLY_STATE_IDLE) {
+             g_R310_ani_ply_state = ANI_PLY_STATE_RESTART;
         }
     }
 }
@@ -383,7 +383,7 @@ void R310_processCommand(const char* p_command) {
         // 명령 문자열을 고정 버퍼로 복사 (최대 길이 제한 및 널 종료 보장)
         strncpy(g_R310_textBuffer, p_command, G_R310_MAX_TEXT_LENGTH);
         g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH] = '\0';
-        g_R310_animState = S_TEXT; // 텍스트 표시 상태로 전환
+        g_R310_ani_ply_state = ANI_PLY_STATE_TEXT; // 텍스트 표시 상태로 전환
     }
 }
 
@@ -396,24 +396,24 @@ bool R310_runAnimation(void) {
     static uint32_t             v_timeOfLastFrame = 0;  // 현재 프레임 표시 시작 시간
 
     // 현재 애니메이션 상태에 따라 동작 수행
-    switch (g_R310_animState) {
-        case S_IDLE:
+    switch (g_R310_ani_ply_state) {
+        case ANI_PLY_STATE_IDLE:
             // 유휴 상태: 새로운 명령 또는 자동 깜빡임 대기
 
             // 텍스트 표시 대기 중인지 확인
             if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0') {
-                g_R310_animState = S_TEXT; // 텍스트 표시 상태로 전환
+                g_R310_ani_ply_state = ANI_PLY_STATE_TEXT; // 텍스트 표시 상태로 전환
                 break;
             }
 
             // 새 애니메이션 대기 중인지 확인
-            if (g_R310_nextEmotion != EMT_NONE) {
-                 g_R310_animState = S_RESTART; // RESTART 상태로 전환
+            if (g_R310_emotion_next != EMT_NONE) {
+                 g_R310_ani_ply_state = ANI_PLY_STATE_RESTART; // RESTART 상태로 전환
                  break;
             }
 
             // 자동 깜빡임 활성화 및 최소 대기 시간 경과 확인
-            if (g_R310_autoBlink && (millis() - g_R310_timeLastAnimation) >= g_R310_timeBlinkMinimum) {
+            if (g_R310_ani_ply_autoBlink_on && (millis() - g_R310_timeLastAnimation) >= g_R310_timeBlinkMinimum) {
                  // 최소 대기 시간 경과 후 무작위 확률(예: 30% 확률)로 깜빡임을 트리거합니다.
                  if (random(1000) > 700) {
                     if (g_R310_robotState == R_STATE_SLEEPING) {					
@@ -431,25 +431,25 @@ bool R310_runAnimation(void) {
             // 대기 상태 유지
             break;
 
-        case S_RESTART:
+        case ANI_PLY_STATE_RESTART:
             // 새 애니메이션 시퀀스 로드 및 준비
 
             // 다음에 재생할 애니메이션 확인
-            if (g_R310_nextEmotion != EMT_NONE) {
+            if (g_R310_emotion_next != EMT_NONE) {
 
-                R310_loadSequence(g_R310_nextEmotion); // 시퀀스 로드
+                R310_loadSequence(g_R310_emotion_next); // 시퀀스 로드
 
-                g_R310_currentEmotion = g_R310_nextEmotion; // 현재 감정 업데이트
-                g_R310_nextEmotion = EMT_NONE; // 큐 비우기
+                g_R310_emotion_current = g_R310_emotion_next; // 현재 감정 업데이트
+                g_R310_emotion_next = EMT_NONE; // 큐 비우기
 
-                g_R310_animState = S_ANIMATE; // 애니메이션 실행 상태로 전환
+                g_R310_ani_ply_state = ANI_PLY_STATE_ANIMATE; // 애니메이션 실행 상태로 전환
 
             } else {
-                 g_R310_animState = S_IDLE; // 오류 또는 논리적 문제 시 유휴 상태 복귀
+                 g_R310_ani_ply_state = ANI_PLY_STATE_IDLE; // 오류 또는 논리적 문제 시 유휴 상태 복귀
             }
             break;
 
-        case S_ANIMATE:
+        case ANI_PLY_STATE_ANIMATE:
             // 현재 프레임 표시 및 다음 프레임 준비
 
             R310_loadFrame(&v_thisFrame); // 현재 프레임 데이터 로드
@@ -463,10 +463,10 @@ bool R310_runAnimation(void) {
                 g_R310_animIndex++; // 정방향
             }
 
-            g_R310_animState = S_PAUSE; // 프레임 대기 상태로 이동
+            g_R310_ani_ply_state = ANI_PLY_STATE_PAUSE; // 프레임 대기 상태로 이동
             break;
 
-        case S_PAUSE:
+        case ANI_PLY_STATE_PAUSE:
             // 현재 프레임 표시 시간만큼 대기
 
             // 대기 시간 경과 확인
@@ -476,7 +476,7 @@ bool R310_runAnimation(void) {
 
             // 대기 시간 경과: 다음 상태 결정
             // 애니메이션 시퀀스 완료 확인
-            if ((!g_R310_animReverse && g_R310_animIndex >= g_R310_animEntry.size) || (g_R310_animReverse && g_R310_animIndex < 0)) {
+            if ((!g_R310_animReverse && g_R310_animIndex >= g_R310_animEntry.seq_size) || (g_R310_animReverse && g_R310_animIndex < 0)) {
                 // 시퀀스 완료
                 if (g_R310_autoReverse) {
                     // 자동 역재생: 동일 시퀀스를 반대 방향으로 다시 시작 준비
@@ -486,41 +486,41 @@ bool R310_runAnimation(void) {
 					} else {
 						v_emtp_ply_dir  = EMTP_PLY_DIR_LAST;
 					}
-                    R310_setAnimation(g_R310_animEntry.e, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
-                    //R310_setAnimation(g_R310_animEntry.e, EMT_AUTO_REVERSE_OFF, !g_R310_animReverse, EMT_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
+                    R310_setAnimation(g_R310_animEntry.emotion_idx, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
+                    //R310_setAnimation(g_R310_animEntry.emotion_idx, EMT_AUTO_REVERSE_OFF, !g_R310_animReverse, EMT_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
                 } else {
                     // 완료: 유휴 상태 복귀
-                    g_R310_animState = S_IDLE;
-                    g_R310_currentEmotion = EMT_NONE; // 현재 감정 상태 지움
+                    g_R310_ani_ply_state = ANI_PLY_STATE_IDLE;
+                    g_R310_emotion_current = EMT_NONE; // 현재 감정 상태 지움
                     g_R310_timeLastAnimation = millis(); // 타이머 리셋
                 }
             } else {
                 // 시퀀스 미완료: 다음 프레임 실행 준비
-                g_R310_animState = S_ANIMATE; // 애니메이션 실행 상태로 전환
+                g_R310_ani_ply_state = ANI_PLY_STATE_ANIMATE; // 애니메이션 실행 상태로 전환
             }
             break;
 
-        case S_TEXT:
+        case ANI_PLY_STATE_TEXT:
             // 텍스트 표시 상태 (정적 표시)
 
             // 텍스트 버퍼 비워졌는지 확인 (외부 명령 등에 의해)
             if (g_R310_textBuffer[0] == '\0') {
-                 g_R310_animState = S_IDLE; // 유휴 상태 복귀
+                 g_R310_ani_ply_state = ANI_PLY_STATE_IDLE; // 유휴 상태 복귀
                  g_R310_timeLastAnimation = millis(); // 타이머 리셋
             }
             // 텍스트 버퍼 비워지지 않음: 텍스트 표시 상태 유지
             break;
 
         default: // 예상치 못한 상태: 초기화 및 유휴 상태 복귀
-            g_R310_animState = S_IDLE;
-            g_R310_currentEmotion = EMT_NONE;
+            g_R310_ani_ply_state = ANI_PLY_STATE_IDLE;
+            g_R310_emotion_current = EMT_NONE;
             R310_clearText();
             g_R310_timeLastAnimation = millis();
             break;
     }
 
     // 현재 상태가 S_IDLE이면 true 반환
-    return (g_R310_animState == S_IDLE);
+    return (g_R310_ani_ply_state == ANI_PLY_STATE_IDLE);
 }
 
 
@@ -552,8 +552,8 @@ void R310_init() {
 
     // 로봇 상태 관련 변수 초기화
     g_R310_robotState           = R_STATE_AWAKE;    // 초기 상태: 깨어있음
-    g_R310_animState            = S_IDLE;   // 초기 애니메이션 상태: 유휴
-    // g_R310_autoBlink            = true;     // 자동 깜빡임 활성화
+    g_R310_ani_ply_state            = ANI_PLY_STATE_IDLE;   // 초기 애니메이션 상태: 유휴
+    // g_R310_ani_ply_autoBlink_on            = true;     // 자동 깜빡임 활성화
     g_R310_timeBlinkMinimum     = 5000;     // 자동 깜빡임 최소 대기 시간 (5초)
     g_R310_timeLastAnimation    = millis(); // 타이머 기준 시간 초기화
 
