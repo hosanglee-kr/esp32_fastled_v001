@@ -48,9 +48,9 @@ int8_t			        g_R310_animIndex		    = 0;                // 현재 시퀀스 �
 EMTP_PlyDirect_t	    g_R310_animReverse	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
 EMTP_AutoReverse_t	    g_R310_autoReverse	        = EMTP_AUTO_REVERSE_OFF;  // 시퀀스 완료 후 자동 역방향 재생 여부
 
-T_R310_emotion_t        g_R310_emotion_next	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
+T_R310_emotion_idx_t    g_R310_emotion_next	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
 
-T_R310_emotion_t        g_R310_emotion_current       = EMT_NONE;         // 현재 화면에 표시되는 애니메이션 감정 종류
+T_R310_emotion_idx_t    g_R310_emotion_current       = EMT_NONE;         // 현재 화면에 표시되는 애니메이션 감정 종류
 
 char			        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];  // 표시할 텍스트 문자열 고정 크기 버퍼
 
@@ -99,13 +99,13 @@ unsigned long	        g_R310_lastCommandTime = 0;                     // 로봇 
 uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uint8_t p_col);
 void     R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) ;
 void     R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left);
-uint8_t  R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx);
+uint8_t  R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx);
 void     R310_loadFrame(T_R310_animFrame_t* p_pBuf) ;
 
 void     R310_clearText();
 void     R310_showText(bool p_bInit);
 
-void     R310_setAnimation(T_R310_emotion_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force);
+void     R310_setAnimation(T_R310_emotion_idx_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force);
 void     R310_set_RobotState(T_R310_RobotState_t p_robotState);
 void     R310_processCommand(const char* p_command);
 
@@ -229,7 +229,7 @@ uint8_t R310_loadSequence(T_R310_emotion_t p_eyeEmotion_idx) {
 
 // 현재 시퀀스에서 특정 인덱스의 프레임 데이터 로드
 // @param p_pBuf 로드된 프레임 데이터를 저장할 구조체 포인터
-void R310_loadFrame(T_R310_animFrame_t* p_pBuf) {
+void R310_loadFrame(T_R310_emotion_idx_t* p_pBuf) {
     // 애니메이션 인덱스 유효 범위 확인
     if (g_R310_animIndex >= 0 && g_R310_animIndex < g_R310_animEntry.seq_size) {
         // PROGMEM에서 프레임 데이터 읽어오기
@@ -279,7 +279,7 @@ void R310_showText(bool p_bInit) {
 // @param p_r 시퀀스 완료 후 자동 역재생 여부
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
-void R310_setAnimation(T_R310_emotion_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force) {
+void R310_setAnimation(T_R310_emotion_idx_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force) {
     // 텍스트 표시 중이고 강제 시작 아니면 무시
     if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_force) return;
 
