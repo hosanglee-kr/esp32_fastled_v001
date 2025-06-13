@@ -183,7 +183,7 @@ typedef enum {
     EMT_IDLE,          // 대기 상태 (찡그린 눈 고정)
     EMT_HEART,         // 하트
 */
-} T_R310_emotion_t;
+} T_R310_emotion_idx_t;
 
 // 애니메이션 시퀀스 단일 프레임
 typedef struct {
@@ -193,7 +193,7 @@ typedef struct {
 
 // 감정 애니메이션 시퀀스 조회 테이블 항목
 typedef struct {
-    T_R310_emotion_t            emotion_idx;        // 감정 종류
+    T_R310_emotion_idx_t        emotion_idx;        // 감정 종류
     const T_R310_animFrame_t*   seq;                // 시퀀스 데이터 PROGMEM 주소
     uint8_t                     seq_size;               // 시퀀스 총 프레임 개수
 } T_R310_ani_Table_t;

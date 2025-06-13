@@ -100,7 +100,7 @@ uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uin
 void     R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) ;
 void     R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left);
 uint8_t  R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx);
-void     R310_loadFrame(T_R310_animFrame_t* p_pBuf) ;
+void     R310_loadFrame(T_R310_animFrame_t* p_animFrame) ;
 
 void     R310_clearText();
 void     R310_showText(bool p_bInit);
@@ -229,18 +229,19 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx) {
 
 // 현재 시퀀스에서 특정 인덱스의 프레임 데이터 로드
 // @param p_pBuf 로드된 프레임 데이터를 저장할 구조체 포인터
-void R310_loadFrame(T_R310_animFrame_t* p_pBuf) {
+void R310_loadFrame(T_R310_animFrame_t* p_animFrame) {
     // 애니메이션 인덱스 유효 범위 확인
     if (g_R310_animIndex >= 0 && g_R310_animIndex < g_R310_animEntry.seq_size) {
         // PROGMEM에서 프레임 데이터 읽어오기
-        memcpy_P(p_pBuf, &g_R310_animEntry.seq[g_R310_animIndex], sizeof(T_R310_animFrame_t));
+        memcpy_P(p_animFrame, &g_R310_animEntry.seq[g_R310_animIndex], sizeof(T_R310_animFrame_t));
     } else {
          // 유효하지 않은 인덱스 접근 시 오류 처리 및 기본 프레임 설정
          Serial.print("Error: Invalid animation index: ");
          Serial.println(g_R310_animIndex);
-         p_pBuf->eyeData[0] = 0;
-         p_pBuf->eyeData[1] = 0;
-         p_pBuf->timeFrame = G_R310_FRAME_TIME;
+		
+         p_animFrame->eyeData[0] = 0;
+         p_animFrame->eyeData[1] = 0;
+         p_animFrame->timeFrame = G_R310_FRAME_TIME;
     }
 }
 
