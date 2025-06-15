@@ -205,7 +205,7 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx) {
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_ani_Tables_arr); v_i++) {
         T_R310_ani_Table_t v_ani_table;
         memcpy_P(&v_ani_table, &g_R310_ani_Tables_arr[v_i], sizeof(T_R310_ani_Table_t));
-        if (v_entry.emotion_idx == p_eyeEmotion_idx) {
+        if (v_ani_table.emotion_idx == p_eyeEmotion_idx) {
             g_R310_animEntry = v_ani_table;
             v_found = true;
             break;
@@ -459,7 +459,7 @@ bool R310_runAnimation(void) {
             v_timeOfLastFrame = millis(); // 프레임 표시 시작 시간 기록
 
             // 애니메이션 재생 방향에 따라 다음 프레임 인덱스 계산
-            if (g_R310_animReverse) {
+            if (g_R310_ani_ply_direct == EMTP_PLY_DIR_LAST) {
                 g_R310_animIndex--; // 역방향
             } else {
                 g_R310_animIndex++; // 정방향
