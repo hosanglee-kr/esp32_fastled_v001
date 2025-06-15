@@ -44,8 +44,9 @@ bool			        g_R310_ani_ply_autoBlink_on			= true;             // 자동 깜�
 T_R310_ani_Table_t      g_R310_animEntry;                               // 현재 실행 중인 애니메이션 시퀀스 정보
 
 int8_t			        g_R310_animIndex		    = 0;                // 현재 시퀀스 내 프레임 인덱스
-  
-EMTP_PlyDirect_t	    g_R310_animReverse	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
+
+EMTP_PlyDirect_t	    g_R310_ani_ply_direct	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
+//// EMTP_PlyDirect_t	    g_R310_animReverse	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
 EMTP_AutoReverse_t	    g_R310_autoReverse	        = EMTP_AUTO_REVERSE_OFF;  // 시퀀스 완료 후 자동 역방향 재생 여부
 
 T_R310_emotion_idx_t    g_R310_emotion_next	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
@@ -219,7 +220,7 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx) {
     }
 
     // 애니메이션 시작 인덱스 설정 (정방향 또는 역방향)
-    if (g_R310_animReverse == EMTP_PLY_DIR_LAST)
+    if (g_R310_ani_ply_direct == EMTP_PLY_DIR_LAST)
         g_R310_animIndex = g_R310_animEntry.seq_size - 1;
     else
         g_R310_animIndex = 0;
@@ -288,7 +289,7 @@ void R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_AutoReverse_t p_a
     if (p_emotionIdx != g_R310_emotion_current || p_forcePly) {
         g_R310_emotion_next = p_emotionIdx;     // 다음에 재생할 감정 설정
         g_R310_autoReverse = p_autoReverse;     // 자동 역재생 여부 설정
-        g_R310_animReverse = p_plyDirect;     // 시작 방향 설정
+        g_R310_ani_ply_direct = p_plyDirect;     // 시작 방향 설정
 
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
         if (p_forcePly == EMTP_FORCE_PLY_ON || g_R310_ani_ply_state == ANI_PLY_STATE_IDLE) {
@@ -477,12 +478,12 @@ bool R310_runAnimation(void) {
 
             // 대기 시간 경과: 다음 상태 결정
             // 애니메이션 시퀀스 완료 확인
-            if ((!g_R310_animReverse && g_R310_animIndex >= g_R310_animEntry.seq_size) || (g_R310_animReverse && g_R310_animIndex < 0)) {
+            if ((!g_R310_ani_ply_direct && g_R310_animIndex >= g_R310_animEntry.seq_size) || (g_R310_ani_ply_direct && g_R310_animIndex < 0)) {
                 // 시퀀스 완료
                 if (g_R310_autoReverse) {
                     // 자동 역재생: 동일 시퀀스를 반대 방향으로 다시 시작 준비
 					EMTP_PlyDirect_t   v_emtp_ply_dir;
-					if( g_R310_animReverse == EMTP_PLY_DIR_LAST){
+					if( g_R310_ani_ply_direct == EMTP_PLY_DIR_LAST){
                        v_emtp_ply_dir  = EMTP_PLY_DIR_FIRST;
 					} else {
 						v_emtp_ply_dir  = EMTP_PLY_DIR_LAST;
