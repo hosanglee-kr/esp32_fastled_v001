@@ -392,7 +392,7 @@ const T_R310_animFrame_t g_R310_seqHeart[] PROGMEM = {
 
 
 // 감정 애니메이션 조회 테이블
-const T_R310_ani_Table_t g_R310_ani_Table[] PROGMEM = {
+const T_R310_ani_Table_t g_R310_ani_Tables_arr[] PROGMEM = {
     {EMT_NEUTRAL      , g_R310_seqBlink        , 1                                  }, // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
     
 	{EMT_BLINK        , g_R310_seqBlink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
