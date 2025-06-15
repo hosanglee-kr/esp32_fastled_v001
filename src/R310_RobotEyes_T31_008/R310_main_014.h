@@ -201,11 +201,11 @@ void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
 uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotion_idx) {
     bool v_found = false;
 
-    for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_ani_Table); v_i++) {
-        T_R310_ani_Table_t v_entry;
-        memcpy_P(&v_entry, &g_R310_ani_Table[v_i], sizeof(T_R310_ani_Table_t));
+    for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_ani_Tables_arr); v_i++) {
+        T_R310_ani_Table_t v_ani_table;
+        memcpy_P(&v_ani_table, &g_R310_ani_Tables_arr[v_i], sizeof(T_R310_ani_Table_t));
         if (v_entry.emotion_idx == p_eyeEmotion_idx) {
-            g_R310_animEntry = v_entry;
+            g_R310_animEntry = v_ani_table;
             v_found = true;
             break;
         }
