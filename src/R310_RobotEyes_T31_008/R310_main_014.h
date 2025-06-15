@@ -105,7 +105,7 @@ void     R310_loadFrame(T_R310_animFrame_t* p_animFrame) ;
 void     R310_clearText();
 void     R310_showText(bool p_bInit);
 
-void     R310_setAnimation(T_R310_emotion_idx_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force);
+void     R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_AutoReverse_t p_autoReverse, EMTP_PlyDirect_t p_plyDirect, EMTP_ForcePly_t p_forcePly);
 void     R310_set_RobotState(T_R310_RobotState_t p_robotState);
 void     R310_processCommand(const char* p_command);
 
@@ -280,18 +280,18 @@ void R310_showText(bool p_bInit) {
 // @param p_r 시퀀스 완료 후 자동 역재생 여부
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
-void R310_setAnimation(T_R310_emotion_idx_t p_e, EMTP_AutoReverse_t p_r, EMTP_PlyDirect_t p_b, EMTP_ForcePly_t p_force) {
+void R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_AutoReverse_t p_autoReverse, EMTP_PlyDirect_t p_plyDirect, EMTP_ForcePly_t p_forcePly) {
     // 텍스트 표시 중이고 강제 시작 아니면 무시
-    if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_force) return;
+    if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_forcePly) return;
 
     // 현재 감정과 다르거나 강제 시작 시 처리
-    if (p_e != g_R310_emotion_current || p_force) {
-        g_R310_emotion_next = p_e;     // 다음에 재생할 감정 설정
-        g_R310_autoReverse = p_r;     // 자동 역재생 여부 설정
-        g_R310_animReverse = p_b;     // 시작 방향 설정
+    if (p_emotionIdx != g_R310_emotion_current || p_forcePly) {
+        g_R310_emotion_next = p_emotionIdx;     // 다음에 재생할 감정 설정
+        g_R310_autoReverse = p_autoReverse;     // 자동 역재생 여부 설정
+        g_R310_animReverse = p_plyDirect;     // 시작 방향 설정
 
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
-        if (p_force == EMTP_FORCE_PLY_ON || g_R310_ani_ply_state == ANI_PLY_STATE_IDLE) {
+        if (p_forcePly == EMTP_FORCE_PLY_ON || g_R310_ani_ply_state == ANI_PLY_STATE_IDLE) {
              g_R310_ani_ply_state = ANI_PLY_STATE_RESTART;
         }
     }
