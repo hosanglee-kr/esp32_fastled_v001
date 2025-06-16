@@ -23,7 +23,6 @@
 // --- 글로벌 변수 정의 (g_R310_ 로 시작) ---
 
 CRGB			        g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];          // FastLED CRGB 배열
-
 CRGB*			        g_R310_leds_ptr			    = nullptr;	        // CRGB 배열 포인터
 
 
@@ -33,32 +32,32 @@ T_R310_RobotState_t	    g_R310_robotState		    = R_STATE_AWAKE;    // 현재 로
 // 현재 애니메이션 프레임 표시 시작 시간
 /// uint32_t g_R310_timeStartPause = 0;
 
-uint32_t		        g_R310_timeLastAnimation    = 0;                // 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
+uint32_t		        g_R310_timeLastAnimation        = 0;                    // 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
 
-uint16_t		        g_R310_timeBlinkMinimum	    = 5000;	            // 자동 깜빡임 최소 대기 시간 (밀리초) 기본값 5초
+uint16_t		        g_R310_timeBlinkMinimum	        = 5000;	                // 자동 깜빡임 최소 대기 시간 (밀리초) 기본값 5초
 
-T_R310_ani_ply_state_t  g_R310_ani_ply_state	    = ANI_PLY_STATE_IDLE; // 애니메이션 상태 머신 현재 상태
+T_R310_ani_ply_state_t  g_R310_ani_ply_state	        = ANI_PLY_STATE_IDLE;   // 애니메이션 상태 머신 현재 상태
      
-bool			        g_R310_ani_ply_autoBlink_on			= true;             // 자동 깜빡임 기능 활성화 여부
+bool			        g_R310_ani_ply_autoBlink_on		= true;                 // 자동 깜빡임 기능 활성화 여부
 
-T_R310_ani_Table_t      g_R310_animEntry;                               // 현재 실행 중인 애니메이션 시퀀스 정보
+T_R310_ani_Table_t      g_R310_animEntry;                                       // 현재 실행 중인 애니메이션 시퀀스 정보
 
-int8_t			        g_R310_animIndex		    = 0;                // 현재 시퀀스 내 프레임 인덱스
+int8_t			        g_R310_animIndex		        = 0;                    // 현재 시퀀스 내 프레임 인덱스
 
-EMTP_PlyDirect_t	    g_R310_ani_ply_direct	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
-//// EMTP_PlyDirect_t	    g_R310_animReverse	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
-EMTP_AutoReverse_t	    g_R310_autoReverse	        = EMTP_AUTO_REVERSE_OFF;  // 시퀀스 완료 후 자동 역방향 재생 여부
+EMTP_Ply_Direct_t	    g_R310_ani_ply_direct	        = EMTP_PLY_DIR_FIRST;     // 애니메이션 시퀀스 역방향 재생 여부
+EMTP_Ply_AutoReverse_t	g_R310_ani_ply_autoReverse	    = EMTP_AUTO_REVERSE_OFF;  // 시퀀스 완료 후 자동 역방향 재생 여부
 
-T_R310_emotion_idx_t    g_R310_emotion_next	        = EMT_NONE;         // 다음에 재생할 애니메이션 감정 종류
+T_R310_emotion_idx_t    g_R310_emotion_next	            = EMT_NONE;             // 다음에 재생할 애니메이션 감정 종류
 
-T_R310_emotion_idx_t    g_R310_emotion_current       = EMT_NONE;         // 현재 화면에 표시되는 애니메이션 감정 종류
-
-char			        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];  // 표시할 텍스트 문자열 고정 크기 버퍼
-
-char*			        g_R310_pText			    = nullptr;          // 표시할 텍스트 문자열 포인터 (g_R310_textBuffer 시작 주소)
+T_R310_emotion_idx_t    g_R310_emotion_current          = EMT_NONE;             // 현재 화면에 표시되는 애니메이션 감정 종류
 
 
-unsigned long	        g_R310_lastCommandTime = 0;                     // 로봇 상태 관리를 위한 마지막 활동 시간 기록
+unsigned long	        g_R310_lastCommandTime = 0;                             // 로봇 상태 관리를 위한 마지막 활동 시간 기록
+
+
+char			        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH + 1];          // 표시할 텍스트 문자열 고정 크기 버퍼
+char*			        g_R310_pText			        = nullptr;              // 표시할 텍스트 문자열 포인터 (g_R310_textBuffer 시작 주소)
+
 
 // ====================================================================================================
 // 함수 선언 (프로토타입)
@@ -106,7 +105,7 @@ void     R310_loadFrame(T_R310_animFrame_t* p_animFrame) ;
 void     R310_clearText();
 void     R310_showText(bool p_bInit);
 
-void     R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_AutoReverse_t p_autoReverse, EMTP_PlyDirect_t p_plyDirect, EMTP_ForcePly_t p_forcePly);
+void     R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_Ply_AutoReverse_t p_autoReverse, EMTP_Ply_Direct_t p_plyDirect, EMTP_Ply_Force_t p_forcePly);
 void     R310_set_RobotState(T_R310_RobotState_t p_robotState);
 void     R310_processCommand(const char* p_command);
 
@@ -151,23 +150,23 @@ uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uin
 // @param p_eye_font_idx 폰트 문자 인덱스
 void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_eye_font_idx) {
     // 폰트 문자 인덱스 유효 범위 확인
-    if (p_eye_font_idx >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font)) {
+    if (p_eye_font_idx >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font_arr)) {
         Serial.print("Error: Invalid Eye Font index: ");
         Serial.println(p_eye_font_idx);
         return;
     }
 
     // PROGMEM에서 비트맵 데이터 읽어오기
-    T_R310_FontChar v_charData;
-    memcpy_P(&v_charData, &g_R310_RobotEyes_Font[p_eye_font_idx], sizeof(T_R310_FontChar));
+    T_R310_FontChar v_fontChar;
+    memcpy_P(&v_fontChar, &g_R310_RobotEyes_Font_arr[p_eye_font_idx], sizeof(T_R310_FontChar));
 
     // 읽어온 행 우선(Row Major) 비트맵 데이터 기반 픽셀 설정
-    // v_charData.data[row]는 해당 행의 8개 픽셀 비트맵을 나타냅니다.
+    // v_fontChar.data[row]는 해당 행의 8개 픽셀 비트맵을 나타냅니다.
     // 각 바이트의 비트는 MSB(왼쪽)부터 LSB(오른쪽) 순서로 열(Col 0 ~ Col 7)을 나타냅니다.
     for (uint8_t v_row = 0; v_row < G_R310_DISPLAY_HEIGHT; v_row++) { // 각 행(0-7)을 반복합니다.
     /////for (uint8_t v_row = 0; v_row < G_R310_DISPLAY_HEIGHT / 2; v_row++) { // 각 행(0-7)을 반복합니다.
         // 현재 행에 해당하는 8열의 비트맵 데이터(1바이트)를 읽어옵니다.
-        uint8_t v_row_byte = pgm_read_byte(&v_charData.data[v_row]); // 이제 data[row]가 행 데이터입니다.
+        uint8_t v_row_byte = pgm_read_byte(&v_fontChar.data[v_row]); // 이제 data[row]가 행 데이터입니다.
 
         for (uint8_t v_col = 0; v_col < G_R310_EYE_COL_SIZE; v_col++) { // 각 열(0-7)을 반복합니다.
             // 현재 행의 비트맵 바이트(v_row_byte)에서 해당 열에 해당하는 비트가 1인지 확인합니다.
@@ -246,50 +245,20 @@ void R310_loadFrame(T_R310_animFrame_t* p_animFrame) {
     }
 }
 
-// 표시할 텍스트 문자열 초기화
-void R310_clearText() {
-    // 고정 크기 버퍼 초기화
-    g_R310_textBuffer[0] = '\0';
-}
-
-// CRGB 버퍼에 텍스트 정적 표시 (첫 두 문자)
-// @param p_bInit 초기화 플래그 (현재 사용되지 않음)
-void R310_showText(bool p_bInit) {
-    // 표시할 텍스트 없으면 종료
-    if (g_R310_pText == nullptr || g_R310_textBuffer[0] == '\0') {
-         R310_clearText();
-         g_R310_ani_ply_state = ANI_PLY_STATE_IDLE; // 유휴 상태 복귀
-         g_R310_timeLastAnimation = millis(); // 타이머 리셋
-         return;
-    }
-
-    FastLED.clear(); // 버퍼 초기화
-
-    // 첫 번째 문자를 오른쪽 눈에 표시 (ASCII 값을 폰트 인덱스로 사용)
-    R310_drawEye(EYE_RIGHT, (uint8_t)g_R310_pText[0]);
-
-    // 두 번째 문자가 있으면 왼쪽 눈에 표시 (ASCII 값을 폰트 인덱스로 사용)
-    if (g_R310_pText[1] != '\0') {
-        R310_drawEye(EYE_LEFT, (uint8_t)g_R310_pText[1]);
-    }
-
-    FastLED.show(); // LED에 표시
-}
-
 // 다음에 표시할 애니메이션 설정
 // @param p_e 감정 애니메이션 종류
 // @param p_r 시퀀스 완료 후 자동 역재생 여부
 // @param p_b 애니메이션 시작 방향 (false: 정방향, true: 역방향)
 // @param p_force 현재 상태에 관계없이 즉시 시작 여부
-void R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_AutoReverse_t p_autoReverse, EMTP_PlyDirect_t p_plyDirect, EMTP_ForcePly_t p_forcePly) {
+void R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_Ply_AutoReverse_t p_autoReverse, EMTP_Ply_Direct_t p_plyDirect, EMTP_Ply_Force_t p_forcePly) {
     // 텍스트 표시 중이고 강제 시작 아니면 무시
     if (g_R310_pText != nullptr && g_R310_textBuffer[0] != '\0' && !p_forcePly) return;
 
     // 현재 감정과 다르거나 강제 시작 시 처리
     if (p_emotionIdx != g_R310_emotion_current || p_forcePly) {
-        g_R310_emotion_next = p_emotionIdx;     // 다음에 재생할 감정 설정
-        g_R310_autoReverse = p_autoReverse;     // 자동 역재생 여부 설정
-        g_R310_ani_ply_direct = p_plyDirect;     // 시작 방향 설정
+        g_R310_emotion_next         = p_emotionIdx;     // 다음에 재생할 감정 설정
+        g_R310_ani_ply_autoReverse  = p_autoReverse;     // 자동 역재생 여부 설정
+        g_R310_ani_ply_direct       = p_plyDirect;     // 시작 방향 설정
 
         // 강제 시작 또는 현재 유휴 상태이면 즉시 재시작 준비
         if (p_forcePly == EMTP_FORCE_PLY_ON || g_R310_ani_ply_state == ANI_PLY_STATE_IDLE) {
@@ -317,77 +286,6 @@ void R310_set_RobotState(T_R310_RobotState_t p_robotState) {
     }
 }
 
-// 외부 명령 문자열 처리 (애니메이션 또는 텍스트)
-// 수신된 명령 파싱하여 눈 모양 변경
-// @param p_command 처리할 명령 문자열
-void R310_processCommand(const char* p_command) {
-    R310_clearText(); // 새 명령 처리 전 텍스트 버퍼 초기화
-
-    // 명령 문자열에 따라 애니메이션 설정
-    if (strcmp(p_command, "neutral") == 0) {
-        R310_setAnimation(EMT_NEUTRAL, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "blink") == 0) {
-        R310_setAnimation(EMT_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    
-    } else if (strcmp(p_command, "wink") == 0) {
-        R310_setAnimation(EMT_WINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-
-    } else if (strcmp(p_command, "left") == 0) {
-        R310_setAnimation(EMT_LOOK_L, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "right") == 0) {
-        R310_setAnimation(EMT_LOOK_R, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "up") == 0) {
-        R310_setAnimation(EMT_LOOK_U, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "down") == 0) {
-        R310_setAnimation(EMT_LOOK_D, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    
-    } else if (strcmp(p_command, "updown") == 0) {
-        R310_setAnimation(EMT_SCAN_UD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "leftright") == 0) {
-        R310_setAnimation(EMT_SCAN_LR, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-	} else if (strcmp(p_command, "angry") == 0) {
-        R310_setAnimation(EMT_ANGRY2, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-	} else if (strcmp(p_command, "smile") == 0) {
-        R310_setAnimation(EMT_SMILE, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-	} else if (strcmp(p_command, "sleep") == 0) { // 잠자는 애니메이션 명시적 실행
-        R310_setAnimation(EMT_SLEEP, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-	} else if (strcmp(p_command, "sleepblink") == 0) { // 잠자는 애니메이션 명시적 실행
-        R310_setAnimation(EMT_SLEEP_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    }
-	
-    // 로봇 상태 직접 변경 명령
-    else if (strcmp(p_command, "awake") == 0) {
-        R310_set_RobotState(R_STATE_AWAKE);
-    } else if (strcmp(p_command, "sleeping") == 0) {
-        R310_set_RobotState(R_STATE_SLEEPING);
-    }
-/*
-    } else if (strcmp(p_command, "angry") == 0) {
-        R310_setAnimation(EMT_ANGRY, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "sad") == 0) {
-        R310_setAnimation(EMT_SAD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "evil") == 0) {
-        R310_setAnimation(EMT_EVIL, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "evil2") == 0) {
-        R310_setAnimation(EMT_EVIL2, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "squint") == 0) {
-        R310_setAnimation(EMT_SQUINT, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "dead") == 0) {
-        R310_setAnimation(EMT_DEAD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    } else if (strcmp(p_command, "core") == 0) { // "core" 명령은 E_HEART
-        R310_setAnimation(EMT_HEART, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-    
-*/
-
-	
-    // 위 명령들에 해당하지 않으면 텍스트 표시 명령으로 간주
-    else {
-        // 명령 문자열을 고정 버퍼로 복사 (최대 길이 제한 및 널 종료 보장)
-        strncpy(g_R310_textBuffer, p_command, G_R310_MAX_TEXT_LENGTH);
-        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH] = '\0';
-        g_R310_ani_ply_state = ANI_PLY_STATE_TEXT; // 텍스트 표시 상태로 전환
-    }
-}
 
 // 애니메이션 상태 머신 실행 (main 루프에서 반복 호출)
 // 현재 상태에 따라 동작 결정 및 함수 호출
@@ -480,21 +378,22 @@ bool R310_runAnimation(void) {
             // 애니메이션 시퀀스 완료 확인
             if ((!g_R310_ani_ply_direct && g_R310_animIndex >= g_R310_animEntry.seq_size) || (g_R310_ani_ply_direct && g_R310_animIndex < 0)) {
                 // 시퀀스 완료
-                if (g_R310_autoReverse) {
+                if (g_R310_ani_ply_autoReverse) {
                     // 자동 역재생: 동일 시퀀스를 반대 방향으로 다시 시작 준비
-					EMTP_PlyDirect_t   v_emtp_ply_dir;
-					if( g_R310_ani_ply_direct == EMTP_PLY_DIR_LAST){
-                       v_emtp_ply_dir  = EMTP_PLY_DIR_FIRST;
+					EMTP_Ply_Direct_t   v_emtp_ply_dir;
+
+					if( g_R310_ani_ply_direct == EMTP_PLY_DIR_FIRST){
+                        v_emtp_ply_dir  = EMTP_PLY_DIR_FIRST;
 					} else {
-						v_emtp_ply_dir  = EMTP_PLY_DIR_LAST;
+					    v_emtp_ply_dir  = EMTP_PLY_DIR_LAST;
 					}
                     R310_setAnimation(g_R310_animEntry.emotion_idx, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
                     //R310_setAnimation(g_R310_animEntry.emotion_idx, EMT_AUTO_REVERSE_OFF, !g_R310_animReverse, EMT_FORCE_PLY_ON); // 자동 역재생 아님, 반대 방향, 강제 실행
                 } else {
                     // 완료: 유휴 상태 복귀
-                    g_R310_ani_ply_state = ANI_PLY_STATE_IDLE;
-                    g_R310_emotion_current = EMT_NONE; // 현재 감정 상태 지움
-                    g_R310_timeLastAnimation = millis(); // 타이머 리셋
+                    g_R310_ani_ply_state        = ANI_PLY_STATE_IDLE;
+                    g_R310_emotion_current      = EMT_NONE; // 현재 감정 상태 지움
+                    g_R310_timeLastAnimation    = millis(); // 타이머 리셋
                 }
             } else {
                 // 시퀀스 미완료: 다음 프레임 실행 준비
@@ -553,11 +452,11 @@ void R310_init() {
 
 
     // 로봇 상태 관련 변수 초기화
-    g_R310_robotState           = R_STATE_AWAKE;    // 초기 상태: 깨어있음
+    g_R310_robotState               = R_STATE_AWAKE;    // 초기 상태: 깨어있음
     g_R310_ani_ply_state            = ANI_PLY_STATE_IDLE;   // 초기 애니메이션 상태: 유휴
-    // g_R310_ani_ply_autoBlink_on            = true;     // 자동 깜빡임 활성화
-    g_R310_timeBlinkMinimum     = 5000;     // 자동 깜빡임 최소 대기 시간 (5초)
-    g_R310_timeLastAnimation    = millis(); // 타이머 기준 시간 초기화
+    // g_R310_ani_ply_autoBlink_on  = true;     // 자동 깜빡임 활성화
+    g_R310_timeBlinkMinimum         = 5000;     // 자동 깜빡임 최소 대기 시간 (5초)
+    g_R310_timeLastAnimation        = millis(); // 타이머 기준 시간 초기화
 
 
 
@@ -601,6 +500,7 @@ void R310_run() {
     if (g_R310_robotState != R_STATE_SLEEPING && millis() - g_R310_lastCommandTime >= G_R310_TIME_TO_SLEEP) {
         R310_set_RobotState(R_STATE_SLEEPING); // R_STATE_SLEEPING 상태로 변경 (잠자는 애니메이션 트리거)
     }
+    
     // R_STATE_SLEEPING 상태인데 활동 감지 시
     else if (g_R310_robotState == R_STATE_SLEEPING && millis() - g_R310_lastCommandTime < G_R310_TIME_TO_SLEEP) {
          R310_set_RobotState(R_STATE_AWAKE); // R_STATE_AWAKE 상태로 변경 (잠 깨는 애니메이션 트리거)
@@ -636,4 +536,115 @@ void R310_run() {
     //delay(1);
 
     delay(1);
+}
+
+
+
+
+/////////////////////////////
+
+
+
+// 표시할 텍스트 문자열 초기화
+void R310_clearText() {
+    // 고정 크기 버퍼 초기화
+    g_R310_textBuffer[0] = '\0';
+}
+
+// CRGB 버퍼에 텍스트 정적 표시 (첫 두 문자)
+// @param p_bInit 초기화 플래그 (현재 사용되지 않음)
+void R310_showText(bool p_bInit) {
+    // 표시할 텍스트 없으면 종료
+    if (g_R310_pText == nullptr || g_R310_textBuffer[0] == '\0') {
+         R310_clearText();
+         g_R310_ani_ply_state = ANI_PLY_STATE_IDLE; // 유휴 상태 복귀
+         g_R310_timeLastAnimation = millis(); // 타이머 리셋
+         return;
+    }
+
+    FastLED.clear(); // 버퍼 초기화
+
+    // 첫 번째 문자를 오른쪽 눈에 표시 (ASCII 값을 폰트 인덱스로 사용)
+    R310_drawEye(EYE_RIGHT, (uint8_t)g_R310_pText[0]);
+
+    // 두 번째 문자가 있으면 왼쪽 눈에 표시 (ASCII 값을 폰트 인덱스로 사용)
+    if (g_R310_pText[1] != '\0') {
+        R310_drawEye(EYE_LEFT, (uint8_t)g_R310_pText[1]);
+    }
+
+    FastLED.show(); // LED에 표시
+}
+
+
+
+// 외부 명령 문자열 처리 (애니메이션 또는 텍스트)
+// 수신된 명령 파싱하여 눈 모양 변경
+// @param p_command 처리할 명령 문자열
+void R310_processCommand(const char* p_command) {
+    R310_clearText(); // 새 명령 처리 전 텍스트 버퍼 초기화
+
+    // 명령 문자열에 따라 애니메이션 설정
+    if (strcmp(p_command, "neutral") == 0) {
+        R310_setAnimation(EMT_NEUTRAL, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "blink") == 0) {
+        R310_setAnimation(EMT_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    
+    } else if (strcmp(p_command, "wink") == 0) {
+        R310_setAnimation(EMT_WINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+
+    } else if (strcmp(p_command, "left") == 0) {
+        R310_setAnimation(EMT_LOOK_L, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "right") == 0) {
+        R310_setAnimation(EMT_LOOK_R, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "up") == 0) {
+        R310_setAnimation(EMT_LOOK_U, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "down") == 0) {
+        R310_setAnimation(EMT_LOOK_D, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    
+    } else if (strcmp(p_command, "updown") == 0) {
+        R310_setAnimation(EMT_SCAN_UD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "leftright") == 0) {
+        R310_setAnimation(EMT_SCAN_LR, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "angry") == 0) {
+        R310_setAnimation(EMT_ANGRY2, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "smile") == 0) {
+        R310_setAnimation(EMT_SMILE, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "sleep") == 0) { // 잠자는 애니메이션 명시적 실행
+        R310_setAnimation(EMT_SLEEP, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "sleepblink") == 0) { // 잠자는 애니메이션 명시적 실행
+        R310_setAnimation(EMT_SLEEP_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    }
+	
+    // 로봇 상태 직접 변경 명령
+    else if (strcmp(p_command, "awake") == 0) {
+        R310_set_RobotState(R_STATE_AWAKE);
+    } else if (strcmp(p_command, "sleeping") == 0) {
+        R310_set_RobotState(R_STATE_SLEEPING);
+    }
+/*
+    } else if (strcmp(p_command, "angry") == 0) {
+        R310_setAnimation(EMT_ANGRY, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "sad") == 0) {
+        R310_setAnimation(EMT_SAD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "evil") == 0) {
+        R310_setAnimation(EMT_EVIL, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "evil2") == 0) {
+        R310_setAnimation(EMT_EVIL2, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "squint") == 0) {
+        R310_setAnimation(EMT_SQUINT, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "dead") == 0) {
+        R310_setAnimation(EMT_DEAD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "core") == 0) { // "core" 명령은 E_HEART
+        R310_setAnimation(EMT_HEART, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    
+*/
+
+	
+    // 위 명령들에 해당하지 않으면 텍스트 표시 명령으로 간주
+    else {
+        // 명령 문자열을 고정 버퍼로 복사 (최대 길이 제한 및 널 종료 보장)
+        strncpy(g_R310_textBuffer, p_command, G_R310_MAX_TEXT_LENGTH);
+        g_R310_textBuffer[G_R310_MAX_TEXT_LENGTH] = '\0';
+        g_R310_ani_ply_state = ANI_PLY_STATE_TEXT; // 텍스트 표시 상태로 전환
+    }
 }
