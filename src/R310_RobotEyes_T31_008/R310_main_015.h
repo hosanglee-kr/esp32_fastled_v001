@@ -348,6 +348,44 @@ void R310_processCommand(const char* p_command) {
     // ... (기존 strcmp를 통한 명령 처리 로직 동일) ...
     // 단, R310_set_RobotState -> R310_setRobotState 로 함수명 변경
     // R310_set_RobotState(R_STATE_AWAKE); -> R310_setRobotState(R_STATE_AWAKE);
+	// 명령 문자열에 따라 애니메이션 설정
+    if (strcmp(p_command, "neutral") == 0) {
+        R310_setAnimation(EMT_NEUTRAL, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "blink") == 0) {
+        R310_setAnimation(EMT_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    
+    } else if (strcmp(p_command, "wink") == 0) {
+        R310_setAnimation(EMT_WINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+
+    } else if (strcmp(p_command, "left") == 0) {
+        R310_setAnimation(EMT_LOOK_L, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "right") == 0) {
+        R310_setAnimation(EMT_LOOK_R, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "up") == 0) {
+        R310_setAnimation(EMT_LOOK_U, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "down") == 0) {
+        R310_setAnimation(EMT_LOOK_D, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    
+    } else if (strcmp(p_command, "updown") == 0) {
+        R310_setAnimation(EMT_SCAN_UD, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    } else if (strcmp(p_command, "leftright") == 0) {
+        R310_setAnimation(EMT_SCAN_LR, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "angry") == 0) {
+        R310_setAnimation(EMT_ANGRY2, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "smile") == 0) {
+        R310_setAnimation(EMT_SMILE, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "sleep") == 0) { // 잠자는 애니메이션 명시적 실행
+        R310_setAnimation(EMT_SLEEP, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+	} else if (strcmp(p_command, "sleepblink") == 0) { // 잠자는 애니메이션 명시적 실행
+        R310_setAnimation(EMT_SLEEP_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
+    }
+	
+    // 로봇 상태 직접 변경 명령
+    else if (strcmp(p_command, "awake") == 0) {
+        R310_setRobotState(R_STATE_AWAKE);
+    } else if (strcmp(p_command, "sleeping") == 0) {
+        R310_setRobotState(R_STATE_SLEEPING);
+    }
 
     else {
         strncpy(g_R310_textDisplay.buffer, p_command, G_R310_MAX_TEXT_LENGTH); // 구조체 멤버 사용
