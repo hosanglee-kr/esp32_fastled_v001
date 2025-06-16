@@ -1,4 +1,4 @@
-// R310_Main_014.h
+// R310_Main_015.h
 
 #pragma once
 
@@ -26,8 +26,8 @@
 typedef struct {
     E_R310_AnimPlayState_t  playState;          // 애니메이션 상태 머신 현재 상태
     bool                    autoBlinkOn;        // 자동 깜빡임 기능 활성화 여부
-    T_R310_AnimTable_t      currentAnimEntry;   // 현재 실행 중인 애니메이션 시퀀스 정보
-    int8_t                  animFrameIndex;     // 현재 시퀀스 내 프레임 인덱스
+    T_R310_AnimTable_t      currentAniEntry;   // 현재 실행 중인 애니메이션 시퀀스 정보
+    int8_t                  aniFrameIndex;     // 현재 시퀀스 내 프레임 인덱스
     E_R310_PlayDirection_t  playDirection;      // 애니메이션 시퀀스 재생 방향
     E_R310_AutoReverse_t    autoReverse;        // 시퀀스 완료 후 자동 역방향 재생 여부
     E_R310_EmotionIdx_t     nextEmotion;        // 다음에 재생할 애니메이션 감정 종류
@@ -54,8 +54,8 @@ typedef struct {
 CRGB			        g_R310_leds[G_R310_NEOPIXEL_NUM_LEDS];          // FastLED CRGB 배열
 CRGB*			        g_R310_ledsPtr			    = nullptr;	        // CRGB 배열 포인터
 
-T_R310_AnimationControl_t g_R310_animControl;   // 애니메이션 제어 관련 변수
-T_R310_StatusAndTiming_t  g_R310_status;        // 로봇 상태 및 타이밍 관련 변수
+T_R310_AnimationControl_t g_R310_aniControl;   // 애니메이션 제어 관련 변수
+T_R310_StatusAndTiming_t  g_R310_robotStatus;        // 로봇 상태 및 타이밍 관련 변수
 T_R310_TextDisplay_t      g_R310_textDisplay;   // 텍스트 표시 관련 변수
 
 // ====================================================================================================
@@ -114,7 +114,7 @@ uint8_t R310_loadSequence(E_R310_EmotionIdx_t p_eyeEmotionIdx) { // 변경된 �
         T_R310_AnimTable_t v_animTable; // 변경된 구조체명
         memcpy_P(&v_animTable, &g_R310_AnimTables_arr[v_i], sizeof(T_R310_AnimTable_t)); // 변경된 배열명, 구조체명
         if (v_animTable.emotionIdx == p_eyeEmotionIdx) { // 변경된 멤버명
-            g_R310_animControl.currentAnimEntry = v_animTable; // 구조체 멤버 사용
+            g_R310_aniControl.currentAniEntry = v_animTable; // 구조체 멤버 사용
             v_found = true;
             break;
         }
@@ -122,24 +122,24 @@ uint8_t R310_loadSequence(E_R310_EmotionIdx_t p_eyeEmotionIdx) { // 변경된 �
     if (!v_found) {
         Serial.print("Warning: Animation sequence not found for emotion: ");
         Serial.println(p_eyeEmotionIdx);
-        g_R310_animControl.currentAnimEntry = {EMT_NEUTRAL, g_R310_seqBlink, 1}; // 구조체 멤버 사용
+        g_R310_aniControl.currentAniEntry = {EMT_NEUTRAL, g_R310_seqBlink, 1}; // 구조체 멤버 사용
     }
 
-    if (g_R310_animControl.playDirection == EMTP_PLY_DIR_LAST) // 구조체 멤버 사용
-        g_R310_animControl.animFrameIndex = g_R310_animControl.currentAnimEntry.seqSize - 1; // 구조체 멤버 사용
+    if (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST) // 구조체 멤버 사용
+        g_R310_aniControl.aniFrameIndex = g_R310_aniControl.currentAniEntry.seqSize - 1; // 구조체 멤버 사용
     else
-        g_R310_animControl.animFrameIndex = 0; // 구조체 멤버 사용
+        g_R310_aniControl.aniFrameIndex = 0; // 구조체 멤버 사용
 
-    return (g_R310_animControl.currentAnimEntry.seqSize); // 구조체 멤버 사용
+    return (g_R310_aniControl.currentAniEntry.seqSize); // 구조체 멤버 사용
 }
 
 // R310_loadFrame 함수
 void R310_loadFrame(T_R310_AnimFrame_t* p_animFrame) { // 변경된 구조체명
-    if (g_R310_animControl.animFrameIndex >= 0 && g_R310_animControl.animFrameIndex < g_R310_animControl.currentAnimEntry.seqSize) { // 구조체 멤버 사용
-        memcpy_P(p_animFrame, &g_R310_animControl.currentAnimEntry.seq[g_R310_animControl.animFrameIndex], sizeof(T_R310_AnimFrame_t)); // 구조체 멤버 사용, 구조체명 변경
+    if (g_R310_aniControl.aniFrameIndex >= 0 && g_R310_aniControl.aniFrameIndex < g_R310_aniControl.currentAniEntry.seqSize) { // 구조체 멤버 사용
+        memcpy_P(p_animFrame, &g_R310_aniControl.currentAniEntry.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_AnimFrame_t)); // 구조체 멤버 사용, 구조체명 변경
     } else {
         Serial.print("Error: Invalid animation index: ");
-        Serial.println(g_R310_animControl.animFrameIndex); // 구조체 멤버 사용
+        Serial.println(g_R310_aniControl.aniFrameIndex); // 구조체 멤버 사용
         p_animFrame->eyeData[0] = 0;
         p_animFrame->eyeData[1] = 0;
         p_animFrame->timeFrame = G_R310_FRAME_TIME;
@@ -150,26 +150,26 @@ void R310_loadFrame(T_R310_AnimFrame_t* p_animFrame) { // 변경된 구조체명
 void R310_setAnimation(E_R310_EmotionIdx_t p_emotionIdx, E_R310_AutoReverse_t p_autoReverse, E_R310_PlayDirection_t p_playDirection, E_R310_ForcePlay_t p_forcePlay) { // 변경된 열거형명
     if (g_R310_textDisplay.pointer != nullptr && g_R310_textDisplay.buffer[0] != '\0' && p_forcePlay == EMTP_FORCE_PLY_OFF) return; // 구조체 멤버 사용
 
-    if (p_emotionIdx != g_R310_animControl.currentEmotion || p_forcePlay == EMTP_FORCE_PLY_ON) { // 구조체 멤버 사용
-        g_R310_animControl.nextEmotion          = p_emotionIdx;     // 구조체 멤버 사용
-        g_R310_animControl.autoReverse          = p_autoReverse;    // 구조체 멤버 사용
-        g_R310_animControl.playDirection        = p_playDirection;  // 구조체 멤버 사용
+    if (p_emotionIdx != g_R310_aniControl.currentEmotion || p_forcePlay == EMTP_FORCE_PLY_ON) { // 구조체 멤버 사용
+        g_R310_aniControl.nextEmotion          = p_emotionIdx;     // 구조체 멤버 사용
+        g_R310_aniControl.autoReverse          = p_autoReverse;    // 구조체 멤버 사용
+        g_R310_aniControl.playDirection        = p_playDirection;  // 구조체 멤버 사용
 
-        if (p_forcePlay == EMTP_FORCE_PLY_ON || g_R310_animControl.playState == ANI_PLY_STATE_IDLE) { // 구조체 멤버 사용
-            g_R310_animControl.playState = ANI_PLY_STATE_RESTART; // 구조체 멤버 사용
+        if (p_forcePlay == EMTP_FORCE_PLY_ON || g_R310_aniControl.playState == ANI_PLY_STATE_IDLE) { // 구조체 멤버 사용
+            g_R310_aniControl.playState = ANI_PLY_STATE_RESTART; // 구조체 멤버 사용
         }
     }
 }
 
 // R310_setRobotState 함수
 void R310_setRobotState(E_R310_RobotState_t p_robotState) { // 변경된 열거형명
-    if (p_robotState != g_R310_status.robotState) { // 구조체 멤버 사용
-        if (p_robotState == R_STATE_SLEEPING && g_R310_status.robotState == R_STATE_AWAKE) { // 구조체 멤버 사용
+    if (p_robotState != g_R310_robotStatus.robotState) { // 구조체 멤버 사용
+        if (p_robotState == R_STATE_SLEEPING && g_R310_robotStatus.robotState == R_STATE_AWAKE) { // 구조체 멤버 사용
             R310_setAnimation(EMT_SLEEP_BLINK, EMTP_AUTO_REVERSE_OFF, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
-        } else if (p_robotState == R_STATE_AWAKE && g_R310_status.robotState == R_STATE_SLEEPING) { // 구조체 멤버 사용
+        } else if (p_robotState == R_STATE_AWAKE && g_R310_robotStatus.robotState == R_STATE_SLEEPING) { // 구조체 멤버 사용
             R310_setAnimation(EMT_SLEEP, EMTP_AUTO_REVERSE_OFF, EMTP_PLY_DIR_LAST, EMTP_FORCE_PLY_ON);
         }
-        g_R310_status.robotState = p_robotState; // 구조체 멤버 사용
+        g_R310_robotStatus.robotState = p_robotState; // 구조체 멤버 사용
     }
 }
 
@@ -178,38 +178,38 @@ bool R310_runAnimation(void) {
     static T_R310_AnimFrame_t   v_thisFrame;
     static uint32_t             v_timeOfLastFrame = 0;
 
-    switch (g_R310_animControl.playState) { // 구조체 멤버 사용
+    switch (g_R310_aniControl.playState) { // 구조체 멤버 사용
         case ANI_PLY_STATE_IDLE:
             if (g_R310_textDisplay.pointer != nullptr && g_R310_textDisplay.buffer[0] != '\0') { // 구조체 멤버 사용
-                g_R310_animControl.playState = ANI_PLY_STATE_TEXT; // 구조체 멤버 사용
+                g_R310_aniControl.playState = ANI_PLY_STATE_TEXT; // 구조체 멤버 사용
                 break;
             }
-            if (g_R310_animControl.nextEmotion != EMT_NONE) { // 구조체 멤버 사용
-                g_R310_animControl.playState = ANI_PLY_STATE_RESTART; // 구조체 멤버 사용
+            if (g_R310_aniControl.nextEmotion != EMT_NONE) { // 구조체 멤버 사용
+                g_R310_aniControl.playState = ANI_PLY_STATE_RESTART; // 구조체 멤버 사용
                 break;
             }
-            if (g_R310_animControl.autoBlinkOn && (millis() - g_R310_status.lastAnimationTime) >= g_R310_status.blinkMinimumTime) { // 구조체 멤버 사용
+            if (g_R310_aniControl.autoBlinkOn && (millis() - g_R310_robotStatus.lastAnimationTime) >= g_R310_robotStatus.blinkMinimumTime) { // 구조체 멤버 사용
                 if (random(1000) > 700) {
-                    if (g_R310_status.robotState == R_STATE_SLEEPING) { // 구조체 멤버 사용
+                    if (g_R310_robotStatus.robotState == R_STATE_SLEEPING) { // 구조체 멤버 사용
                         R310_setAnimation(EMT_SLEEP_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_LAST, EMTP_FORCE_PLY_ON);
-                    } else if (g_R310_status.robotState == R_STATE_AWAKE) { // 구조체 멤버 사용
+                    } else if (g_R310_robotStatus.robotState == R_STATE_AWAKE) { // 구조체 멤버 사용
                         R310_setAnimation(EMT_BLINK, EMTP_AUTO_REVERSE_ON, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
                     }
-                    g_R310_status.lastAnimationTime = millis(); // 구조체 멤버 사용
+                    g_R310_robotStatus.lastAnimationTime = millis(); // 구조체 멤버 사용
                 } else {
-                    g_R310_status.lastAnimationTime = millis(); // 구조체 멤버 사용
+                    g_R310_robotStatus.lastAnimationTime = millis(); // 구조체 멤버 사용
                 }
             }
             break;
 
         case ANI_PLY_STATE_RESTART:
-            if (g_R310_animControl.nextEmotion != EMT_NONE) { // 구조체 멤버 사용
-                R310_loadSequence(g_R310_animControl.nextEmotion); // 구조체 멤버 사용
-                g_R310_animControl.currentEmotion = g_R310_animControl.nextEmotion; // 구조체 멤버 사용
-                g_R310_animControl.nextEmotion = EMT_NONE; // 구조체 멤버 사용
-                g_R310_animControl.playState = ANI_PLY_STATE_ANIMATE; // 구조체 멤버 사용
+            if (g_R310_aniControl.nextEmotion != EMT_NONE) { // 구조체 멤버 사용
+                R310_loadSequence(g_R310_aniControl.nextEmotion); // 구조체 멤버 사용
+                g_R310_aniControl.currentEmotion = g_R310_aniControl.nextEmotion; // 구조체 멤버 사용
+                g_R310_aniControl.nextEmotion = EMT_NONE; // 구조체 멤버 사용
+                g_R310_aniControl.playState = ANI_PLY_STATE_ANIMATE; // 구조체 멤버 사용
             } else {
-                g_R310_animControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
+                g_R310_aniControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
             }
             break;
 
@@ -218,53 +218,53 @@ bool R310_runAnimation(void) {
             R310_drawEyes(v_thisFrame.eyeData[0], v_thisFrame.eyeData[1]);
             v_timeOfLastFrame = millis();
 
-            if (g_R310_animControl.playDirection == EMTP_PLY_DIR_LAST) { // 구조체 멤버 사용
-                g_R310_animControl.animFrameIndex--; // 구조체 멤버 사용
+            if (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST) { // 구조체 멤버 사용
+                g_R310_aniControl.aniFrameIndex--; // 구조체 멤버 사용
             } else {
-                g_R310_animControl.animFrameIndex++; // 구조체 멤버 사용
+                g_R310_aniControl.aniFrameIndex++; // 구조체 멤버 사용
             }
-            g_R310_animControl.playState = ANI_PLY_STATE_PAUSE; // 구조체 멤버 사용
+            g_R310_aniControl.playState = ANI_PLY_STATE_PAUSE; // 구조체 멤버 사용
             break;
 
         case ANI_PLY_STATE_PAUSE:
             if ((millis() - v_timeOfLastFrame) < v_thisFrame.timeFrame) {
                 break;
             }
-            if ((g_R310_animControl.playDirection == EMTP_PLY_DIR_FIRST && g_R310_animControl.animFrameIndex >= g_R310_animControl.currentAnimEntry.seqSize) ||
-                (g_R310_animControl.playDirection == EMTP_PLY_DIR_LAST && g_R310_animControl.animFrameIndex < 0)) { // 구조체 멤버 사용
-                if (g_R310_animControl.autoReverse == EMTP_AUTO_REVERSE_ON) { // 구조체 멤버 사용
+            if ((g_R310_aniControl.playDirection == EMTP_PLY_DIR_FIRST && g_R310_aniControl.aniFrameIndex >= g_R310_aniControl.currentAniEntry.seqSize) ||
+                (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST && g_R310_aniControl.aniFrameIndex < 0)) { // 구조체 멤버 사용
+                if (g_R310_aniControl.autoReverse == EMTP_AUTO_REVERSE_ON) { // 구조체 멤버 사용
                     E_R310_PlayDirection_t v_emtp_ply_dir;
-                    if( g_R310_animControl.playDirection == EMTP_PLY_DIR_FIRST){ // 구조체 멤버 사용
+                    if( g_R310_aniControl.playDirection == EMTP_PLY_DIR_FIRST){ // 구조체 멤버 사용
                         v_emtp_ply_dir  = EMTP_PLY_DIR_LAST; // 역방향 시작으로 변경 (자동 역재생)
                     } else {
                         v_emtp_ply_dir  = EMTP_PLY_DIR_FIRST; // 정방향 시작으로 변경 (자동 역재생)
                     }
-                    R310_setAnimation(g_R310_animControl.currentAnimEntry.emotionIdx, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 구조체 멤버 사용
+                    R310_setAnimation(g_R310_aniControl.currentAniEntry.emotionIdx, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 구조체 멤버 사용
                 } else {
-                    g_R310_animControl.playState        = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
-                    g_R310_animControl.currentEmotion   = EMT_NONE; // 구조체 멤버 사용
-                    g_R310_status.lastAnimationTime     = millis(); // 구조체 멤버 사용
+                    g_R310_aniControl.playState        = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
+                    g_R310_aniControl.currentEmotion   = EMT_NONE; // 구조체 멤버 사용
+                    g_R310_robotStatus.lastAnimationTime     = millis(); // 구조체 멤버 사용
                 }
             } else {
-                g_R310_animControl.playState = ANI_PLY_STATE_ANIMATE; // 구조체 멤버 사용
+                g_R310_aniControl.playState = ANI_PLY_STATE_ANIMATE; // 구조체 멤버 사용
             }
             break;
 
         case ANI_PLY_STATE_TEXT:
             if (g_R310_textDisplay.buffer[0] == '\0') { // 구조체 멤버 사용
-                g_R310_animControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
-                g_R310_status.lastAnimationTime = millis(); // 구조체 멤버 사용
+                g_R310_aniControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
+                g_R310_robotStatus.lastAnimationTime = millis(); // 구조체 멤버 사용
             }
             break;
 
         default:
-            g_R310_animControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
-            g_R310_animControl.currentEmotion = EMT_NONE; // 구조체 멤버 사용
+            g_R310_aniControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
+            g_R310_aniControl.currentEmotion = EMT_NONE; // 구조체 멤버 사용
             R310_clearText();
-            g_R310_status.lastAnimationTime = millis(); // 구조체 멤버 사용
+            g_R310_robotStatus.lastAnimationTime = millis(); // 구조체 멤버 사용
             break;
     }
-    return (g_R310_animControl.playState == ANI_PLY_STATE_IDLE); // 구조체 멤버 사용
+    return (g_R310_aniControl.playState == ANI_PLY_STATE_IDLE); // 구조체 멤버 사용
 }
 
 // R310_init 함수
@@ -273,17 +273,17 @@ void R310_init() {
     g_R310_ledsPtr = g_R310_leds; // 변경된 변수명
 
     // 로봇 상태 관련 변수 초기화 (구조체 멤버 사용)
-    g_R310_status.robotState            = R_STATE_AWAKE;
-    g_R310_animControl.playState        = ANI_PLY_STATE_IDLE;
-    g_R310_animControl.autoBlinkOn      = true;     // 이제 명시적으로 설정
-    g_R310_status.blinkMinimumTime      = 5000;
-    g_R310_status.lastAnimationTime     = millis();
+    g_R310_robotStatus.robotState            = R_STATE_AWAKE;
+    g_R310_aniControl.playState        = ANI_PLY_STATE_IDLE;
+    g_R310_aniControl.autoBlinkOn      = true;     // 이제 명시적으로 설정
+    g_R310_robotStatus.blinkMinimumTime      = 5000;
+    g_R310_robotStatus.lastAnimationTime     = millis();
 
     // 텍스트 버퍼 초기화 및 포인터 연결 (구조체 멤버 사용)
     g_R310_textDisplay.buffer[0]        = '\0';
     g_R310_textDisplay.pointer          = g_R310_textDisplay.buffer;
 
-    g_R310_status.lastActivityTime      = millis(); // 구조체 멤버 사용
+    g_R310_robotStatus.lastActivityTime      = millis(); // 구조체 멤버 사용
 
     R310_setAnimation(EMT_NEUTRAL, EMTP_AUTO_REVERSE_OFF, EMTP_PLY_DIR_FIRST, EMTP_FORCE_PLY_ON);
 }
@@ -292,9 +292,9 @@ void R310_init() {
 void R310_run() {
     R310_runAnimation();
 
-    if (g_R310_status.robotState != R_STATE_SLEEPING && millis() - g_R310_status.lastActivityTime >= G_R310_TIME_TO_SLEEP) { // 구조체 멤버 사용
+    if (g_R310_robotStatus.robotState != R_STATE_SLEEPING && millis() - g_R310_robotStatus.lastActivityTime >= G_R310_TIME_TO_SLEEP) { // 구조체 멤버 사용
         R310_setRobotState(R_STATE_SLEEPING); // 변경된 함수명
-    } else if (g_R310_status.robotState == R_STATE_SLEEPING && millis() - g_R310_status.lastActivityTime < G_R310_TIME_TO_SLEEP) { // 구조체 멤버 사용
+    } else if (g_R310_robotStatus.robotState == R_STATE_SLEEPING && millis() - g_R310_robotStatus.lastActivityTime < G_R310_TIME_TO_SLEEP) { // 구조체 멤버 사용
         R310_setRobotState(R_STATE_AWAKE); // 변경된 함수명
     }
 	
@@ -305,7 +305,7 @@ void R310_run() {
             Serial.print("Received command: ");
             Serial.println(v_commandString);
             R310_processCommand(v_commandString.c_str());
-            g_R310_status.lastActivityTime = millis(); // 구조체 멤버 사용
+            g_R310_robotStatus.lastActivityTime = millis(); // 구조체 멤버 사용
          }
 	#elif
         if (Serial.available()) {
@@ -314,7 +314,7 @@ void R310_run() {
             Serial.print("Received command: ");
             Serial.println(v_commandString);
             R310_processCommand(v_commandString.c_str());
-            g_R310_status.lastActivityTime = millis(); // 구조체 멤버 사용
+            g_R310_robotStatus.lastActivityTime = millis(); // 구조체 멤버 사용
         }
 	#endif
     delay(1);
@@ -329,8 +329,8 @@ void R310_clearText() {
 void R310_showText(bool p_bInit) {
     if (g_R310_textDisplay.pointer == nullptr || g_R310_textDisplay.buffer[0] == '\0') { // 구조체 멤버 사용
          R310_clearText();
-         g_R310_animControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
-         g_R310_status.lastAnimationTime = millis(); // 구조체 멤버 사용
+         g_R310_aniControl.playState = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
+         g_R310_robotStatus.lastAnimationTime = millis(); // 구조체 멤버 사용
          return;
     }
     FastLED.clear();
@@ -352,6 +352,6 @@ void R310_processCommand(const char* p_command) {
     else {
         strncpy(g_R310_textDisplay.buffer, p_command, G_R310_MAX_TEXT_LENGTH); // 구조체 멤버 사용
         g_R310_textDisplay.buffer[G_R310_MAX_TEXT_LENGTH] = '\0'; // 구조체 멤버 사용
-        g_R310_animControl.playState = ANI_PLY_STATE_TEXT; // 구조체 멤버 사용
+        g_R310_aniControl.playState = ANI_PLY_STATE_TEXT; // 구조체 멤버 사용
     }
 }
