@@ -28,10 +28,10 @@ typedef struct {
     bool                    autoBlinkOn;        // 자동 깜빡임 기능 활성화 여부
     T_R310_ani_Table_t      currentAniEntry;   // 현재 실행 중인 애니메이션 시퀀스 정보
     int8_t                  aniFrameIndex;     // 현재 시퀀스 내 프레임 인덱스
-    E_R310_PlayDirection_t  playDirection;      // 애니메이션 시퀀스 재생 방향
-    E_R310_AutoReverse_t    autoReverse;        // 시퀀스 완료 후 자동 역방향 재생 여부
-    E_R310_EmotionIdx_t     nextEmotion;        // 다음에 재생할 애니메이션 감정 종류
-    E_R310_EmotionIdx_t     currentEmotion;     // 현재 화면에 표시되는 애니메이션 감정 종류
+    EMTP_Ply_Direct_t       playDirection;      // 애니메이션 시퀀스 재생 방향
+    EMTP_Ply_AutoReverse_t  autoReverse;        // 시퀀스 완료 후 자동 역방향 재생 여부
+    T_R310_emotion_idx_t     nextEmotion;        // 다음에 재생할 애니메이션 감정 종류
+    T_R310_emotion_idx_t     currentEmotion;     // 현재 화면에 표시되는 애니메이션 감정 종류
 } T_R310_AnimationControl_t;
 
 // 로봇 상태 및 타이밍 구조체
@@ -62,16 +62,16 @@ T_R310_TextDisplay_t      g_R310_textDisplay;   // 텍스트 표시 관련 변�
 // 함수 선언 (프로토타입) - 파라미터 타입명도 변경된 열거형/구조체 명칭에 맞게 수정
 // ====================================================================================================
 
-uint16_t R310_mapEyePixel(E_R310_EyeSideIdx_t p_eyeSideIdx, uint8_t p_row, uint8_t p_col);
-void     R310_drawEye(E_R310_EyeSideIdx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) ;
+uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_tp_eyeSideIdx, uint8_t p_row, uint8_t p_col);
+void     R310_drawEye(T_R310_EyeSide_Idx_tp_eyeSideIdx, uint8_t p_eyeFontIdx) ;
 void     R310_drawEyes(uint8_t p_eyeFontIdxRight, uint8_t p_eyeFontIdxLeft);
-uint8_t  R310_loadSequence(E_R310_EmotionIdx_t p_eyeEmotionIdx);
-void     R310_loadFrame(T_R310_AnimFrame_t* p_animFrame) ;
+uint8_t  R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx);
+void     R310_loadFrame(T_R310_animFrame_t* p_animFrame) ;
 
 void     R310_clearText();
 void     R310_showText(bool p_bInit);
 
-void     R310_setAnimation(E_R310_EmotionIdx_t p_emotionIdx, E_R310_AutoReverse_t p_autoReverse, E_R310_PlayDirection_t p_playDirection, E_R310_ForcePlay_t p_forcePlay);
+void     R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_Ply_AutoReverse_t p_autoReverse, EMTP_Ply_Direct_t p_playDirection, E_R310_ForcePlay_t p_forcePlay);
 void     R310_setRobotState(E_R310_RobotState_t p_robotState);
 void     R310_processCommand(const char* p_command);
 
@@ -86,7 +86,7 @@ void     R310_run() ;
 // R310_mapEyePixel 함수는 기존과 동일하게 유지
 
 // R310_drawEye 함수
-void R310_drawEye(E_R310_EyeSideIdx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) {
+void R310_drawEye(T_R310_EyeSide_Idx_tp_eyeSideIdx, uint8_t p_eyeFontIdx) {
     if (p_eyeFontIdx >= G_R310_ARRAY_SIZE(g_R310_RobotEyesFont_arr)) { // 변경된 배열명
         Serial.print("Error: Invalid Eye Font index: ");
         Serial.println(p_eyeFontIdx);
@@ -107,7 +107,7 @@ void R310_drawEye(E_R310_EyeSideIdx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) {
 }
 
 // R310_loadSequence 함수
-uint8_t R310_loadSequence(E_R310_EmotionIdx_t p_eyeEmotionIdx) { // 변경된 열거형명
+uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 열거형명
     bool v_found = false;
 
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_AnimTables_arr); v_i++) { // 변경된 배열명
@@ -134,9 +134,9 @@ uint8_t R310_loadSequence(E_R310_EmotionIdx_t p_eyeEmotionIdx) { // 변경된 �
 }
 
 // R310_loadFrame 함수
-void R310_loadFrame(T_R310_AnimFrame_t* p_animFrame) { // 변경된 구조체명
+void R310_loadFrame(T_R310_animFrame_t* p_animFrame) { // 변경된 구조체명
     if (g_R310_aniControl.aniFrameIndex >= 0 && g_R310_aniControl.aniFrameIndex < g_R310_aniControl.currentAniEntry.seqSize) { // 구조체 멤버 사용
-        memcpy_P(p_animFrame, &g_R310_aniControl.currentAniEntry.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_AnimFrame_t)); // 구조체 멤버 사용, 구조체명 변경
+        memcpy_P(p_animFrame, &g_R310_aniControl.currentAniEntry.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_animFrame_t)); // 구조체 멤버 사용, 구조체명 변경
     } else {
         Serial.print("Error: Invalid animation index: ");
         Serial.println(g_R310_aniControl.aniFrameIndex); // 구조체 멤버 사용
@@ -147,7 +147,7 @@ void R310_loadFrame(T_R310_AnimFrame_t* p_animFrame) { // 변경된 구조체명
 }
 
 // R310_setAnimation 함수
-void R310_setAnimation(E_R310_EmotionIdx_t p_emotionIdx, E_R310_AutoReverse_t p_autoReverse, E_R310_PlayDirection_t p_playDirection, E_R310_ForcePlay_t p_forcePlay) { // 변경된 열거형명
+void R310_setAnimation(T_R310_emotion_idx_t p_emotionIdx, EMTP_Ply_AutoReverse_t p_autoReverse, EMTP_Ply_Direct_t p_playDirection, E_R310_ForcePlay_t p_forcePlay) { // 변경된 열거형명
     if (g_R310_textDisplay.pointer != nullptr && g_R310_textDisplay.buffer[0] != '\0' && p_forcePlay == EMTP_FORCE_PLY_OFF) return; // 구조체 멤버 사용
 
     if (p_emotionIdx != g_R310_aniControl.currentEmotion || p_forcePlay == EMTP_FORCE_PLY_ON) { // 구조체 멤버 사용
@@ -175,7 +175,7 @@ void R310_setRobotState(E_R310_RobotState_t p_robotState) { // 변경된 열거�
 
 // R310_runAnimation 함수
 bool R310_runAnimation(void) {
-    static T_R310_AnimFrame_t   v_thisFrame;
+    static T_R310_animFrame_t   v_thisFrame;
     static uint32_t             v_timeOfLastFrame = 0;
 
     switch (g_R310_aniControl.playState) { // 구조체 멤버 사용
@@ -233,7 +233,7 @@ bool R310_runAnimation(void) {
             if ((g_R310_aniControl.playDirection == EMTP_PLY_DIR_FIRST && g_R310_aniControl.aniFrameIndex >= g_R310_aniControl.currentAniEntry.seqSize) ||
                 (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST && g_R310_aniControl.aniFrameIndex < 0)) { // 구조체 멤버 사용
                 if (g_R310_aniControl.autoReverse == EMTP_AUTO_REVERSE_ON) { // 구조체 멤버 사용
-                    E_R310_PlayDirection_t v_emtp_ply_dir;
+                    EMTP_Ply_Direct_t v_emtp_ply_dir;
                     if( g_R310_aniControl.playDirection == EMTP_PLY_DIR_FIRST){ // 구조체 멤버 사용
                         v_emtp_ply_dir  = EMTP_PLY_DIR_LAST; // 역방향 시작으로 변경 (자동 역재생)
                     } else {
