@@ -26,7 +26,7 @@
 typedef struct {
     T_R310_ani_ply_state_t  playState;          // 애니메이션 상태 머신 현재 상태
     bool                    autoBlinkOn;        // 자동 깜빡임 기능 활성화 여부
-    T_R310_ani_Table_t      currentAniEntry;   // 현재 실행 중인 애니메이션 시퀀스 정보
+    T_R310_ani_Table_t      currentAniTable;   // 현재 실행 중인 애니메이션 시퀀스 정보
     int8_t                  aniFrameIndex;     // 현재 시퀀스 내 프레임 인덱스
     EMTP_Ply_Direct_t       playDirection;      // 애니메이션 시퀀스 재생 방향
     EMTP_Ply_AutoReverse_t  autoReverse;        // 시퀀스 완료 후 자동 역방향 재생 여부
@@ -153,7 +153,7 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 �
         T_R310_ani_Table_t v_ani_Table; 
         memcpy_P(&v_ani_Table, &g_R310_ani_Tables_arr[v_i], sizeof(T_R310_ani_Table_t)); // 변경된 배열명, 구조체명
         if (v_ani_Table.emotionIdx == p_eyeEmotionIdx) { // 변경된 멤버명
-            g_R310_aniControl.currentAniEntry = v_ani_Table; // 구조체 멤버 사용
+            g_R310_aniControl.currentAniTable = v_ani_Table; // 구조체 멤버 사용
             v_found = true;
             break;
         }
@@ -161,21 +161,21 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 �
     if (!v_found) {
         Serial.print("Warning: Animation sequence not found for emotion: ");
         Serial.println(p_eyeEmotionIdx);
-        g_R310_aniControl.currentAniEntry = {EMT_NEUTRAL, g_R310_seqBlink, 1}; // 구조체 멤버 사용
+        g_R310_aniControl.currentAniTable = {EMT_NEUTRAL, g_R310_seqBlink, 1}; // 구조체 멤버 사용
     }
 
     if (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST) // 구조체 멤버 사용
-        g_R310_aniControl.aniFrameIndex = g_R310_aniControl.currentAniEntry.seqSize - 1; // 구조체 멤버 사용
+        g_R310_aniControl.aniFrameIndex = g_R310_aniControl.currentAniTable.seqSize - 1; // 구조체 멤버 사용
     else
         g_R310_aniControl.aniFrameIndex = 0; // 구조체 멤버 사용
 
-    return (g_R310_aniControl.currentAniEntry.seqSize); // 구조체 멤버 사용
+    return (g_R310_aniControl.currentAniTable.seqSize); // 구조체 멤버 사용
 }
 
 // R310_loadFrame 함수
 void R310_loadFrame(T_R310_ani_Frame_t* p_ani_Frame) { // 변경된 구조체명
-    if (g_R310_aniControl.aniFrameIndex >= 0 && g_R310_aniControl.aniFrameIndex < g_R310_aniControl.currentAniEntry.seqSize) { // 구조체 멤버 사용
-        memcpy_P(p_ani_Frame, &g_R310_aniControl.currentAniEntry.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_ani_Frame_t)); // 구조체 멤버 사용, 구조체명 변경
+    if (g_R310_aniControl.aniFrameIndex >= 0 && g_R310_aniControl.aniFrameIndex < g_R310_aniControl.currentAniTable.seqSize) { // 구조체 멤버 사용
+        memcpy_P(p_ani_Frame, &g_R310_aniControl.currentAniTable.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_ani_Frame_t)); // 구조체 멤버 사용, 구조체명 변경
     } else {
         Serial.print("Error: Invalid animation index: ");
         Serial.println(g_R310_aniControl.aniFrameIndex); // 구조체 멤버 사용
@@ -244,7 +244,7 @@ bool R310_runAnimation(void) {
         case ANI_PLY_STATE_RESTART:
             if (g_R310_aniControl.nextEmotion != EMT_NONE) { // 구조체 멤버 사용
                 R310_loadSequence(g_R310_aniControl.nextEmotion); // 구조체 멤버 사용
-                g_R310_aniControl.currentEmotion = g_R310_aniControl.nextEmotion; // 구조체 멤버 사용
+                g_R310_aniControl.currentAniTable = g_R310_aniControl.nextEmotion; // 구조체 멤버 사용
                 g_R310_aniControl.nextEmotion = EMT_NONE; // 구조체 멤버 사용
                 g_R310_aniControl.playState = ANI_PLY_STATE_ANIMATE; // 구조체 멤버 사용
             } else {
@@ -278,7 +278,7 @@ bool R310_runAnimation(void) {
                     } else {
                         v_emtp_ply_dir  = EMTP_PLY_DIR_FIRST; // 정방향 시작으로 변경 (자동 역재생)
                     }
-                    R310_setAnimation(g_R310_aniControl.currentAniEntry.emotionIdx, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 구조체 멤버 사용
+                    R310_setAnimation(g_R310_aniControl.currentAniTable.emotionIdx, EMTP_AUTO_REVERSE_OFF, v_emtp_ply_dir, EMTP_FORCE_PLY_ON); // 구조체 멤버 사용
                 } else {
                     g_R310_aniControl.playState        = ANI_PLY_STATE_IDLE; // 구조체 멤버 사용
                     g_R310_aniControl.currentEmotion   = EMT_NONE; // 구조체 멤버 사용
