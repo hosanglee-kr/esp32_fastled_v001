@@ -66,7 +66,7 @@ uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSideIdx, uint8_t p_row, uint
 void     R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) ;
 void     R310_drawEyes(uint8_t p_eyeFontIdxRight, uint8_t p_eyeFontIdxLeft);
 uint8_t  R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx);
-void     R310_loadFrame(T_R310_animFrame_t* p_animFrame) ;
+void     R310_loadFrame(T_R310_ani_Frame_t* p_animFrame) ;
 
 void     R310_clearText();
 void     R310_showText(bool p_bInit);
@@ -173,15 +173,15 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 �
 }
 
 // R310_loadFrame 함수
-void R310_loadFrame(T_R310_animFrame_t* p_animFrame) { // 변경된 구조체명
+void R310_loadFrame(T_R310_ani_Frame_t* p_ani_Frame) { // 변경된 구조체명
     if (g_R310_aniControl.aniFrameIndex >= 0 && g_R310_aniControl.aniFrameIndex < g_R310_aniControl.currentAniEntry.seqSize) { // 구조체 멤버 사용
-        memcpy_P(p_animFrame, &g_R310_aniControl.currentAniEntry.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_animFrame_t)); // 구조체 멤버 사용, 구조체명 변경
+        memcpy_P(p_ani_Frame, &g_R310_aniControl.currentAniEntry.seq[g_R310_aniControl.aniFrameIndex], sizeof(T_R310_ani_Frame_t)); // 구조체 멤버 사용, 구조체명 변경
     } else {
         Serial.print("Error: Invalid animation index: ");
         Serial.println(g_R310_aniControl.aniFrameIndex); // 구조체 멤버 사용
-        p_animFrame->eyeData[0] = 0;
-        p_animFrame->eyeData[1] = 0;
-        p_animFrame->timeFrame = G_R310_FRAME_TIME;
+        p_ani_Frame->eyeData[0] = 0;
+        p_ani_Frame->eyeData[1] = 0;
+        p_ani_Frame->timeFrame = G_R310_FRAME_TIME;
     }
 }
 
@@ -214,7 +214,7 @@ void R310_setRobotState(T_R310_RobotState_t p_robotState) { // 변경된 열거�
 
 // R310_runAnimation 함수
 bool R310_runAnimation(void) {
-    static T_R310_animFrame_t   v_thisFrame;
+    static T_R310_ani_Frame_t   v_thisFrame;
     static uint32_t             v_timeOfLastFrame = 0;
 
     switch (g_R310_aniControl.playState) { // 구조체 멤버 사용
