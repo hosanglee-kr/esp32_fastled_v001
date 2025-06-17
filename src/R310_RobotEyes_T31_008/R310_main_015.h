@@ -36,7 +36,7 @@ typedef struct {
 
 // 로봇 상태 및 타이밍 구조체
 typedef struct {
-    T_R310_RobotState_trobotState;         // 현재 로봇 상태
+    T_R310_RobotState_t robotState;         // 현재 로봇 상태
     uint32_t            lastAnimationTime;  // 마지막 애니메이션/활동 시작 시간 (자동 깜빡임 타이머 기준)
     uint16_t            blinkMinimumTime;   // 자동 깜빡임 최소 대기 시간 (밀리초)
     unsigned long       lastActivityTime;   // 로봇 상태 관리를 위한 마지막 활동 시간 기록
@@ -87,13 +87,13 @@ void     R310_run() ;
 
 // R310_drawEye 함수
 void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) {
-    if (p_eyeFontIdx >= G_R310_ARRAY_SIZE(g_R310_RobotEyesFont_arr)) { // 변경된 배열명
+    if (p_eyeFontIdx >= G_R310_ARRAY_SIZE(g_R310_RobotEyes_Font_arr)) { // 변경된 배열명
         Serial.print("Error: Invalid Eye Font index: ");
         Serial.println(p_eyeFontIdx);
         return;
     }
     T_R310_FontChar_t v_fontChar; // 변경된 구조체명
-    memcpy_P(&v_fontChar, &g_R310_RobotEyesFont_arr[p_eyeFontIdx], sizeof(T_R310_FontChar_t)); // 변경된 배열명, 구조체명
+    memcpy_P(&v_fontChar, &g_R310_RobotEyes_Font_arr[p_eyeFontIdx], sizeof(T_R310_FontChar_t)); // 변경된 배열명, 구조체명
 
     for (uint8_t v_row = 0; v_row < G_R310_DISPLAY_HEIGHT; v_row++) {
         uint8_t v_rowByte = pgm_read_byte(&v_fontChar.data[v_row]);
@@ -111,7 +111,7 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 �
     bool v_found = false;
 
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_AnimTables_arr); v_i++) { // 변경된 배열명
-        T_R310_ani_Table_t v_animTable; // 변경된 구조체명
+        T_R310_ani_Table_t v_animTable; // 변경된 구조체명  
         memcpy_P(&v_animTable, &g_R310_AnimTables_arr[v_i], sizeof(T_R310_ani_Table_t)); // 변경된 배열명, 구조체명
         if (v_animTable.emotionIdx == p_eyeEmotionIdx) { // 변경된 멤버명
             g_R310_aniControl.currentAniEntry = v_animTable; // 구조체 멤버 사용
