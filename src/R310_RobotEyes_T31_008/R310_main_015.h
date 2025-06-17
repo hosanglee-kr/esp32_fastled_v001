@@ -110,9 +110,9 @@ void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) {
 uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 열거형명
     bool v_found = false;
 
-    for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_AnimTables_arr); v_i++) { // 변경된 배열명
+    for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_ani_Tables_arr); v_i++) { // 변경된 배열명
         T_R310_ani_Table_t v_animTable; // 변경된 구조체명  
-        memcpy_P(&v_animTable, &g_R310_AnimTables_arr[v_i], sizeof(T_R310_ani_Table_t)); // 변경된 배열명, 구조체명
+        memcpy_P(&v_animTable, &g_R310_ani_Tables_arr[v_i], sizeof(T_R310_ani_Table_t)); // 변경된 배열명, 구조체명
         if (v_animTable.emotionIdx == p_eyeEmotionIdx) { // 변경된 멤버명
             g_R310_aniControl.currentAniEntry = v_animTable; // 구조체 멤버 사용
             v_found = true;
