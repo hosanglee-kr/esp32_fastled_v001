@@ -83,7 +83,33 @@ void     R310_run() ;
 // 함수 정의 (R310_ 로 시작) - 내부 로직에서 전역 변수 및 파라미터 사용 시 변경
 // ====================================================================================================
 
-// R310_mapEyePixel 함수는 기존과 동일하게 유지
+
+// (눈 인덱스, 행, 열) 좌표를 FastLED CRGB 배열의 선형 픽셀 인덱스로 변환
+// @param p_eyeSide_idx 눈의 인덱스 (0: 오른쪽, 1: 왼쪽)
+// @param p_row 매트릭스 내 행 (0-7)
+// @param p_col 매트릭스 내 열 (0-7)
+// @return 해당 픽셀의 FastLED CRGB 배열 내 선형 인덱스. 범위 벗어날 시 0 반환.
+//T_R310_Eye_Idx
+uint16_t R310_mapEyePixel(T_R310_EyeSide_Idx_t p_eyeSide_idx, uint8_t p_row, uint8_t p_col) {
+    uint16_t v_base_pixel = (p_eyeSide_idx == EYE_RIGHT) ? G_R310_RIGHT_EYE_START_PIXEL : G_R310_LEFT_EYE_START_PIXEL;
+    uint16_t v_pixel_index;
+
+    // 행 우선 지그재그(serpentine) 방식 가정
+    if (p_row % 2 == 0) {
+        v_pixel_index = v_base_pixel + (p_row * 8) + p_col;
+    } else {
+        v_pixel_index = v_base_pixel + (p_row * 8) + (7 - p_col);
+    }
+
+    // 픽셀 인덱스 범위 확인
+    if (v_pixel_index >= G_R310_NEOPIXEL_NUM_LEDS) {
+        Serial.print("Error: Mapped pixel index out of bounds: ");
+        Serial.println(v_pixel_index);
+        return 0;
+    }
+
+    return v_pixel_index;
+}
 
 // R310_drawEye 함수
 void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) {
@@ -104,6 +130,19 @@ void R310_drawEye(T_R310_EyeSide_Idx_t p_eyeSideIdx, uint8_t p_eyeFontIdx) {
             }
         }
     }
+}
+
+
+// 오른쪽 눈(R)과 왼쪽 눈(L)에 사용할 폰트 문자 인덱스를 받아, 해당 눈 모양을 CRGB 버퍼에 그리고 FastLED.show()로 표시합니다.
+// @param p_eye_font_idx_Right 오른쪽 눈에 사용할 폰트 문자 인덱스.
+// @param p_eye_font_idx_Left 왼쪽 눈에 사용할 폰트 문자 인덱스.
+void R310_drawEyes(uint8_t p_eye_font_idx_Right, uint8_t p_eye_font_idx_Left) {
+    FastLED.clear(); // 전체 LED 픽셀 버퍼를 검은색으로 초기화합니다.
+
+    R310_drawEye(EYE_RIGHT, p_eye_font_idx_Right); // 오른쪽 눈 그리기
+    R310_drawEye(EYE_LEFT, p_eye_font_idx_Left);  // 왼쪽 눈 그리기
+
+    FastLED.show(); // LED에 표시
 }
 
 // R310_loadSequence 함수
