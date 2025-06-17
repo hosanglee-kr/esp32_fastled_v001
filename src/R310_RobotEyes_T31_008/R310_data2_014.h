@@ -324,7 +324,7 @@ const T_R310_ani_Table_t g_R310_ani_Tables_arr[] PROGMEM = {
 // 로봇 눈 모양 폰트 데이터 배열
 // PROGMEM 키워드는 데이터를 AVR 마이크로컨트롤러의 플래시 메모리에 저장하여
 // SRAM 사용량을 절약하는 데 사용됩니다.
-const T_R310_FontChar g_R310_RobotEyes_Font_arr[] PROGMEM = {
+const T_R310_FontChar_t g_R310_RobotEyes_Font_arr[] PROGMEM = {
     // 인덱스 0: EYE_NEUTRAL (중립/행복한 눈)
     {8, {
         0b00000000, // . . . . . . . .
@@ -1027,8 +1027,8 @@ const T_R310_FontChar g_R310_RobotEyes_Font_arr[] PROGMEM = {
 */
 };
 
-// 폰트 데이터 배열의 길이 (T_R310_FontChar 개수)
-const int G_R310_ROBOT_EYES_FONT_LEN = sizeof(g_R310_RobotEyes_Font_arr) / sizeof(T_R310_FontChar);
+// 폰트 데이터 배열의 길이 (T_R310_FontChar_t 개수)
+const int G_R310_ROBOT_EYES_FONT_LEN = sizeof(g_R310_RobotEyes_Font_arr) / sizeof(T_R310_FontChar_t);
 
 
 ////////////////////////////////////////////////////////////////////
