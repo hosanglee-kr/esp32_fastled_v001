@@ -24,9 +24,9 @@
 // --- 새로운 구조체 정의 (R310_config_009.h 또는 이 파일 상단에 위치) ---
 // 애니메이션 제어 구조체
 typedef struct {
-    E_R310_AnimPlayState_t  playState;          // 애니메이션 상태 머신 현재 상태
+    T_R310_ani_ply_state_t  playState;          // 애니메이션 상태 머신 현재 상태
     bool                    autoBlinkOn;        // 자동 깜빡임 기능 활성화 여부
-    T_R310_AnimTable_t      currentAniEntry;   // 현재 실행 중인 애니메이션 시퀀스 정보
+    T_R310_ani_Table_t      currentAniEntry;   // 현재 실행 중인 애니메이션 시퀀스 정보
     int8_t                  aniFrameIndex;     // 현재 시퀀스 내 프레임 인덱스
     E_R310_PlayDirection_t  playDirection;      // 애니메이션 시퀀스 재생 방향
     E_R310_AutoReverse_t    autoReverse;        // 시퀀스 완료 후 자동 역방향 재생 여부
@@ -111,8 +111,8 @@ uint8_t R310_loadSequence(E_R310_EmotionIdx_t p_eyeEmotionIdx) { // 변경된 �
     bool v_found = false;
 
     for (uint8_t v_i = 0; v_i < G_R310_ARRAY_SIZE(g_R310_AnimTables_arr); v_i++) { // 변경된 배열명
-        T_R310_AnimTable_t v_animTable; // 변경된 구조체명
-        memcpy_P(&v_animTable, &g_R310_AnimTables_arr[v_i], sizeof(T_R310_AnimTable_t)); // 변경된 배열명, 구조체명
+        T_R310_ani_Table_t v_animTable; // 변경된 구조체명
+        memcpy_P(&v_animTable, &g_R310_AnimTables_arr[v_i], sizeof(T_R310_ani_Table_t)); // 변경된 배열명, 구조체명
         if (v_animTable.emotionIdx == p_eyeEmotionIdx) { // 변경된 멤버명
             g_R310_aniControl.currentAniEntry = v_animTable; // 구조체 멤버 사용
             v_found = true;
@@ -307,7 +307,7 @@ void R310_run() {
             R310_processCommand(v_commandString.c_str());
             g_R310_robotStatus.lastActivityTime = millis(); // 구조체 멤버 사용
          }
-	#elif
+	#else
         if (Serial.available()) {
             String v_commandString = Serial.readStringUntil('\n'); // 변경된 지역변수명
             v_commandString.trim();
