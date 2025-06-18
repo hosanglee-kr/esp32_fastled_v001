@@ -161,7 +161,7 @@ uint8_t R310_loadSequence(T_R310_emotion_idx_t p_eyeEmotionIdx) { // 변경된 �
     if (!v_found) {
         Serial.print("Warning: Animation sequence not found for emotion: ");
         Serial.println(p_eyeEmotionIdx);
-        g_R310_aniControl.currentAniTable = {EMT_NEUTRAL, g_R310_seqBlink, 1}; // 구조체 멤버 사용
+        g_R310_aniControl.currentAniTable = {EMT_NEUTRAL, g_R310_frameSeq_Blink, 1}; // 구조체 멤버 사용
     }
 
     if (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST) // 구조체 멤버 사용
