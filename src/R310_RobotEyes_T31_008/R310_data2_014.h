@@ -300,23 +300,23 @@ typedef struct {
 const T_R310_ani_Table_t g_R310_ani_Tables_arr[] PROGMEM = {
     {EMT_NEUTRAL      , g_R310_frameSeq_Blink        , 1                                  }, // 중립: Blink 시퀀스의 첫 프레임만 사용 (정적)
     
-	{EMT_BLINK        , g_R310_frameSeq_Blink        , G_R310_ARRAY_SIZE(g_R310_seqBlink) }, // 깜빡임
-    {EMT_WINK         , g_R310_frameSeq_Wink         , G_R310_ARRAY_SIZE(g_R310_seqWink)  }, // 윙크
+	{EMT_BLINK        , g_R310_frameSeq_Blink        , G_R310_ARRAY_SIZE(g_R310_frameSeq_Blink) }, // 깜빡임
+    {EMT_WINK         , g_R310_frameSeq_Wink         , G_R310_ARRAY_SIZE(g_R310_frameSeq_Wink)  }, // 윙크
     
-	{EMT_LOOK_L       , g_R310_frameSeq_Left         , G_R310_ARRAY_SIZE(g_R310_seqLeft)  }, // 왼쪽 보기
-    {EMT_LOOK_R       , g_R310_frameSeq_Right        , G_R310_ARRAY_SIZE(g_R310_seqRight) }, // 오른쪽 보기
+	{EMT_LOOK_L       , g_R310_frameSeq_Left         , G_R310_ARRAY_SIZE(g_R310_frameSeq_Left)  }, // 왼쪽 보기
+    {EMT_LOOK_R       , g_R310_frameSeq_Right        , G_R310_ARRAY_SIZE(g_R310_frameSeq_Right) }, // 오른쪽 보기
  
-	{EMT_LOOK_U       , g_R310_frameSeq_Up           , G_R310_ARRAY_SIZE(g_R310_seqUp)    }, // 위 보기
-    {EMT_LOOK_D       , g_R310_frameSeq_Down         , G_R310_ARRAY_SIZE(g_R310_seqDown)  }, // 아래 보기
+	{EMT_LOOK_U       , g_R310_frameSeq_Up           , G_R310_ARRAY_SIZE(g_R310_frameSeq_Up)    }, // 위 보기
+    {EMT_LOOK_D       , g_R310_frameSeq_Down         , G_R310_ARRAY_SIZE(g_R310_frameSeq_Down)  }, // 아래 보기
 
-	{EMT_SCAN_LR      , g_R310_frameSeq_ScanLeftRight, G_R310_ARRAY_SIZE(g_R310_seqScanLeftRight)}, // 좌우 스캔
-    {EMT_SCAN_UD      , g_R310_frameSeq_ScanUpDown   , G_R310_ARRAY_SIZE(g_R310_seqScanUpDown)}, // 상하 스캔
+	{EMT_SCAN_LR      , g_R310_frameSeq_ScanLeftRight, G_R310_ARRAY_SIZE(g_R310_frameSeq_ScanLeftRight)}, // 좌우 스캔
+    {EMT_SCAN_UD      , g_R310_frameSeq_ScanUpDown   , G_R310_ARRAY_SIZE(g_R310_frameSeq_ScanUpDown)}, // 상하 스캔
 
-    {EMT_ANGRY2       , g_R310_frameSeq_Angry2       , G_R310_ARRAY_SIZE(g_R310_seqAngry2)}, // 좌우 스캔
-    {EMT_SMILE        , g_R310_frameSeq_Smile        , G_R310_ARRAY_SIZE(g_R310_seqSmile)}, // 상하 스캔
+    {EMT_ANGRY2       , g_R310_frameSeq_Angry2       , G_R310_ARRAY_SIZE(g_R310_frameSeq_Angry2)}, // 좌우 스캔
+    {EMT_SMILE        , g_R310_frameSeq_Smile        , G_R310_ARRAY_SIZE(g_R310_frameSeq_Smile)}, // 상하 스캔
 
-    {EMT_SLEEP        , g_R310_frameSeq_Sleep        , G_R310_ARRAY_SIZE(g_R310_seqSleep)}, // 잠자는 눈
-    {EMT_SLEEP_BLINK  , g_R310_frameSeq_SleepBlink   , G_R310_ARRAY_SIZE(g_R310_seqSleepBlink)}, // 잠자는 눈
+    {EMT_SLEEP        , g_R310_frameSeq_Sleep        , G_R310_ARRAY_SIZE(g_R310_frameSeq_Sleep)}, // 잠자는 눈
+    {EMT_SLEEP_BLINK  , g_R310_frameSeq_SleepBlink   , G_R310_ARRAY_SIZE(g_R310_frameSeq_SleepBlink)}, // 잠자는 눈
 
 };
 
