@@ -244,7 +244,7 @@ bool R310_runAnimation(void) {
         case ANI_PLY_STATE_RESTART:
             if (g_R310_aniControl.nextEmotion != EMT_NONE) { // 구조체 멤버 사용
                 R310_loadSequence(g_R310_aniControl.nextEmotion); // 구조체 멤버 사용
-                g_R310_aniControl.currentAniTable = g_R310_aniControl.nextEmotion; // 구조체 멤버 사용
+                g_R310_aniControl.currentEmotion = g_R310_aniControl.nextEmotion; // 구조체 멤버 사용
                 g_R310_aniControl.nextEmotion = EMT_NONE; // 구조체 멤버 사용
                 g_R310_aniControl.playState = ANI_PLY_STATE_ANIMATE; // 구조체 멤버 사용
             } else {
@@ -269,7 +269,7 @@ bool R310_runAnimation(void) {
             if ((millis() - v_timeOfLastFrame) < v_thisFrame.timeFrame) {
                 break;
             }
-            if ((g_R310_aniControl.playDirection == EMTP_PLY_DIR_FIRST && g_R310_aniControl.aniFrameIndex >= g_R310_aniControl.currentAniEntry.seqSize) ||
+            if ((g_R310_aniControl.playDirection == EMTP_PLY_DIR_FIRST && g_R310_aniControl.aniFrameIndex >= g_R310_aniControl.currentAniTable.seqSize) ||
                 (g_R310_aniControl.playDirection == EMTP_PLY_DIR_LAST && g_R310_aniControl.aniFrameIndex < 0)) { // 구조체 멤버 사용
                 if (g_R310_aniControl.autoReverse == EMTP_AUTO_REVERSE_ON) { // 구조체 멤버 사용
                     EMTP_Ply_Direct_t v_emtp_ply_dir;
