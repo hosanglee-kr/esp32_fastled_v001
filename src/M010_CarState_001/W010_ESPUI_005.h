@@ -26,8 +26,7 @@
 // M010_main3_010.h 에 정의된 전역 변수 및 함수 선언을 사용하기 위해 포함
 #include "M010_main3_011.h"
 
-
-//"W010_ESPUI_ui_config_001.json"
+#define     G_W010_UI_CONFIG_JSON_FILE     "/W010_ESPUI_ui_config_001.json"
 
 // ====================================================================================================
 // 전역 변수 선언
@@ -128,7 +127,7 @@ bool W010_EmbUI_loadUIConfig() {
         return false;
     }
 
-    File configFile = LittleFS.open("/ui_config.json", "r");
+    File configFile = LittleFS.open(G_W010_UI_CONFIG_JSON_FILE, "r");
     if (!configFile) {
         dbgP1_println_F(F("ui_config.json 파일 열기 실패!"));
         LittleFS.end();
@@ -165,7 +164,7 @@ bool W010_EmbUI_loadUIConfig() {
 void W010_EmbUI_init() {
     dbgP1_println_F(F("ESPUI 초기화 중..."));
 
-    // LittleFS 초기화 및 UI 설정 로드
+	// LittleFS 초기화 및 UI 설정 로드
     if (!LittleFS.begin()) {
         dbgP1_println_F(F("LittleFS 마운트 실패! UI 설정 로드 불가."));
         // 파일 시스템 에러 처리
