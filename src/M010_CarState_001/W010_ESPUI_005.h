@@ -304,3 +304,250 @@ void W010_EmbUI_setupWebPages() {
 
     dbgP1_println_F(F("ESPUI 웹페이지 UI 설정 완료 (JSON 활용)."));
 }
+
+/**
+ * @brief g_M010_Config 구조체에 저장된 현재 설정값을 ESPUI 웹 UI로 로드하여 표시합니다.
+ * 주로 시스템 시작 시 또는 '불러오기' 버튼 클릭 시 호출됩니다.
+ */
+void W010_EmbUI_loadConfigToWebUI() {
+    dbgP1_println_F(F("웹 UI에 설정값 로드 중..."));
+
+    ESPUI.updateControlValue(C_ID_MVSTATE_ACCELFILTER_ALPHA                         , String(g_M010_Config.mvState_accelFilter_Alpha, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN            , String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN            , String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX               , String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX              , String(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX                , String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN                , String(g_M010_Config.mvState_stop_durationMs_Stable_Min));
+    ESPUI.updateControlValue(C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN                , String(g_M010_Config.mvState_move_durationMs_Stable_Min));
+    ESPUI.updateControlValue(C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD                 , String(g_M010_Config.mvState_Decel_accelMps2_Threshold, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD                  , String(g_M010_Config.mvState_Bump_accelMps2_Threshold, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_SPEEDKMH_MIN                         , String(g_M010_Config.mvState_Bump_SpeedKmh_Min, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_COOLDOWNMS                           , String(g_M010_Config.mvState_Bump_CooldownMs));
+    ESPUI.updateControlValue(C_ID_MVSTATE_DECEL_DURATIONMS_HOLD                     , String(g_M010_Config.mvState_Decel_durationMs_Hold));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_DURATIONMS_HOLD                      , String(g_M010_Config.mvState_Bump_durationMs_Hold));
+    ESPUI.updateControlValue(C_ID_MVSTATE_SIGNALWAIT1_SECONDS                       , String(g_M010_Config.mvState_signalWait1_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_SIGNALWAIT2_SECONDS                       , String(g_M010_Config.mvState_signalWait2_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOPPED1_SECONDS                          , String(g_M010_Config.mvState_stopped1_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOPPED2_SECONDS                          , String(g_M010_Config.mvState_stopped2_Seconds)); // ID 오타 수정: C_ID_MVSTATE_STOPPED2_SECONDS
+    ESPUI.updateControlValue(C_ID_MVSTATE_PARK_SECONDS                              , String(g_M010_Config.mvState_park_Seconds));
+    ESPUI.updateControlValue(C_ID_SERIALPRINT_INTERVALMS                            , String(g_M010_Config.serialPrint_intervalMs));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD   , String(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 2));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD     , String(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 2));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD     , String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 2));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD     , String(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 2));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_SPEEDKMH_MINSPEED                       , String(g_M010_Config.turnState_speedKmh_MinSpeed, 2));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD            , String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 2));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_STABLEDURATIONMS                        , String(g_M010_Config.turnState_StableDurationMs));
+
+    dbgP1_println_F(F("웹 UI에 설정값 로드 완료."));
+}
+
+/**
+ * @brief ESPUI 웹 UI에서 컨트롤 값이 변경되거나 버튼이 클릭될 때 호출되는 콜백 함수입니다.
+ * 변경된 값을 g_M010_Config 구조체에 반영하거나, 명령 버튼에 따른 동작을 수행합니다.
+ * @param p_Control 변경되거나 클릭된 컨트롤 객체
+ * @param p_controlType 컨트롤의 변경/클릭 유형 (Control::Type::Button, Control::Type::Number 등)
+ */
+void W010_ESPUI_callback(Control* p_Control, int p_controlType, void* p_userData) {
+    dbgP1_printf_F(F("ESPUI 콜백 감지: ID=%d, Name=%s, Value=%s, Type=%d\n"), p_Control->id, p_Control->label, p_Control->value.c_str(), p_controlType);
+
+    int v_controlId = *static_cast<int*>(p_userData); // userData를 int 포인터로 캐스팅 후 역참조
+
+    // Number 컨트롤의 값 변경 처리
+    if (p_controlType == Number) {
+        float v_floatValue  = p_Control->value.toFloat();
+        int v_intValue      = p_Control->value.toInt();
+
+        switch (p_Control->id) {
+            case C_ID_MVSTATE_ACCELFILTER_ALPHA:
+                g_M010_Config.mvState_accelFilter_Alpha = v_floatValue;
+                break;
+            case C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN:
+                g_M010_Config.mvState_Forward_speedKmh_Threshold_Min = v_floatValue;
+                break;
+            case C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN:
+                g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min = v_floatValue;
+                break;
+            case C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX:
+                g_M010_Config.mvState_Stop_speedKmh_Threshold_Max = v_floatValue;
+                break;
+            case C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX:
+                g_M010_Config.mvState_Stop_accelMps2_Threshold_Max = v_floatValue;
+                break;
+            case C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX:
+                g_M010_Config.mvState_Stop_gyroDps_Threshold_Max = v_floatValue;
+                break;
+            case C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN:
+                g_M010_Config.mvState_stop_durationMs_Stable_Min = v_intValue;
+                break;
+            case C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN:
+                g_M010_Config.mvState_move_durationMs_Stable_Min = v_intValue;
+                break;
+            case C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD:
+                g_M010_Config.mvState_Decel_accelMps2_Threshold = v_floatValue;
+                break;
+            case C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD:
+                g_M010_Config.mvState_Bump_accelMps2_Threshold = v_floatValue;
+                break;
+            case C_ID_MVSTATE_BUMP_SPEEDKMH_MIN:
+                g_M010_Config.mvState_Bump_SpeedKmh_Min = v_floatValue;
+                break;
+            case C_ID_MVSTATE_BUMP_COOLDOWNMS:
+                g_M010_Config.mvState_Bump_CooldownMs = v_intValue;
+                break;
+            case C_ID_MVSTATE_DECEL_DURATIONMS_HOLD:
+                g_M010_Config.mvState_Decel_durationMs_Hold = v_intValue;
+                break;
+            case C_ID_MVSTATE_BUMP_DURATIONMS_HOLD:
+                g_M010_Config.mvState_Bump_durationMs_Hold = v_intValue;
+                break;
+            case C_ID_MVSTATE_SIGNALWAIT1_SECONDS:
+                g_M010_Config.mvState_signalWait1_Seconds = v_intValue;
+                break;
+            case C_ID_MVSTATE_SIGNALWAIT2_SECONDS:
+                g_M010_Config.mvState_signalWait2_Seconds = v_intValue;
+                break;
+            case C_ID_MVSTATE_STOPPED1_SECONDS:
+                g_M010_Config.mvState_stopped1_Seconds = v_intValue;
+                break;
+            case C_ID_MVSTATE_STOPPED2_SECONDS: // ID 오타 수정됨
+                g_M010_Config.mvState_stopped2_Seconds = v_intValue;
+                break;
+            case C_ID_MVSTATE_PARK_SECONDS:
+                g_M010_Config.mvState_park_Seconds = v_intValue;
+                break;
+            case C_ID_SERIALPRINT_INTERVALMS:
+                g_M010_Config.serialPrint_intervalMs = v_intValue;
+                break;
+            case C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold = v_floatValue;
+                break;
+            case C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold = v_floatValue;
+                break;
+            case C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold = v_floatValue;
+                break;
+            case C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold = v_floatValue;
+                break;
+            case C_ID_TURNSTATE_SPEEDKMH_MINSPEED:
+                g_M010_Config.turnState_speedKmh_MinSpeed = v_floatValue;
+                break;
+            case C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD:
+                g_M010_Config.turnState_speedKmh_HighSpeed_Threshold = v_floatValue;
+                break;
+            case C_ID_TURNSTATE_STABLEDURATIONMS:
+                g_M010_Config.turnState_StableDurationMs = v_intValue;
+                break;
+            default:
+                dbgP1_printf_F(F("알 수 없는 Number 컨트롤 ID: %d\n"), p_Control->id);
+                break;
+        }
+    }
+    // Button 클릭 처리
+    else if (p_controlType == ControlType::Button) {
+        String v_cmd = p_Control->value; // Button의 value 속성이 명령어 역할을 합니다.
+
+        if (v_cmd.equals("save_config")) {
+            if (M010_Config_save()) {
+                dbgP1_println_F(F("웹 UI: 설정값이 LittleFS에 저장되었습니다."));                
+                ESPUI.print(g_W010_Control_Alaram_Id, "설정값이 성공적으로 저장되었습니다."); // ESPUI 메시지
+                // ESPUI.print("알림", "설정값이 성공적으로 저장되었습니다.", "lime"); // ESPUI 메시지
+            } else {
+                dbgP1_println_F(F("웹 UI: 설정값 저장 실패!"));
+                ESPUI.print(g_W010_Control_Error_Id, "파일 시스템에 설정값을 저장할 수 없습니다.");
+                //ESPUI.print("경고", "파일 시스템에 설정값을 저장할 수 없습니다.", "red");
+            }
+        } else if (v_cmd.equals("load_config")) {
+            if (M010_Config_load()) {
+                dbgP1_println_F(F("웹 UI: 설정값이 LittleFS에서 로드되었습니다."));
+                W010_EmbUI_loadConfigToWebUI(); // 웹 UI에도 로드된 값 반영
+                ESPUI.print(g_W010_Control_Alaram_Id, "설정값이 성공적으로 불러와졌습니다.");
+                // ESPUI.print("알림", "설정값이 성공적으로 불러와졌습니다.", "lime");
+            } else {
+                dbgP1_println_F(F("웹 UI: 설정값 로드 실패! 기본값이 사용됩니다."));
+                M010_Config_initDefaults(); // 로드 실패 시 기본값으로 초기화
+                W010_EmbUI_loadConfigToWebUI(); // 웹 UI에도 기본값 반영
+
+                ESPUI.print(g_W010_Control_Error_Id, "설정 파일을 찾을 수 없습니다. 기본값이 적용됩니다.");
+                //ESPUI.print("경고", "설정 파일을 찾을 수 없습니다. 기본값이 적용됩니다.", "red");
+            }
+        } else if (v_cmd.equals("reset_config")) {
+            M010_Config_initDefaults(); // 설정값을 기본값으로 초기화
+            if (M010_Config_save()) { // 초기화된 기본값을 파일에 저장
+                dbgP1_println_F(F("웹 UI: 설정값이 기본값으로 초기화되고 저장되었습니다."));
+                W010_EmbUI_loadConfigToWebUI(); // 웹 UI에도 기본값 반영
+                ESPUI.print(g_W010_Control_Alaram_Id, "설정값이 기본값으로 초기화되었습니다.");
+                // ESPUI.print("알림", "설정값이 기본값으로 초기화되었습니다.", "lime");
+            } else {
+                dbgP1_println_F(F("웹 UI: 설정 초기화 후 저장 실패!"));
+                ESPUI.print(g_W010_Control_Error_Id, "기본값 저장 중 오류가 발생했습니다.");
+                //ESPUI.print("경고", "기본값 저장 중 오류가 발생했습니다.", "red");
+            }
+        } else {
+            dbgP1_printf_F(F("웹 UI: 알 수 없는 명령: %s\n"), v_cmd.c_str());
+            ESPUI.print(g_W010_Control_Error_Id, "알 수 없는 명령입니다.");
+            //ESPUI.print("오류", "알 수 없는 명령입니다.", "red");
+        }
+    }
+}
+
+/**
+ * @brief g_M010_CarStatus 구조체의 현재 자동차 상태 정보를 ESPUI 웹페이지에 주기적으로 업데이트합니다.
+ * "status" 페이지에 정의된 Label 컨트롤들의 값을 실시간으로 갱신합니다.
+ */
+void W010_EmbUI_updateCarStatusWeb() {
+    String v_movementStateStr;
+    switch (g_M010_CarStatus.carMovementState) {
+        case E_M010_CARMOVESTATE_UNKNOWN:       v_movementStateStr = "알 수 없음"                                                                     ; break;
+        case E_M010_CARMOVESTATE_STOPPED_INIT:  v_movementStateStr = "정차 중 (기본)"                                                                 ; break;
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT1:  v_movementStateStr = "신호대기 1 (" + String(g_M010_Config.mvState_signalWait1_Seconds) + "s 미만)"   ; break;
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT2:  v_movementStateStr = "신호대기 2 (" + String(g_M010_Config.mvState_signalWait2_Seconds) + "s 미만)"   ; break;
+        case E_M010_CARMOVESTATE_STOPPED1:      v_movementStateStr = "정차 1 (" + String(g_M010_Config.mvState_stopped1_Seconds / 60) + "분 미만)"    ; break;
+        case E_M010_CARMOVESTATE_STOPPED2:      v_movementStateStr = "정차 2 (" + String(g_M010_Config.mvState_stopped2_Seconds / 60) + "분 미만)"    ; break;
+        case E_M010_CARMOVESTATE_PARKED:        v_movementStateStr = "주차 중 (>= " + String(g_M010_Config.mvState_park_Seconds / 60) + "분)"         ; break;
+        case E_M010_CARMOVESTATE_FORWARD:       v_movementStateStr = "전진 중"; break;
+        case E_M010_CARMOVESTATE_REVERSE:       v_movementStateStr = "후진 중"; break;
+    }
+
+    String v_turnStateStr;
+    switch (g_M010_CarStatus.carTurnState) {
+        case E_M010_CARTURNSTATE_CENTER:    v_turnStateStr = "직진 또는 정지"; break;
+        case E_M010_CARTURNSTATE_LEFT_1:    v_turnStateStr = "약간 좌회전"; break;
+        case E_M010_CARTURNSTATE_LEFT_2:    v_turnStateStr = "중간 좌회전"; break;
+        case E_M010_CARTURNSTATE_LEFT_3:    v_turnStateStr = "급격한 좌회전"; break;
+        case E_M010_CARTURNSTATE_RIGHT_1:   v_turnStateStr = "약간 우회전"; break;
+        case E_M010_CARTURNSTATE_RIGHT_2:   v_turnStateStr = "중간 우회전"; break;
+        case E_M010_CARTURNSTATE_RIGHT_3:   v_turnStateStr = "급격한 우회전"; break;
+    }
+
+    ESPUI.updateControlValue(C_ID_CARMOVEMENTSTATE_LABEL, v_movementStateStr);
+    ESPUI.updateControlValue(C_ID_CARTURNSTATE_LABEL, v_turnStateStr);
+    ESPUI.updateControlValue(C_ID_SPEED_KMH_LABEL, String(g_M010_CarStatus.speed_kmh, 2) + " km/h");
+    ESPUI.updateControlValue(C_ID_ACCELX_MS2_LABEL, String(g_M010_CarStatus.accelX_ms2, 2) + " m/s^2");
+    ESPUI.updateControlValue(C_ID_ACCELY_MS2_LABEL, String(g_M010_CarStatus.accelY_ms2, 2) + " m/s^2");
+    ESPUI.updateControlValue(C_ID_ACCELZ_MS2_LABEL, String(g_M010_CarStatus.accelZ_ms2, 2) + " m/s^2");
+    ESPUI.updateControlValue(C_ID_YAWANGLE_DEG_LABEL, String(g_M010_CarStatus.yawAngle_deg, 2) + " 도");
+    ESPUI.updateControlValue(C_ID_PITCHANGLE_DEG_LABEL, String(g_M010_CarStatus.pitchAngle_deg, 2) + " 도");
+    ESPUI.updateControlValue(C_ID_YAWANGLEVELOCITY_DEGPS_LABEL, String(g_M010_CarStatus.yawAngleVelocity_degps, 2) + " 도/초");
+    ESPUI.updateControlValue(C_ID_ISEMERGENCYBRAKING_LABEL, g_M010_CarStatus.isEmergencyBraking ? "감지됨" : "아님");
+    ESPUI.updateControlValue(C_ID_ISSPEEDBUMPDETECTED_LABEL, g_M010_CarStatus.isSpeedBumpDetected ? "감지됨" : "아님");
+    ESPUI.updateControlValue(C_ID_CURRENTSTOPTIME_SEC_LABEL, String(g_M010_CarStatus.currentStopTime_ms / 1000) + " 초");
+}
+
+/**
+ * @brief ESPUI의 메인 루프를 실행하고, 주기적으로 자동차 상태를 웹에 업데이트합니다.
+ * Arduino의 `loop()` 함수에서 이 함수를 호출해야 합니다.
+ */
+void W010_EmbUI_run() {
+    // ESPUI.loop()은 ESPUI.begin()에서 내부적으로 WebServer를 시작하므로
+    // 별도로 호출할 필요가 없습니다. (예전 버전에서는 필요했음)
+
+    static u_int32_t v_lastWebUpdateTime_ms = 0;
+    if (millis() - v_lastWebUpdateTime_ms >= g_M010_Config.serialPrint_intervalMs) {
+        W010_EmbUI_updateCarStatusWeb();
+        v_lastWebUpdateTime_ms = millis();
+    }
+}
