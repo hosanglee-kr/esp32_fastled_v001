@@ -127,8 +127,8 @@ bool W010_EmbUI_loadUIConfig() {
         return false;
     }
 
-    File configFile = LittleFS.open(G_W010_UI_CONFIG_JSON_FILE, "r");
-    if (!configFile) {
+    File v_configFile = LittleFS.open(G_W010_UI_CONFIG_JSON_FILE, "r");
+    if (!v_configFile) {
         dbgP1_println_F(F("ui_config.json 파일 열기 실패!"));
         LittleFS.end();
         return false;
@@ -141,15 +141,15 @@ bool W010_EmbUI_loadUIConfig() {
     // g_W010_uiConfigDoc.clear(); // 기존 데이터가 있다면 초기화
     // g_W010_uiConfigDoc.capacity = 1024 * 4; // 크기 설정 (ArduinoJson v6 이상)
 
-    DeserializationError error = deserializeJson(g_W010_uiConfigDoc, configFile);
-    if (error) {
-        dbgP1_printf_F(F("JSON 파싱 실패: %s\n"), error.c_str());
-        configFile.close();
+    DeserializationError v_error = deserializeJson(g_W010_uiConfigDoc, v_configFile);
+    if (v_error) {
+        dbgP1_printf_F(F("JSON 파싱 실패: %s\n"), v_error.c_str());
+        v_configFile.close();
         LittleFS.end();
         return false;
     }
 
-    configFile.close();
+    v_configFile.close();
     LittleFS.end();
     dbgP1_println_F(F("UI 설정 파일 로드 및 파싱 완료."));
     return true;
