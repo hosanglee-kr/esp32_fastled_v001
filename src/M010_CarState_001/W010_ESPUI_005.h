@@ -251,6 +251,68 @@ void W010_EmbUI_setupWebPages() {
             else if (enumIdStr.equals("C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD;
             else if (enumIdStr.equals("C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD;
             else if (enumIdStr.equals("C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD;
+/**
+ * @brief ESPUI 웹페이지 UI를 구성하고, g_M010_Config 구조체의 멤버 변수들을 웹 UI에 바인딩합니다.
+ * 사용자가 웹 인터페이스를 통해 설정을 조회하고 변경할 수 있도록 필드를 정의합니다.
+ */
+void W010_EmbUI_setupWebPages() {
+    dbgP1_println_F(F("ESPUI 웹페이지 UI 설정 중 (JSON 활용)..."));
+
+    JsonArray tabs = g_W010_uiConfigDoc["tabs"].as<JsonArray>();
+
+    for (JsonObject tab : tabs) {
+        String tabId = tab["id"].as<String>();
+        String tabTitle = tab["title"].as<String>();
+        JsonArray controls = tab["controls"].as<JsonArray>();
+
+        uint16_t currentTabId;
+        if (tabId.equals("config")) {
+            // tabTitle이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+            g_W010_Tab_Config_Id = ESPUI.addControl(Tab, tabTitle.c_str(), tabTitle);
+            currentTabId = g_W010_Tab_Config_Id;
+        } else if (tabId.equals("status")) {
+            // tabTitle이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+            g_W010_Tab_Status_Id = ESPUI.addControl(ControlType::Tab, tabTitle.c_str(), "", ControlColor::Wetasphalt);
+            ESPUI.setVertical(g_W010_Tab_Status_Id, true);
+            currentTabId = g_W010_Tab_Status_Id;
+        } else {
+            dbgP1_printf_F(F("알 수 없는 탭 ID: %s\n"), tabId.c_str());
+            continue;
+        }
+
+        for (JsonObject control : controls) {
+            String enumIdStr = control["enum_id"].as<String>();
+            String label = control["label"].as<String>();
+            JsonVariant defaultValue = control["default_value"]; // 값을 직접 사용하지 않고, 레이블 생성 시에만 활용.
+
+            // enum_id 문자열을 enum 값으로 매핑
+            int controlEnumId = -1;
+            // 각 enum 값에 대한 case 문을 추가하여 매핑합니다.
+            // 이 부분은 수동으로 매핑해야 합니다.
+            // 더 효율적인 방법은 String to Enum 매핑 함수를 만드는 것입니다.
+            if (enumIdStr.equals("C_ID_MVSTATE_ACCELFILTER_ALPHA")) controlEnumId = C_ID_MVSTATE_ACCELFILTER_ALPHA;
+            else if (enumIdStr.equals("C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN")) controlEnumId = C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN;
+            else if (enumIdStr.equals("C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN")) controlEnumId = C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN;
+            else if (enumIdStr.equals("C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX")) controlEnumId = C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX;
+            else if (enumIdStr.equals("C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX")) controlEnumId = C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX;
+            else if (enumIdStr.equals("C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX")) controlEnumId = C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX;
+            else if (enumIdStr.equals("C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN")) controlEnumId = C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN;
+            else if (enumIdStr.equals("C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN")) controlEnumId = C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN;
+            else if (enumIdStr.equals("C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD")) controlEnumId = C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD;
+            else if (enumIdStr.equals("C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD")) controlEnumId = C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD;
+            else if (enumIdStr.equals("C_ID_MVSTATE_BUMP_SPEEDKMH_MIN")) controlEnumId = C_ID_MVSTATE_BUMP_SPEEDKMH_MIN;
+            else if (enumIdStr.equals("C_ID_MVSTATE_BUMP_COOLDOWNMS")) controlEnumId = C_ID_MVSTATE_BUMP_COOLDOWNMS;
+            else if (enumIdStr.equals("C_ID_MVSTATE_DECEL_DURATIONMS_HOLD")) controlEnumId = C_ID_MVSTATE_DECEL_DURATIONMS_HOLD;
+            else if (enumIdStr.equals("C_ID_MVSTATE_BUMP_DURATIONMS_HOLD")) controlEnumId = C_ID_MVSTATE_BUMP_DURATIONMS_HOLD;
+            else if (enumIdStr.equals("C_ID_MVSTATE_SIGNALWAIT1_SECONDS")) controlEnumId = C_ID_MVSTATE_SIGNALWAIT1_SECONDS;
+            else if (enumIdStr.equals("C_ID_MVSTATE_SIGNALWAIT2_SECONDS")) controlEnumId = C_ID_MVSTATE_SIGNALWAIT2_SECONDS;
+            else if (enumIdStr.equals("C_ID_MVSTATE_STOPPED1_SECONDS")) controlEnumId = C_ID_MVSTATE_STOPPED1_SECONDS;
+            else if (enumIdStr.equals("C_ID_MVSTATE_STOPPED2_SECONDS")) controlEnumId = C_ID_MVSTATE_STOPPED2_SECONDS;
+            else if (enumIdStr.equals("C_ID_MVSTATE_PARK_SECONDS")) controlEnumId = C_ID_MVSTATE_PARK_SECONDS;
+            else if (enumIdStr.equals("C_ID_SERIALPRINT_INTERVALMS")) controlEnumId = C_ID_SERIALPRINT_INTERVALMS;
+            else if (enumIdStr.equals("C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD;
+            else if (enumIdStr.equals("C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD;
+            else if (enumIdStr.equals("C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD;
             else if (enumIdStr.equals("C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD")) controlEnumId = C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD;
             else if (enumIdStr.equals("C_ID_TURNSTATE_SPEEDKMH_MINSPEED")) controlEnumId = C_ID_TURNSTATE_SPEEDKMH_MINSPEED;
             else if (enumIdStr.equals("C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD")) controlEnumId = C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD;
@@ -271,14 +333,15 @@ void W010_EmbUI_setupWebPages() {
             else if (enumIdStr.equals("C_ID_ISSPEEDBUMPDETECTED_LABEL")) controlEnumId = C_ID_ISSPEEDBUMPDETECTED_LABEL;
             else if (enumIdStr.equals("C_ID_CURRENTSTOPTIME_SEC_LABEL")) controlEnumId = C_ID_CURRENTSTOPTIME_SEC_LABEL;
             else if (enumIdStr.equals("g_W010_Control_Alaram_Id")) { // 알림/오류 라벨은 enum_id 대신 전역 변수를 직접 사용
-                g_W010_Control_Alaram_Id = ESPUI.addControl(ControlType::Label, label, defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
+                // label이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+                g_W010_Control_Alaram_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
                 continue; // 다음 컨트롤로 넘어감
             }
             else if (enumIdStr.equals("g_W010_Control_Error_Id")) { // 알림/오류 라벨은 enum_id 대신 전역 변수를 직접 사용
-                g_W010_Control_Error_Id = ESPUI.addControl(ControlType::Label, label, defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
+                // label이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+                g_W010_Control_Error_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
                 continue; // 다음 컨트롤로 넘어감
             }
-
 
             if (controlEnumId == -1) {
                 dbgP1_printf_F(F("JSON에 정의된 알 수 없는 enum_id: %s\n"), enumIdStr.c_str());
@@ -289,15 +352,18 @@ void W010_EmbUI_setupWebPages() {
             if (tabId.equals("config")) {
                 // Config 탭의 컨트롤들은 Number 또는 Button
                 if (enumIdStr.endsWith("_BTN")) { // 버튼인지 확인
-                    ESPUI.addControl(ControlType::Button, label, label.c_str(), ControlColor::Emerald, currentTabId, &W010_ESPUI_callback, (void*)controlEnumId);
+                    // label이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+                    ESPUI.addControl(ControlType::Button, label.c_str(), label.c_str(), ControlColor::Emerald, currentTabId, &W010_ESPUI_callback, (void*)controlEnumId);
                 } else {
                     // Number 컨트롤의 초기값은 String(g_M010_Config.xxx, decimal_places) 형식으로 제공되어야 합니다.
                     // 여기서는 초기값을 0으로 설정하고, 나중에 loadConfigToWebUI에서 실제 값을 로드합니다.
-                    ESPUI.addControl(ControlType::Number, label, String(defaultValue.as<float>(), 3), ControlColor::Alizarin, currentTabId, &W010_ESPUI_callback, (void*)controlEnumId);
+                    // label이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+                    ESPUI.addControl(ControlType::Number, label.c_str(), String(defaultValue.as<float>(), 3), ControlColor::Alizarin, currentTabId, &W010_ESPUI_callback, (void*)controlEnumId);
                 }
             } else if (tabId.equals("status")) {
                 // Status 탭의 컨트롤들은 Label
-                ESPUI.addControl(ControlType::Label, label, defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId, nullptr, (void*)controlEnumId);
+                // label이 String 타입이므로 .c_str()을 사용하여 const char*로 변환
+                ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId, nullptr, (void*)controlEnumId);
             }
         }
     }
