@@ -310,8 +310,20 @@ void W010_EmbUI_setupWebPages() {
             // ESPUI.addControl( ControlType::Option, "Option1", "Opt1", ControlColor::Alizarin, select1);
             // ESPUI.addControl( ControlType::Option, "Option2", "Opt2", ControlColor::Alizarin, select1);
             
-            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko"), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
-            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en"), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
+            // auto mainselector = ESPUI.addControl(Select, "Selector", "Selector", Wetasphalt, maintab, generalCallback);
+            // for(auto const& v : optionValues) {
+            //     ESPUI.addControl(Option, v.c_str(), v, None, mainselector);
+            // }
+
+            // uint16_t addControl(ControlType type, const char* label);
+            // uint16_t addControl(ControlType type, const char* label, const String& value);
+            // uint16_t addControl(ControlType type, const char* label, const String& value, ControlColor color);
+            // uint16_t addControl(ControlType type, const char* label, const String& value, ControlColor color, uint16_t parentControl);
+            // uint16_t addControl(ControlType type, const char* label, const String& value, ControlColor color, uint16_t parentControl, std::function<void(Control*, int)> callback);
+
+
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko").c_str(), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en").c_str(), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
             //ESPUI.addControlOption(g_W010_Control_Language_Id, W010_EmbUI_getCommonString("messages.lang_ko"), "ko");
             //ESPUI.addControlOption(g_W010_Control_Language_Id, W010_EmbUI_getCommonString("messages.lang_en"), "en");
             
