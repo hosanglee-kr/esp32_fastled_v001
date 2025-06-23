@@ -340,6 +340,8 @@ void W010_EmbUI_setupWebPages() {
             continue;
         }
 
+		JsonArray controls = tab["controls"].as<JsonArray>();
+
         for (JsonObject control : controls) {
             String enumIdStr = control["enum_id"].as<String>();
             String label = W010_EmbUI_getControlLabel(enumIdStr); // 다국어 레이블 가져오기
