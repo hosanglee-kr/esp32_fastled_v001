@@ -28,7 +28,8 @@
 // JSON 파일 경로 정의 (언어 코드에 따라 동적으로 결정)
 
 #define    G_W010_UI_CONFIG_BASE_FILE_PREFIX    "/W010_ESPUI_ui_config_003_"
-#deinfe    G_W010_UI_CONFIG_BASE_FILE_SUBFIX    ".json"
+#define    G_W010_UI_CONFIG_BASE_FILE_SUBFIX    ".json"
+
 //#define     G_W010_UI_CONFIG_BASE_FILE        "/W010_ESPUI_ui_config_001"
 
 #define     G_W010_LAST_LANG_FILE               "/last_lang.txt" // 마지막 언어 설정을 저장할 파일
@@ -297,7 +298,7 @@ void W010_EmbUI_setupWebPages() {
             currentTabId = g_W010_Tab_Config_Id;
 
             // 언어 선택 드롭다운 추가
-            g_W010_Control_Language_Id = ESPUI.addControl(ControlType::Dropdown,
+            g_W010_Control_Language_Id = ESPUI.addControl(ControlType::Select,
                                                            W010_EmbUI_getCommonString("messages.lang_select_label").c_str(),
                                                            "",
                                                            ControlColor::Wetasphalt,
@@ -305,8 +306,15 @@ void W010_EmbUI_setupWebPages() {
                                                            &W010_ESPUI_callback,
                                                            reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT)));
             // 드롭다운 옵션 추가
-            ESPUI.addControlOption(g_W010_Control_Language_Id, W010_EmbUI_getCommonString("messages.lang_ko"), "ko");
-            ESPUI.addControlOption(g_W010_Control_Language_Id, W010_EmbUI_getCommonString("messages.lang_en"), "en");
+            // uint16_t select1 = ESPUI.addControl( ControlType::Select, "Select Title", "Initial Value", ControlColor::Alizarin, tab1, &selectExample );
+            // ESPUI.addControl( ControlType::Option, "Option1", "Opt1", ControlColor::Alizarin, select1);
+            // ESPUI.addControl( ControlType::Option, "Option2", "Opt2", ControlColor::Alizarin, select1);
+            
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko"), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en"), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
+            //ESPUI.addControlOption(g_W010_Control_Language_Id, W010_EmbUI_getCommonString("messages.lang_ko"), "ko");
+            //ESPUI.addControlOption(g_W010_Control_Language_Id, W010_EmbUI_getCommonString("messages.lang_en"), "en");
+            
             // 현재 선택된 언어를 드롭다운에 반영
             ESPUI.updateControlValue(g_W010_Control_Language_Id, g_W010_currentLanguage);
 
@@ -576,7 +584,7 @@ void W010_ESPUI_callback(Control* p_Control, int p_controlType, void* p_userData
             dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_command") + ": %s\n").c_str(), v_cmd.c_str());
             ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command"));
         }
-    } else if (p_controlType == Dropdown) {
+    } else if (p_controlType == Select) {
         if (v_controlId == C_ID_LANGUAGE_SELECT) {
             String selectedLang = p_Control->value;
             if (selectedLang != g_W010_currentLanguage) {
