@@ -432,7 +432,7 @@ void W010_EmbUI_loadConfigToWebUI() {
     ESPUI.updateControlValue(C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN            , String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 2));
     ESPUI.updateControlValue(C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN            , String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 2));
     ESPUI.updateControlValue(C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX               , String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 2));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX              , String(g_M010_Config.mvState_Stop_acc  elMps2_Threshold_Max, 2));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX              , String(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 2));
     ESPUI.updateControlValue(C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX                , String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 2));
     ESPUI.updateControlValue(C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN                , String(g_M010_Config.mvState_stop_durationMs_Stable_Min));
     ESPUI.updateControlValue(C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN                , String(g_M010_Config.mvState_move_durationMs_Stable_Min));
@@ -479,7 +479,7 @@ void W010_ESPUI_callback(Control* p_Control, int p_controlType, void* p_userData
 
         switch (v_controlId) {
             case C_ID_MVSTATE_ACCELFILTER_ALPHA:
-                g_M010_Config.mvState_acc  elFilter_Alpha = v_floatValue;
+                g_M010_Config.mvState_accelFilter_Alpha = v_floatValue;
                 break;
             case C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN:
                 g_M010_Config.mvState_Forward_speedKmh_Threshold_Min = v_floatValue;
