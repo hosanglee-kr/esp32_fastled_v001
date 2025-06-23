@@ -404,7 +404,8 @@ void W010_EmbUI_loadConfigToWebUI() {
         else if (tabId.equals(F("status"))) currentTabEspuiId = g_W010_Tab_Status_Id;
 
         if (currentTabEspuiId != 0) {
-             ESPUI.updateControl(currentTabEspuiId, tabTitle.c_str(), "");
+			ESPUI.updateControlLabel(currentTabEspuiId, tabTitle.c_str());
+             // ESPUI.updateControl(currentTabEspuiId, tabTitle.c_str(), "");
         }
 
         JsonArray controls = tab["controls"].as<JsonArray>();
@@ -422,7 +423,8 @@ void W010_EmbUI_loadConfigToWebUI() {
             if (controlEnumId == -1) continue;
 
             // ESPUI 컨트롤 레이블 업데이트
-            ESPUI.updateControl(controlEnumId, label.c_str(), "");
+			ESPUI.updateControlLabel(controlEnumId, label.c_str());
+            //ESPUI.updateControl(controlEnumId, label.c_str(), "");
         }
     }
 
