@@ -738,24 +738,13 @@ void W010_EmbUI_saveLastLanguage() {
 void W010_EmbUI_rebuildUI() {
     dbgP1_printf("UI 재구성 중... 새로운 언어: %s\n", g_W010_currentLanguage.c_str());
 
-    // 기존 ESPUI 컨트롤 모두 제거
-    ESPUI.empty();
-
-    // 새 언어의 UI 설정 파일 로드
-    if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
-        dbgP1_printf("UI 설정 JSON 파일 (%s) 로드 실패 (재구성 중). 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
-        g_W010_currentLanguage = "ko";
-        if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
-             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. UI 재구성 실패."));
-             return; // 치명적인 오류, 더 이상 진행 불가
-        }
-    }
+    // 기존 ESPUI 컨트롤을 모두 제거하는 대신, ESP32를 재시작하여
+    // setup() 함수에서 UI가 완전히 새로 구성되도록 합니다.
+    dbgP1_println(F("언어 변경 요청으로 인해 ESP32를 재시작합니다. 잠시 후 웹 UI에 다시 접속해주세요."));
     
-    // UI 페이지 다시 구성
-    W010_EmbUI_setupWebPages();
-    
-    // 설정값들을 새로 구성된 UI에 로드
-    W010_EmbUI_loadConfigToWebUI();
+    // 중요한 메시지이므로, 시리얼 포트로 전송될 시간을 확보합니다.
+    delay(2000); 
 
-    dbgP1_println(F("UI 재구성 완료."));
+    // ESP32를 소프트웨어적으로 재시작합니다.
+    ESP.restart(); 
 }
