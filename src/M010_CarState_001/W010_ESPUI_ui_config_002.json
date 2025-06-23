@@ -1,0 +1,261 @@
+{
+  "tabs": [
+    {
+      "id": "config",
+      "title": "시스템 설정",
+      "controls": [
+        {
+          "enum_id": "C_ID_MVSTATE_ACCELFILTER_ALPHA",
+          "label": "가속도 필터 Alpha",
+          "default_value": 0.5
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN",
+          "label": "전진 시작 속도 (km/h)",
+          "default_value": 0.1
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN",
+          "label": "후진 시작 속도 (km/h)",
+          "default_value": -0.1
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX",
+          "label": "정지 판단 최대 속도 (km/h)",
+          "default_value": 0.05
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX",
+          "label": "정지 판단 Y Accel (m/s^2)",
+          "default_value": 0.5
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX",
+          "label": "정지 판단 Yaw Gyro (deg/s)",
+          "default_value": 3.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN",
+          "label": "정지 안정 최소 시간 (ms)",
+          "default_value": 500
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN",
+          "label": "움직임 안정 최소 시간 (ms)",
+          "default_value": 500
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD",
+          "label": "급감속 Accel Y (m/s^2)",
+          "default_value": -3.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD",
+          "label": "방지턱 Accel Z (m/s^2)",
+          "default_value": 2.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_SPEEDKMH_MIN",
+          "label": "방지턱 최소 속도 (km/h)",
+          "default_value": 5.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_COOLDOWNMS",
+          "label": "방지턱 쿨다운 (ms)",
+          "default_value": 2000
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_DECEL_DURATIONMS_HOLD",
+          "label": "급감속 유지 시간 (ms)",
+          "default_value": 1000
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_DURATIONMS_HOLD",
+          "label": "방지턱 유지 시간 (ms)",
+          "default_value": 500
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_SIGNALWAIT1_SECONDS",
+          "label": "신호대기1 (초)",
+          "default_value": 10
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_SIGNALWAIT2_SECONDS",
+          "label": "신호대기2 (초)",
+          "default_value": 30
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOPPED1_SECONDS",
+          "label": "정차1 (초)",
+          "default_value": 300
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOPPED2_SECONDS",
+          "label": "정차2 (초)",
+          "default_value": 600
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_PARK_SECONDS",
+          "label": "주차 (초)",
+          "default_value": 1800
+        },
+        {
+          "enum_id": "C_ID_SERIALPRINT_INTERVALMS",
+          "label": "시리얼 출력 간격 (ms)",
+          "default_value": 1000
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "직진 Yaw Thres (deg/s)",
+          "default_value": 5.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR1 Yaw Thres (deg/s)",
+          "default_value": 10.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR2 Yaw Thres (deg/s)",
+          "default_value": 20.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR3 Yaw Thres (deg/s)",
+          "default_value": 30.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_SPEEDKMH_MINSPEED",
+          "label": "회전 최소 속도 (km/h)",
+          "default_value": 1.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD",
+          "label": "고속 회전 임계 (km/h)",
+          "default_value": 30.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_STABLEDURATIONMS",
+          "label": "회전 안정 시간 (ms)",
+          "default_value": 200
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "자동차 현재 상태",
+      "controls": [
+        {
+          "enum_id": "C_ID_CARMOVEMENTSTATE_LABEL",
+          "label": "움직임 상태:",
+          "default_value": "정보 없음"
+        },
+        {
+          "enum_id": "C_ID_CARTURNSTATE_LABEL",
+          "label": "회전 상태:",
+          "default_value": "정보 없음"
+        },
+        {
+          "enum_id": "C_ID_SPEED_KMH_LABEL",
+          "label": "추정 속도:",
+          "default_value": "0.00 km/h"
+        },
+        {
+          "enum_id": "C_ID_ACCELX_MS2_LABEL",
+          "label": "AccelX (m/s^2):",
+          "default_value": "0.00 m/s^2"
+        },
+        {
+          "enum_id": "C_ID_ACCELY_MS2_LABEL",
+          "label": "AccelY (m/s^2):",
+          "default_value": "0.00 m/s^2"
+        },
+        {
+          "enum_id": "C_ID_ACCELZ_MS2_LABEL",
+          "label": "AccelZ (m/s^2):",
+          "default_value": "0.00 m/s^2"
+        },
+        {
+          "enum_id": "C_ID_YAWANGLE_DEG_LABEL",
+          "label": "Yaw (도):",
+          "default_value": "0.00 도"
+        },
+        {
+          "enum_id": "C_ID_PITCHANGLE_DEG_LABEL",
+          "label": "Pitch (도):",
+          "default_value": "0.00 도"
+        },
+        {
+          "enum_id": "C_ID_YAWANGLEVELOCITY_DEGPS_LABEL",
+          "label": "Yaw 속도 (도/초):",
+          "default_value": "0.00 도/초"
+        },
+        {
+          "enum_id": "C_ID_ISEMERGENCYBRAKING_LABEL",
+          "label": "급감속 감지:",
+          "default_value": "아님"
+        },
+        {
+          "enum_id": "C_ID_ISSPEEDBUMPDETECTED_LABEL",
+          "label": "방지턱 감지:",
+          "default_value": "아님"
+        },
+        {
+          "enum_id": "C_ID_CURRENTSTOPTIME_SEC_LABEL",
+          "label": "정차 지속 시간:",
+          "default_value": "0 초"
+        },
+        {
+          "enum_id": "g_W010_Control_Alaram_Id",
+          "label": "알림",
+          "default_value": ""
+        },
+        {
+          "enum_id": "g_W010_Control_Error_Id",
+          "label": "오류",
+          "default_value": ""
+        }
+      ],
+      "car_movement_states": {
+        "E_M010_CARMOVESTATE_UNKNOWN": "알 수 없음",
+        "E_M010_CARMOVESTATE_STOPPED_INIT": "정차 중 (기본)",
+        "E_M010_CARMOVESTATE_SIGNAL_WAIT1": "신호대기 1",
+        "E_M010_CARMOVESTATE_SIGNAL_WAIT2": "신호대기 2",
+        "E_M010_CARMOVESTATE_STOPPED1": "정차 1",
+        "E_M010_CARMOVESTATE_STOPPED2": "정차 2",
+        "E_M010_CARMOVESTATE_PARKED": "주차 중",
+        "E_M010_CARMOVESTATE_FORWARD": "전진 중",
+        "E_M010_CARMOVESTATE_REVERSE": "후진 중"
+      },
+      "car_turn_states": {
+        "E_M010_CARTURNSTATE_CENTER": "직진 또는 정지",
+        "E_M010_CARTURNSTATE_LEFT_1": "약간 좌회전",
+        "E_M010_CARTURNSTATE_LEFT_2": "중간 좌회전",
+        "E_M010_CARTURNSTATE_LEFT_3": "급격한 좌회전",
+        "E_M010_CARTURNSTATE_RIGHT_1": "약간 우회전",
+        "E_M010_CARTURNSTATE_RIGHT_2": "중간 우회전",
+        "E_M010_CARTURNSTATE_RIGHT_3": "급격한 우회전"
+      },
+      "boolean_states": {
+        "true": "감지됨",
+        "false": "아님"
+      },
+      "units": {
+        "speed": " km/h",
+        "accel": " m/s^2",
+        "angle": " 도",
+        "angular_velocity": " 도/초",
+        "time_seconds": " 초",
+        "time_minutes": "분"
+      },
+      "messages": {
+        "signal_wait1_suffix": "s 미만)",
+        "signal_wait2_suffix": "s 미만)",
+        "stopped1_suffix": "분 미만)",
+        "stopped2_suffix": "분 미만)",
+        "parked_prefix": " (>= ",
+        "parked_suffix": "분)"
+      }
+    }
+  ]
+}

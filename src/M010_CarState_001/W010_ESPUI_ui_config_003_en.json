@@ -1,0 +1,305 @@
+{
+  "tabs": [
+    {
+      "id": "config",
+      "title": "System Settings",
+      "controls": [
+        {
+          "enum_id": "C_ID_MVSTATE_ACCELFILTER_ALPHA",
+          "label": "Accel Filter Alpha",
+          "default_value": 0.5
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN",
+          "label": "Forward Start Speed (km/h)",
+          "default_value": 0.1
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN",
+          "label": "Reverse Start Speed (km/h)",
+          "default_value": -0.1
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX",
+          "label": "Stop Max Speed (km/h)",
+          "default_value": 0.05
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX",
+          "label": "Stop Y Accel (m/s^2)",
+          "default_value": 0.5
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX",
+          "label": "Stop Yaw Gyro (deg/s)",
+          "default_value": 3.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN",
+          "label": "Stop Stable Min Time (ms)",
+          "default_value": 500
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN",
+          "label": "Move Stable Min Time (ms)",
+          "default_value": 500
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD",
+          "label": "Decel Accel Y (m/s^2)",
+          "default_value": -3.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD",
+          "label": "Bump Accel Z (m/s^2)",
+          "default_value": 2.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_SPEEDKMH_MIN",
+          "label": "Bump Min Speed (km/h)",
+          "default_value": 5.0
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_COOLDOWNMS",
+          "label": "Bump Cooldown (ms)",
+          "default_value": 2000
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_DECEL_DURATIONMS_HOLD",
+          "label": "Decel Hold Time (ms)",
+          "default_value": 1000
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_DURATIONMS_HOLD",
+          "label": "Bump Hold Time (ms)",
+          "default_value": 500
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_SIGNALWAIT1_SECONDS",
+          "label": "Signal Wait1 (sec)",
+          "default_value": 10
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_SIGNALWAIT2_SECONDS",
+          "label": "Signal Wait2 (sec)",
+          "default_value": 30
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOPPED1_SECONDS",
+          "label": "Stopped1 (sec)",
+          "default_value": 300
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOPPED2_SECONDS",
+          "label": "Stopped2 (sec)",
+          "default_value": 600
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_PARK_SECONDS",
+          "label": "Parking (sec)",
+          "default_value": 1800
+        },
+        {
+          "enum_id": "C_ID_SERIALPRINT_INTERVALMS",
+          "label": "Serial Print Interval (ms)",
+          "default_value": 1000
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "Straight Yaw Thres (deg/s)",
+          "default_value": 5.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR1 Yaw Thres (deg/s)",
+          "default_value": 10.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR2 Yaw Thres (deg/s)",
+          "default_value": 20.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR3 Yaw Thres (deg/s)",
+          "default_value": 30.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_SPEEDKMH_MINSPEED",
+          "label": "Turn Min Speed (km/h)",
+          "default_value": 1.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD",
+          "label": "High Speed Turn Thres (km/h)",
+          "default_value": 30.0
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_STABLEDURATIONMS",
+          "label": "Turn Stable Time (ms)",
+          "default_value": 200
+        },
+        {
+          "enum_id": "C_ID_SAVE_CONFIG_BTN",
+          "label": "Save Config",
+          "default_value": "save_config"
+        },
+        {
+          "enum_id": "C_ID_LOAD_CONFIG_BTN",
+          "label": "Load Config",
+          "default_value": "load_config"
+        },
+        {
+          "enum_id": "C_ID_RESET_CONFIG_BTN",
+          "label": "Reset Config",
+          "default_value": "reset_config"
+        },
+        {
+          "enum_id": "C_ID_LANGUAGE_SELECT",
+          "label": "Language Select"
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title": "Car Current Status",
+      "controls": [
+        {
+          "enum_id": "C_ID_CARMOVEMENTSTATE_LABEL",
+          "label": "Movement State:",
+          "default_value": "No Information"
+        },
+        {
+          "enum_id": "C_ID_CARTURNSTATE_LABEL",
+          "label": "Turn State:",
+          "default_value": "No Information"
+        },
+        {
+          "enum_id": "C_ID_SPEED_KMH_LABEL",
+          "label": "Estimated Speed:",
+          "default_value": "0.00 km/h"
+        },
+        {
+          "enum_id": "C_ID_ACCELX_MS2_LABEL",
+          "label": "AccelX (m/s^2):",
+          "default_value": "0.00 m/s^2"
+        },
+        {
+          "enum_id": "C_ID_ACCELY_MS2_LABEL",
+          "label": "AccelY (m/s^2):",
+          "default_value": "0.00 m/s^2"
+        },
+        {
+          "enum_id": "C_ID_ACCELZ_MS2_LABEL",
+          "label": "AccelZ (m/s^2):",
+          "default_value": "0.00 m/s^2"
+        },
+        {
+          "enum_id": "C_ID_YAWANGLE_DEG_LABEL",
+          "label": "Yaw (deg):",
+          "default_value": "0.00 deg"
+        },
+        {
+          "enum_id": "C_ID_PITCHANGLE_DEG_LABEL",
+          "label": "Pitch (deg):",
+          "default_value": "0.00 deg"
+        },
+        {
+          "enum_id": "C_ID_YAWANGLEVELOCITY_DEGPS_LABEL",
+          "label": "Yaw Velocity (deg/s):",
+          "default_value": "0.00 deg/s"
+        },
+        {
+          "enum_id": "C_ID_ISEMERGENCYBRAKING_LABEL",
+          "label": "Emergency Braking:",
+          "default_value": "No"
+        },
+        {
+          "enum_id": "C_ID_ISSPEEDBUMPDETECTED_LABEL",
+          "label": "Speed Bump Detected:",
+          "default_value": "No"
+        },
+        {
+          "enum_id": "C_ID_CURRENTSTOPTIME_SEC_LABEL",
+          "label": "Stop Duration:",
+          "default_value": "0 sec"
+        },
+        {
+          "enum_id": "g_W010_Control_Alaram_Id",
+          "label": "Alert",
+          "default_value": ""
+        },
+        {
+          "enum_id": "g_W010_Control_Error_Id",
+          "label": "Error",
+          "default_value": ""
+        }
+      ]
+    }
+  ],
+  "common_strings": {
+    "car_movement_states": {
+      "E_M010_CARMOVESTATE_UNKNOWN": "Unknown",
+      "E_M010_CARMOVESTATE_STOPPED_INIT": "Stopped (Default)",
+      "E_M010_CARMOVESTATE_SIGNAL_WAIT1": "Signal Wait 1",
+      "E_M010_CARMOVESTATE_SIGNAL_WAIT2": "Signal Wait 2",
+      "E_M010_CARMOVESTATE_STOPPED1": "Stopped 1",
+      "E_M010_CARMOVESTATE_STOPPED2": "Stopped 2",
+      "E_M010_CARMOVESTATE_PARKED": "Parked",
+      "E_M010_CARMOVESTATE_FORWARD": "Forward",
+      "E_M010_CARMOVESTATE_REVERSE": "Reverse"
+    },
+    "car_turn_states": {
+      "E_M010_CARTURNSTATE_CENTER": "Straight or Stopped",
+      "E_M010_CARTURNSTATE_LEFT_1": "Slight Left Turn",
+      "E_M010_CARTURNSTATE_LEFT_2": "Medium Left Turn",
+      "E_M010_CARTURNSTATE_LEFT_3": "Sharp Left Turn",
+      "E_M010_CARTURNSTATE_RIGHT_1": "Slight Right Turn",
+      "E_M010_CARTURNSTATE_RIGHT_2": "Medium Right Turn",
+      "E_M010_CARTURNSTATE_RIGHT_3": "Sharp Right Turn"
+    },
+    "boolean_states": {
+      "true": "Detected",
+      "false": "No"
+    },
+    "units": {
+      "speed": " km/h",
+      "accel": " m/s^2",
+      "angle": " deg",
+      "angular_velocity": " deg/s",
+      "time_seconds": " sec",
+      "time_minutes": " min"
+    },
+    "messages": {
+      "signal_wait1_suffix": "s less than)",
+      "signal_wait2_suffix": "s less than)",
+      "stopped1_suffix": "min less than)",
+      "stopped2_suffix": "min less than)",
+      "parked_prefix": " (>= ",
+      "parked_suffix": "min)",
+      "config_save_success": "Settings successfully saved.",
+      "config_save_fail": "Failed to save settings to file system.",
+      "config_load_success": "Settings successfully loaded.",
+      "config_load_fail": "Configuration file not found. Default values will be applied.",
+      "config_reset_success": "Settings reset to defaults.",
+      "config_reset_fail": "Error saving default values.",
+      "unknown_command": "Unknown command.",
+      "unknown_control_id": "Unknown Control ID:",
+      "unknown_tab_id": "Unknown Tab ID:",
+      "ui_config_load_fail": "Failed to load UI configuration JSON. Default UI constants will be used or UI configuration may have issues.",
+      "fs_mount_fail": "LittleFS mount failed! UI configuration cannot be loaded.",
+      "json_parse_fail": "JSON parsing failed:",
+      "ui_config_load_success": "UI configuration file loaded and parsed.",
+      "ui_init_start": "Initializing ESPUI...",
+      "ui_init_done": "ESPUI initialization complete. Web interface accessible.",
+      "ui_setup_start": "Setting up ESPUI web pages (using JSON)...",
+      "ui_setup_done": "ESPUI web pages setup complete (using JSON).",
+      "config_load_to_web_start": "Loading settings to web UI...",
+      "config_load_to_web_done": "Settings loaded to web UI.",
+      "callback_detected": "ESPUI Callback detected: ID=%d, Name=%s, Value=%s, Type=%d",
+      "lang_select_label": "Language Select",
+      "lang_ko": "Korean",
+      "lang_en": "English"
+    }
+  }
+}
