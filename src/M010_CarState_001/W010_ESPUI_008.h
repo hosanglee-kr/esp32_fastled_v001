@@ -51,8 +51,8 @@ uint16_t g_W010_Control_Alaram_Id;
 uint16_t g_W010_Control_Error_Id;
 uint16_t g_W010_Control_Language_Id; // 언어 선택 드롭다운 컨트롤 ID
 
-// JSON에서 로드된 UI 설정을 저장할 동적 문서 객체
-JsonDocument g_W010_uiConfigDoc; // 외부에 선언된 전역 변수임을 알림
+// JSON에서 로드된 UI 설정을 저장할 json doc 객체
+JsonDocument g_W010_uiConfigDoc; 
 
 
 // ESPUI 컨트롤 ID 정의
@@ -118,6 +118,7 @@ struct ControlMapEntry {
 
 // 모든 컨트롤 ID를 매핑하는 배열
 const ControlMapEntry controlMap[] = {
+    // Config Page Controls
     {"C_ID_MVSTATE_ACCELFILTER_ALPHA"                       , C_ID_MVSTATE_ACCELFILTER_ALPHA},
     {"C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN"          , C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN},
     {"C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN"          , C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN},
@@ -149,6 +150,8 @@ const ControlMapEntry controlMap[] = {
     {"C_ID_LOAD_CONFIG_BTN"                                 , C_ID_LOAD_CONFIG_BTN},
     {"C_ID_RESET_CONFIG_BTN"                                , C_ID_RESET_CONFIG_BTN},
     {"C_ID_LANGUAGE_SELECT"                                 , C_ID_LANGUAGE_SELECT},
+
+    // Status Page Controls
     {"C_ID_CARMOVEMENTSTATE_LABEL"                          , C_ID_CARMOVEMENTSTATE_LABEL},
     {"C_ID_CARTURNSTATE_LABEL"                              , C_ID_CARTURNSTATE_LABEL},
     {"C_ID_SPEED_KMH_LABEL"                                 , C_ID_SPEED_KMH_LABEL},
@@ -191,10 +194,6 @@ void W010_EmbUI_rebuildUI(); // UI를 다시 그리는 함수
  * @return 로드 성공 시 true, 실패 시 false
  */
 bool W010_EmbUI_loadUIConfig(const String& langCode) {
-    
-    
-
-
     String filePath = String(G_W010_UI_CONFIG_BASE_FILE_PREFIX) + langCode + G_W010_UI_CONFIG_BASE_FILE_SUBFIX;
     //String filePath = String(G_W010_UI_CONFIG_BASE_FILE) + "_" + langCode + ".json";
     dbgP1_printf("UI 설정 파일 로드 중: %s\n", filePath.c_str());
@@ -223,12 +222,12 @@ bool W010_EmbUI_loadUIConfig(const String& langCode) {
  * @param defaultVal 키를 찾지 못했을 때 반환할 기본값
  * @return 해당 언어의 문자열. 없으면 defaultVal 반환.
  */
-String W010_EmbUI_getCommonString(const char* key, const char* defaultVal) {
-    JsonVariant value = g_W010_uiConfigDoc["common_strings"][key];
-    if (!value.isNull()) {
-        return value.as<String>();
+String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
+    JsonVariant v_value = g_W010_uiConfigDoc["common_strings"][key];
+    if (!v_value.isNull()) {
+        return v_value.as<String>();
     }
-    return String(defaultVal);
+    return String(p_defaultVal);
 }
 
 /**
@@ -236,15 +235,15 @@ String W010_EmbUI_getCommonString(const char* key, const char* defaultVal) {
  * @param enumIdStr 컨트롤의 enum_id 문자열
  * @return 해당 컨트롤의 레이블 문자열. 없으면 빈 문자열 반환.
  */
-String W010_EmbUI_getControlLabel(const String& enumIdStr) {
-    JsonArray tabs = g_W010_uiConfigDoc["tabs"].as<JsonArray>();
-    for (JsonObject tab : tabs) {
-        JsonArray controls = tab["controls"].as<JsonArray>();
-        for (JsonObject control : controls) {
-            if (control["enum_id"].as<String>().equals(enumIdStr)) {
-                JsonVariant labelVariant = control["label"]; // 언어별 파일이므로 직접 접근
-                if (!labelVariant.isNull()) {
-                    return labelVariant.as<String>();
+String W010_EmbUI_getControlLabel(const String& p_enumIdStr) {
+    JsonArray v_tabs = g_W010_uiConfigDoc["tabs"].as<JsonArray>();
+    for (JsonObject v_tab : v_tabs) {
+        JsonArray v_controls = v_tab["controls"].as<JsonArray>();
+        for (JsonObject v_control : v_controls) {
+            if (v_control["enum_id"].as<String>().equals(p_enumIdStr)) {
+                JsonVariant v_labelVariant = v_control["label"]; // 언어별 파일이므로 직접 접근
+                if (!v_labelVariant.isNull()) {
+                    return v_labelVariant.as<String>();
                 }
             }
         }
