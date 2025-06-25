@@ -734,16 +734,32 @@ void W010_EmbUI_saveLastLanguage() {
  * @brief ESPUI UI를 완전히 제거하고 현재 언어 설정에 따라 다시 구성합니다.
  * 언어 변경 시 UI 전체를 리로드하는 데 사용됩니다.
  */
+
+
 void W010_EmbUI_rebuildUI() {
     dbgP1_printf("UI 재구성 중... 새로운 언어: %s\n", g_W010_currentLanguage.c_str());
 
-    // 기존 ESPUI 컨트롤을 모두 제거하는 대신, ESP32를 재시작하여
-    // setup() 함수에서 UI가 완전히 새로 구성되도록 합니다.
-    dbgP1_println(F("언어 변경 요청으로 인해 ESP32를 재시작합니다. 잠시 후 웹 UI에 다시 접속해주세요."));
-    
-    // 중요한 메시지이므로, 시리얼 포트로 전송될 시간을 확보합니다.
-    delay(2000); 
+    // 1. 새로운 언어의 UI 설정 JSON 파일 로드
+    // 이전 언어 설정은 메모리에 남아있을 수 있으므로 JsonDocument를 초기화하거나
+    // 새 JSON 파일을 안전하게 로드합니다.
+    // 여기서는 g_W010_uiConfigDoc 객체를 재활용하되, 오류 발생 시 기본 언어로 폴백합니다.
+    if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
+        dbgP1_printf("UI 설정 JSON 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
+        g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
+        if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
+            dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. UI 업데이트 불가."));
+            ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.ui_load_fail_critical"));
+            return; // 치명적인 오류이므로 여기서 종료
+        }
+    }
 
-    // ESP32를 소프트웨어적으로 재시작합니다.
-    ESP.restart(); 
+    // 2. 모든 탭과 컨트롤의 레이블 업데이트
+    // W010_EmbUI_loadConfigToWebUI() 함수는 이미 이 기능을 포함하고 있으므로,
+    // 이 함수를 호출하여 웹 UI를 갱신합니다.
+    W010_EmbUI_loadConfigToWebUI();
+
+    // 3. 언어 변경 성공 메시지 표시 (선택 사항)
+    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.lang_change_success"));
+
+    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_rebuild_done"));
 }
