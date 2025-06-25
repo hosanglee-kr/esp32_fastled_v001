@@ -52,8 +52,12 @@ uint16_t g_W010_Control_Alaram_Id;
 uint16_t g_W010_Control_Error_Id;
 uint16_t g_W010_Control_Language_Id; // 언어 선택 드롭다운 컨트롤 ID
 
+
+JsonDocument g_W010_uiLayoutDoc; // UI 레이아웃 및 기본값을 위한 JSON 문서
+JsonDocument g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
+
 // JSON에서 로드된 UI 설정을 저장할 json doc 객체
-JsonDocument g_W010_uiConfigDoc; 
+// JsonDocument g_W010_uiConfigDoc; 
 
 
 // ESPUI 컨트롤 ID 정의
