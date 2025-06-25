@@ -299,7 +299,9 @@
       "callback_detected": "ESPUI 콜백 감지: ID=%d, Name=%s, Value=%s, Type=%d",
       "lang_select_label": "언어 선택",
       "lang_ko": "한국어",
-      "lang_en": "English"
+      "lang_en": "English",
+      "messages.ui_load_fail_critical": "UI 설정 로드 실패! 웹 UI가 올바르게 표시되지 않을 수 있습니다.",
+      "messages.lang_change_success": "언어가 성공적으로 변경되었습니다!"
     }
   }
 }
