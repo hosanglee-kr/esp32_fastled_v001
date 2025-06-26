@@ -256,11 +256,83 @@ String W010_EmbUI_getControlLabel(const String& p_enumIdStr) {
     return String(""); // 찾지 못함
 }
 
+bool W010_EmbUI_loadUILayoutDefaults() {
+    const char* filePath = "/W010_ESPUI_ui_layout_defaults.json"; // 고정된 기본값 파일
+    dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 중: %s\n", filePath);
+
+    File configFile = LittleFS.open(filePath, "r");
+    if (!configFile) {
+        dbgP1_printf("파일 열기 실패: %s\n", filePath);
+        return false;
+    }
+
+    DeserializationError error = deserializeJson(g_W010_uiLayoutDoc, configFile);
+    configFile.close();
+    if (error) {
+        dbgP1_printf("JSON 파싱 실패: %s\n", error.c_str());
+        return false;
+    }
+    dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 및 파싱 완료: %s\n", filePath);
+    return true;
+}
+
+bool W010_EmbUI_loadUILanguage(const String& langCode) {
+    String filePath = String(G_W010_UI_CONFIG_BASE_FILE_PREFIX) + langCode + G_W010_UI_CONFIG_BASE_FILE_SUBFIX;
+    dbgP1_printf("UI 언어 파일 로드 중: %s\n", filePath.c_str());
+
+    File langFile = LittleFS.open(filePath, "r");
+    if (!langFile) {
+        dbgP1_printf("파일 열기 실패: %s\n", filePath.c_str());
+        return false;
+    }
+
+    DeserializationError error = deserializeJson(g_W010_uiLangDoc, langFile);
+    langFile.close();
+    if (error) {
+        dbgP1_printf("JSON 파싱 실패: %s\n", error.c_str());
+        return false;
+    }
+    dbgP1_printf("UI 언어 파일 로드 및 파싱 완료: %s\n", filePath.c_str());
+    return true;
+}
+
+void W010_EmbUI_init() {
+    dbgP1_println(F("ESPUI 초기화 중..."));
+
+    if (!LittleFS.begin()) {
+        dbgP1_println(F("LittleFS 마운트 실패! UI 설정 로드 불가."));
+        return;
+    }
+
+    // 1. UI 레이아웃 및 기본값 파일 로드 (한 번만 로드)
+    if (!W010_EmbUI_loadUILayoutDefaults()) {
+        dbgP1_println(F("UI 레이아웃 및 기본값 파일 로드 실패. UI 구성에 문제 발생 가능."));
+        // 이 경우 default_value를 사용할 수 없으므로, 코드를 통해 기본값을 직접 설정하거나
+        // 최소한의 UI만 구성하도록 폴백 로직 필요
+    }
+
+    // 2. 마지막 언어 설정 로드 시도 및 해당 언어 파일 로드
+    W010_EmbUI_loadLastLanguage(); // g_W010_currentLanguage 설정
+
+    if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+        dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
+        g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
+        if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+            dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. 다국어 지원 불가."));
+        }
+    }
+
+    ESPUI.begin("Robot Eye Car", "roboteye", "carpassword");
+    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_init_done"));
+}
+
+
 /**
  * @brief ESPUI를 초기화하고 Wi-Fi 연결을 설정합니다.
  * Access Point (AP) 모드로 시작하여 ESP32가 설정 웹페이지를 호스팅합니다.
  * 추후 Wi-Fi STA 모드로 전환하여 기존 네트워크에 연결할 수 있습니다.
  */
+/*
 void W010_EmbUI_init() {
     dbgP1_println(F("ESPUI 초기화 중...")); // 초기화 메시지는 우선 고정
 
@@ -282,6 +354,7 @@ void W010_EmbUI_init() {
 
     dbgP1_println(W010_EmbUI_getCommonString("messages.ui_init_done"));
 }
+*/
 
 /**
  * @brief ESPUI 웹페이지 UI를 구성하고, g_M010_Config 구조체의 멤버 변수들을 웹 UI에 바인딩합니다.
