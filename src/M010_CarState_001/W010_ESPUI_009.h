@@ -802,10 +802,12 @@ void W010_EmbUI_rebuildUI() {
     // 이전 언어 설정은 메모리에 남아있을 수 있으므로 JsonDocument를 초기화하거나
     // 새 JSON 파일을 안전하게 로드합니다.
     // 여기서는 g_W010_uiConfigDoc 객체를 재활용하되, 오류 발생 시 기본 언어로 폴백합니다.
-    if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
+	
+    if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+    //if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
         dbgP1_printf("UI 설정 JSON 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
         g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
-        if (!W010_EmbUI_loadUIConfig(g_W010_currentLanguage)) {
+        if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. UI 업데이트 불가."));
             ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.ui_load_fail_critical"));
             return; // 치명적인 오류이므로 여기서 종료
