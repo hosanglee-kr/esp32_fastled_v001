@@ -28,9 +28,10 @@
 
 // JSON 파일 경로 정의 (언어 코드에 따라 동적으로 결정)
 
-#define    G_W010_UI_CONFIG_BASE_FILE_PREFIX    "/W010_ESPUI_ui_config_003_"
-#define    G_W010_UI_CONFIG_BASE_FILE_SUBFIX    ".json"
+#define    G_W010_UI_LANG_FILE_PREFIX      "/W010_ESPUI_ui_lang_004_"
+#define    G_W010_UI_LANG_FILE_SUBFIX       ".json"
 
+#define    G_W010_UI_DEFAULT_CONFIG_FILE    "/W010_ESPUI_ui_defaults_004.json"
 //#define     G_W010_UI_CONFIG_BASE_FILE        "/W010_ESPUI_ui_config_001"
 
 #define     G_W010_LAST_LANG_FILE               "/last_lang.txt" // 마지막 언어 설정을 저장할 파일
@@ -38,6 +39,11 @@
 // 현재 선택된 언어 코드 (예: "ko", "en")
 String      g_W010_currentLanguage              = "ko"; // 기본 언어는 한국어
 
+JsonDocument g_W010_uiLayoutDoc; // UI 레이아웃 및 기본값을 위한 JSON 문서
+JsonDocument g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
+
+// JSON에서 로드된 UI 설정을 저장할 json doc 객체
+// JsonDocument g_W010_uiConfigDoc; 
 
 
 // ====================================================================================================
@@ -51,13 +57,6 @@ uint16_t g_W010_Tab_Status_Id;
 uint16_t g_W010_Control_Alaram_Id;
 uint16_t g_W010_Control_Error_Id;
 uint16_t g_W010_Control_Language_Id; // 언어 선택 드롭다운 컨트롤 ID
-
-
-JsonDocument g_W010_uiLayoutDoc; // UI 레이아웃 및 기본값을 위한 JSON 문서
-JsonDocument g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
-
-// JSON에서 로드된 UI 설정을 저장할 json doc 객체
-// JsonDocument g_W010_uiConfigDoc; 
 
 
 // ESPUI 컨트롤 ID 정의
@@ -277,7 +276,8 @@ String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr) {
 
 
 bool W010_EmbUI_loadUILayoutDefaults() {
-    const char* filePath = "/W010_ESPUI_ui_layout_defaults.json"; // 고정된 기본값 파일
+	const char* filePath = G_W010_UI_DEFAULT_CONFIG_FILE; // 고정된 기본값 파일
+    // const char* filePath = "/W010_ESPUI_ui_layout_defaults.json"; // 고정된 기본값 파일
     dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 중: %s\n", filePath);
 
     File configFile = LittleFS.open(filePath, "r");
@@ -300,7 +300,7 @@ bool W010_EmbUI_loadUILayoutDefaults() {
 
 
 bool W010_EmbUI_loadUILanguage(const String& langCode) {
-    String filePath = String(G_W010_UI_CONFIG_BASE_FILE_PREFIX) + langCode + G_W010_UI_CONFIG_BASE_FILE_SUBFIX;
+    String filePath = String(G_W010_UI_LANG_FILE_PREFIX) + langCode + G_W010_UI_LANG_FILE_SUBFIX;
     dbgP1_printf("UI 언어 파일 로드 중: %s\n", filePath.c_str());
 
     File langFile = LittleFS.open(filePath, "r");
