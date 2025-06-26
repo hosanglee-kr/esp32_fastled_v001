@@ -176,7 +176,7 @@ const size_t controlMapSize = sizeof(controlMap) / sizeof(controlMap[0]);
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
-bool W010_EmbUI_loadUIConfig(const String& langCode); // UI 설정 JSON 로드 함수 (언어 코드 추가)
+// bool W010_EmbUI_loadUIConfig(const String& langCode); // UI 설정 JSON 로드 함수 (언어 코드 추가)
 String W010_EmbUI_getCommonString(const char* key, const char* defaultVal = ""); // 다국어 문자열 가져오는 헬퍼 함수
 String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr); // 언어 문서에서 enum_id에 해당하는 label을 찾는 함수
 String W010_EmbUI_getControlLabel(const String& enumIdStr); // 컨트롤 레이블 가져오는 헬퍼 함수
@@ -204,6 +204,7 @@ void W010_EmbUI_rebuildUI(); // UI를 다시 그리는 함수
  * @param langCode 로드할 언어 코드 (예: "ko", "en")
  * @return 로드 성공 시 true, 실패 시 false
  */
+/*
 bool W010_EmbUI_loadUIConfig(const String& langCode) {
     String filePath = String(G_W010_UI_CONFIG_BASE_FILE_PREFIX) + langCode + G_W010_UI_CONFIG_BASE_FILE_SUBFIX;
     //String filePath = String(G_W010_UI_CONFIG_BASE_FILE) + "_" + langCode + ".json";
@@ -227,6 +228,7 @@ bool W010_EmbUI_loadUIConfig(const String& langCode) {
     return true;
 }
 
+*/
 String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
     JsonVariant value = g_W010_uiLangDoc["common_strings"][key]; // g_W010_uiLangDoc 사용
     if (!value.isNull()) {
