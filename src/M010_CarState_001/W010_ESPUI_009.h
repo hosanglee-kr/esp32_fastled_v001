@@ -221,12 +221,57 @@ bool W010_EmbUI_loadUIConfig(const String& langCode) {
     return true;
 }
 
+String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
+    JsonVariant value = g_W010_uiLangDoc["common_strings"][key]; // g_W010_uiLangDoc 사용
+    if (!value.isNull()) {
+        return value.as<String>();
+    }
+    return String(p_defaultVal);
+}
+
+String W010_EmbUI_getControlLabel(const String& p_enumIdStr) {
+    // 레이아웃 문서에서 enum_id를 찾아 해당 컨트롤의 레이블을 언어 문서에서 가져옵니다.
+    // 레이아웃 문서의 "tabs" 구조를 따라가면서 enum_id를 찾습니다.
+    JsonArray tabs = g_W010_uiLayoutDoc["tabs"].as<JsonArray>(); // g_W010_uiLayoutDoc 사용
+    for (JsonObject tab : tabs) {
+        JsonArray controls = tab["controls"].as<JsonArray>();
+        for (JsonObject control : controls) {
+            if (control["enum_id"].as<String>().equals(p_enumIdStr)) {
+                // 해당 enum_id에 맞는 레이블을 언어 문서에서 찾습니다.
+                // 언어 문서의 "tabs" 구조를 다시 따라가야 합니다.
+                // 더 효율적인 방법: 언어 문서에 enum_id -> label 맵을 직접 구성.
+                // 여기서는 기존 getControlLabel 로직을 언어 문서에 그대로 적용했다고 가정.
+                return W010_EmbUI_getLabelFromLangDoc(p_enumIdStr);
+            }
+        }
+    }
+    return String(""); // 찾지 못함
+}
+
+// 새로운 헬퍼 함수: 언어 문서에서 enum_id에 해당하는 label을 찾는 함수
+String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr) {
+    JsonArray tabs = g_W010_uiLangDoc["tabs"].as<JsonArray>(); // g_W010_uiLangDoc 사용
+    for (JsonObject tab : tabs) {
+        JsonArray controls = tab["controls"].as<JsonArray>();
+        for (JsonObject control : controls) {
+            if (control["enum_id"].as<String>().equals(p_enumIdStr)) {
+                JsonVariant labelVariant = control["label"];
+                if (!labelVariant.isNull()) {
+                    return labelVariant.as<String>();
+                }
+            }
+        }
+    }
+    return String(""); // 찾지 못함
+}
+
 /**
  * @brief JSON에서 현재 선택된 언어에 해당하는 공통 문자열을 가져옵니다.
  * @param key JSON 경로 (예: "car_movement_states.E_M010_CARMOVESTATE_UNKNOWN")
  * @param defaultVal 키를 찾지 못했을 때 반환할 기본값
  * @return 해당 언어의 문자열. 없으면 defaultVal 반환.
  */
+/*
 String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
     JsonVariant v_value = g_W010_uiConfigDoc["common_strings"][key];
     if (!v_value.isNull()) {
@@ -234,12 +279,14 @@ String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
     }
     return String(p_defaultVal);
 }
+*/
 
 /**
  * @brief 주어진 enum ID 문자열에 해당하는 컨트롤의 레이블을 현재 로드된 언어 파일에서 가져옵니다.
  * @param enumIdStr 컨트롤의 enum_id 문자열
  * @return 해당 컨트롤의 레이블 문자열. 없으면 빈 문자열 반환.
  */
+/*
 String W010_EmbUI_getControlLabel(const String& p_enumIdStr) {
     JsonArray v_tabs = g_W010_uiConfigDoc["tabs"].as<JsonArray>();
     for (JsonObject v_tab : v_tabs) {
@@ -255,6 +302,7 @@ String W010_EmbUI_getControlLabel(const String& p_enumIdStr) {
     }
     return String(""); // 찾지 못함
 }
+*/
 
 bool W010_EmbUI_loadUILayoutDefaults() {
     const char* filePath = "/W010_ESPUI_ui_layout_defaults.json"; // 고정된 기본값 파일
