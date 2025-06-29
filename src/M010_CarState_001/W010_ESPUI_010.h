@@ -1,5 +1,5 @@
 #pragma once
-// W010_embUI_009.h
+// W010_embUI_010.h
 // -- json설정값과 다국어 설정 분리
 // ====================================================================================================
 // 프로젝트: 자동차 후방 로봇 눈
@@ -186,6 +186,9 @@ void W010_EmbUI_setupWebPages();
 void W010_EmbUI_loadConfigToWebUI();
 void W010_ESPUI_callback(Control* p_Control, int p_controlType, void* p_userData);
 void W010_EmbUI_updateCarStatusWeb();
+String W010_EmbUI_getCarTurnStateEnumString(M010_CARTURNSTATE_E state);
+String W010_EmbUI_getCarMovementStateEnumString(M010_CARMOVESTATE_E state);
+void W010_EmbUI_updateStatusLabels();
 void W010_EmbUI_run();
 void W010_EmbUI_loadLastLanguage(); // 마지막 선택된 언어를 로드
 void W010_EmbUI_saveLastLanguage(); // 현재 언어 설정을 저장
@@ -707,6 +710,91 @@ void W010_EmbUI_updateCarStatusWeb() {
     ESPUI.updateControlValue(C_ID_ISSPEEDBUMPDETECTED_LABEL, g_M010_CarStatus.isSpeedBumpDetected ? W010_EmbUI_getCommonString("boolean_states.true") : W010_EmbUI_getCommonString("boolean_states.false"));
     ESPUI.updateControlValue(C_ID_CURRENTSTOPTIME_SEC_LABEL, String(g_M010_CarStatus.currentStopTime_ms / 1000) + W010_EmbUI_getCommonString("units.time_seconds"));
 }
+
+
+
+// 이 함수는 main.cpp의 loop() 함수 또는 별도의 타이머에서 주기적으로 호출되어야 합니다.
+void W010_EmbUI_updateStatusLabels() {
+    // 예시: 속도 레이블 업데이트
+    String speedKmhUnit = W010_EmbUI_getCommonString("units.speed", " km/h");
+    ESPUI.updateControlValue(C_ID_SPEED_KMH_LABEL, String(g_M010_CarState.v_speedKmh, 2) + speedKmhUnit);
+
+    // 예시: AccelX 레이블 업데이트
+    String accelUnit = W010_EmbUI_getCommonString("units.accel", " m/s^2");
+    ESPUI.updateControlValue(C_ID_ACCELX_MS2_LABEL, String(g_M010_CarState.v_accelX_mps2, 2) + accelUnit);
+    ESPUI.updateControlValue(C_ID_ACCELY_MS2_LABEL, String(g_M010_CarState.v_accelY_mps2, 2) + accelUnit);
+    ESPUI.updateControlValue(C_ID_ACCELZ_MS2_LABEL, String(g_M010_CarState.v_accelZ_mps2, 2) + accelUnit);
+
+    // 예시: Yaw 각도 업데이트
+    String angleUnit = W010_EmbUI_getCommonString("units.angle", " deg");
+    ESPUI.updateControlValue(C_ID_YAWANGLE_DEG_LABEL, String(g_M010_CarState.v_yawAngle_deg, 2) + angleUnit);
+    ESPUI.updateControlValue(C_ID_PITCHANGLE_DEG_LABEL, String(g_M010_CarState.v_pitchAngle_deg, 2) + angleUnit);
+
+    // 예시: Yaw 각속도 업데이트
+    String angularVelocityUnit = W010_EmbUI_getCommonString("units.angular_velocity", " deg/s");
+    ESPUI.updateControlValue(C_ID_YAWANGLEVELOCITY_DEGPS_LABEL, String(g_M010_CarState.v_yawAngleVelocity_degps, 2) + angularVelocityUnit);
+
+    // 급감속/방지턱 감지 상태 업데이트 (true/false 문자열도 언어 파일에서 가져옴)
+    String isEmergencyBrakingStr = g_M010_CarState.v_isEmergencyBraking ? W010_EmbUI_getCommonString("boolean_states.true", "Detected") : W010_EmbUI_getCommonString("boolean_states.false", "Not Detected");
+    ESPUI.updateControlValue(C_ID_ISEMERGENCYBRAKING_LABEL, isEmergencyBrakingStr);
+
+    String isSpeedBumpDetectedStr = g_M010_CarState.v_isSpeedBumpDetected ? W010_EmbUI_getCommonString("boolean_states.true", "Detected") : W010_EmbUI_getCommonString("boolean_states.false", "Not Detected");
+    ESPUI.updateControlValue(C_ID_ISSPEEDBUMPDETECTED_LABEL, isSpeedBumpDetectedStr);
+
+    // 정차 지속 시간 업데이트
+    String timeSecondsUnit = W010_EmbUI_getCommonString("units.time_seconds", " sec");
+    ESPUI.updateControlValue(C_ID_CURRENTSTOPTIME_SEC_LABEL, String(g_M010_CarState.v_currentStopTime_sec) + timeSecondsUnit);
+
+    // 자동차 움직임 상태 업데이트
+    String carMovementStateStr = W010_EmbUI_getCommonString(
+        (String("car_movement_states.") + W010_EmbUI_getCarMovementStateEnumString(g_M010_CarState.v_carMovementState)).c_str(),
+        "Unknown State"
+    );
+    ESPUI.updateControlValue(C_ID_CARMOVEMENTSTATE_LABEL, W010_EmbUI_getCommonString("C_ID_CARMOVEMENTSTATE_LABEL_prefix", "Movement State:") + " " + carMovementStateStr);
+
+    // 자동차 회전 상태 업데이트
+    String carTurnStateStr = W010_EmbUI_getCommonString(
+        (String("car_turn_states.") + W010_EmbUI_getCarTurnStateEnumString(g_M010_CarState.v_carTurnState)).c_str(),
+        "Unknown Turn State"
+    );
+    ESPUI.updateControlValue(C_ID_CARTURNSTATE_LABEL, W010_EmbUI_getCommonString("C_ID_CARTURNSTATE_LABEL_prefix", "Turn State:") + " " + carTurnStateStr);
+
+    // g_W010_Control_Alaram_Id, g_W010_Control_Error_Id는 W010_ESPUI_callback에서 직접 업데이트하므로 여기서는 처리하지 않습니다.
+}
+
+
+
+// 각 enum 값을 문자열로 변환하는 헬퍼 함수 (main.cpp 또는 M010_CarState_001.h에 정의되어 있을 것으로 예상)
+// 이 함수들은 언어에 종속되지 않고 enum 값을 나타내는 고유 문자열을 반환해야 합니다.
+String W010_EmbUI_getCarMovementStateEnumString(M010_CARMOVESTATE_E state) {
+    switch (state) {
+        case E_M010_CARMOVESTATE_UNKNOWN: return "E_M010_CARMOVESTATE_UNKNOWN";
+        case E_M010_CARMOVESTATE_STOPPED_INIT: return "E_M010_CARMOVESTATE_STOPPED_INIT";
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT1: return "E_M010_CARMOVESTATE_SIGNAL_WAIT1";
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT2: return "E_M010_CARMOVESTATE_SIGNAL_WAIT2";
+        case E_M010_CARMOVESTATE_STOPPED1: return "E_M010_CARMOVESTATE_STOPPED1";
+        case E_M010_CARMOVESTATE_STOPPED2: return "E_M010_CARMOVESTATE_STOPPED2";
+        case E_M010_CARMOVESTATE_PARKED: return "E_M010_CARMOVESTATE_PARKED";
+        case E_M010_CARMOVESTATE_FORWARD: return "E_M010_CARMOVESTATE_FORWARD";
+        case E_M010_CARMOVESTATE_REVERSE: return "E_M010_CARMOVESTATE_REVERSE";
+        default: return "UNKNOWN_ENUM_STATE";
+    }
+}
+
+String W010_EmbUI_getCarTurnStateEnumString(M010_CARTURNSTATE_E state) {
+    switch (state) {
+        case E_M010_CARTURNSTATE_CENTER: return "E_M010_CARTURNSTATE_CENTER";
+        case E_M010_CARTURNSTATE_LEFT_1: return "E_M010_CARTURNSTATE_LEFT_1";
+        case E_M010_CARTURNSTATE_LEFT_2: return "E_M010_CARTURNSTATE_LEFT_2";
+        case E_M010_CARTURNSTATE_LEFT_3: return "E_M010_CARTURNSTATE_LEFT_3";
+        case E_M010_CARTURNSTATE_RIGHT_1: return "E_M010_CARTURNSTATE_RIGHT_1";
+        case E_M010_CARTURNSTATE_RIGHT_2: return "E_M010_CARTURNSTATE_RIGHT_2";
+        case E_M010_CARTURNSTATE_RIGHT_3: return "E_M010_CARTURNSTATE_RIGHT_3";
+        default: return "UNKNOWN_ENUM_TURN_STATE";
+    }
+}
+
+
 
 /**
  * @brief ESPUI의 메인 루프를 실행하고, 주기적으로 자동차 상태를 웹에 업데이트합니다.
