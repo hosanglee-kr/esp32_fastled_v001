@@ -198,36 +198,6 @@ void W010_EmbUI_rebuildUI(); // UI를 다시 그리는 함수
 // 함수 정의
 // ====================================================================================================
 
-/**
- * @brief UI 설정 JSON 파일을 LittleFS에서 로드하고 파싱합니다.
- * @param langCode 로드할 언어 코드 (예: "ko", "en")
- * @return 로드 성공 시 true, 실패 시 false
- */
-/*
-bool W010_EmbUI_loadUIConfig(const String& langCode) {
-    String filePath = String(G_W010_UI_CONFIG_BASE_FILE_PREFIX) + langCode + G_W010_UI_CONFIG_BASE_FILE_SUBFIX;
-    //String filePath = String(G_W010_UI_CONFIG_BASE_FILE) + "_" + langCode + ".json";
-    dbgP1_printf("UI 설정 파일 로드 중: %s\n", filePath.c_str());
-
-    File v_configFile = LittleFS.open(filePath, "r");
-    if (!v_configFile) {
-        dbgP1_printf("파일 열기 실패: %s\n", filePath.c_str());
-        return false;
-    }
-
-    DeserializationError v_error = deserializeJson(g_W010_uiConfigDoc, v_configFile);
-    if (v_error) {
-        dbgP1_printf("JSON 파싱 실패: %s\n", v_error.c_str());
-        v_configFile.close();
-        return false;
-    }
-
-    v_configFile.close();
-    dbgP1_printf("UI 설정 파일 로드 및 파싱 완료: %s\n", filePath.c_str());
-    return true;
-}
-
-*/
 String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
     JsonVariant value = g_W010_uiLangDoc["common_strings"][key]; // g_W010_uiLangDoc 사용
     if (!value.isNull()) {
@@ -357,44 +327,36 @@ void W010_EmbUI_init() {
  * 사용자가 웹 인터페이스를 통해 설정을 조회하고 변경할 수 있도록 필드를 정의합니다.
  */
 void W010_EmbUI_setupWebPages() {
-    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_setup_start"));
+    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_setup_start", "UI setup start..."));
 
-    // UI 레이아웃 정의는 g_W010_uiLayoutDoc에서 가져옵니다.
     JsonArray tabs = g_W010_uiLayoutDoc["tabs"].as<JsonArray>();
 
     for (JsonObject tab : tabs) {
         String tabId = tab["id"].as<String>();
-        // 탭 제목은 언어 문서에서 가져옵니다.
-        String tabTitle = W010_EmbUI_getLabelFromLangDoc(tabId + "_title"); // 예: "config_title" 같은 키 필요
+        String tabTitle = W010_EmbUI_getLabelFromLangDoc(tabId + "_title"); // 언어 파일에서 탭 제목 가져오기
 
-       
         uint16_t currentTabId;
         if (tabId.equals(F("config"))) {
             g_W010_Tab_Config_Id = ESPUI.addControl(Tab, tabTitle.c_str(), tabTitle);
             currentTabId = g_W010_Tab_Config_Id;
 
-            // 언어 선택 드롭다운 추가
             g_W010_Control_Language_Id = ESPUI.addControl(ControlType::Select,
-                                                           W010_EmbUI_getCommonString("messages.lang_select_label").c_str(),
+                                                           W010_EmbUI_getCommonString("messages.lang_select_label", "Language Select").c_str(),
                                                            "",
                                                            ControlColor::Wetasphalt,
                                                            currentTabId,
                                                            &W010_ESPUI_callback,
                                                            reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT)));
- 
-            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko").c_str(), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
-            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en").c_str(), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
             
-            // 현재 선택된 언어를 드롭다운에 반영
-            ESPUI.updateControlValue(g_W010_Control_Language_Id, g_W010_currentLanguage);
-
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko", "Korean").c_str(), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en", "English").c_str(), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
 
         } else if (tabId.equals(F("status"))) {
             g_W010_Tab_Status_Id = ESPUI.addControl(ControlType::Tab, tabTitle.c_str(), F(""), ControlColor::Wetasphalt);
             ESPUI.setVertical(g_W010_Tab_Status_Id, true);
             currentTabId = g_W010_Tab_Status_Id;
         } else {
-            dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_tab_id") + " %s\n").c_str(), tabId.c_str());
+            dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_tab_id", "Unknown Tab ID:") + " %s\n").c_str(), tabId.c_str());
             continue;
         }
 
@@ -402,8 +364,8 @@ void W010_EmbUI_setupWebPages() {
 
         for (JsonObject control : controls) {
             String enumIdStr = control["enum_id"].as<String>();
-            String label = W010_EmbUI_getLabelFromLangDoc(enumIdStr); // 언어 문서에서 레이블 가져오기
-            JsonVariant defaultValue = control["default_value"]; // 레이아웃 문서에서 기본값 가져오기
+            String label = W010_EmbUI_getLabelFromLangDoc(enumIdStr); // 언어 파일에서 레이블 가져오기
+            JsonVariant defaultValue = control["default_value"]; // 레이아웃 파일에서 기본값 가져오기
 
             int controlEnumId = -1;
             for (size_t i = 0; i < controlMapSize; ++i) {
@@ -419,28 +381,31 @@ void W010_EmbUI_setupWebPages() {
             } else if (enumIdStr.equals(F("g_W010_Control_Error_Id"))) {
                 g_W010_Control_Error_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
                 continue;
-            } else if (enumIdStr.equals(F("C_ID_LANGUAGE_SELECT"))) { // 언어 선택 드롭다운은 이미 추가했으므로 건너뛰기
+            } else if (enumIdStr.equals(F("C_ID_LANGUAGE_SELECT"))) { 
                 continue;
             }
 
             if (controlEnumId == -1) {
-                dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_control_id") + " %s\n").c_str(), enumIdStr.c_str());
+                dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_control_id", "Unknown control ID:") + " %s\n").c_str(), enumIdStr.c_str());
                 continue;
             }
 
             if (tabId.equals(F("config"))) {
                 if (enumIdStr.endsWith(F("_BTN"))) {
-                    ESPUI.addControl(ControlType::Button, label.c_str(), label.c_str(), ControlColor::Emerald, currentTabId, &W010_ESPUI_callback, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
+                    ESPUI.addControl(ControlType::Button, label.c_str(), defaultValue.as<String>().c_str(), ControlColor::Emerald, currentTabId, &W010_ESPUI_callback, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
                 } else {
+                    // 숫자 입력 필드는 레이블만 설정하고, 단위는 나중에 표시되는 값에 추가합니다.
                     ESPUI.addControl(ControlType::Number, label.c_str(), String(defaultValue.as<float>(), 3), ControlColor::Alizarin, currentTabId, &W010_ESPUI_callback, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
                 }
             } else if (tabId.equals(F("status"))) {
+                // 상태 레이블도 레이블만 설정하고, 값과 단위는 실시간 업데이트 함수에서 처리합니다.
                 ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId, nullptr, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
             }
         }
     }
-    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_setup_done"));
+    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_setup_done", "UI setup done."));
 }
+
 
 /**
  * @brief g_M010_Config 구조체에 저장된 현재 설정값을 ESPUI 웹 UI로 로드하여 표시합니다.
