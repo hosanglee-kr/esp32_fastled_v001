@@ -186,8 +186,8 @@ void W010_EmbUI_setupWebPages();
 void W010_EmbUI_loadConfigToWebUI();
 void W010_ESPUI_callback(Control* p_control, int p_value);
 void W010_EmbUI_updateCarStatusWeb();
-String W010_EmbUI_getCarTurnStateEnumString(M010_CARTURNSTATE_E state);
-String W010_EmbUI_getCarMovementStateEnumString(M010_CARMOVESTATE_E state);
+String W010_EmbUI_getCarTurnStateEnumString(T_M010_CarTurnState state);
+String W010_EmbUI_getCarMovementStateEnumString(T_M010_CarMovementState state);
 void W010_EmbUI_updateStatusLabels();
 void W010_EmbUI_run();
 void W010_EmbUI_loadLastLanguage(); // 마지막 선택된 언어를 로드
@@ -772,7 +772,7 @@ void W010_EmbUI_updateStatusLabels() {
 
 // 각 enum 값을 문자열로 변환하는 헬퍼 함수 (main.cpp 또는 M010_CarState_001.h에 정의되어 있을 것으로 예상)
 // 이 함수들은 언어에 종속되지 않고 enum 값을 나타내는 고유 문자열을 반환해야 합니다.
-String W010_EmbUI_getCarMovementStateEnumString(M010_CARMOVESTATE_E state) {
+String W010_EmbUI_getCarMovementStateEnumString(T_M010_CarMovementState state) {
     switch (state) {
         case E_M010_CARMOVESTATE_UNKNOWN: return "E_M010_CARMOVESTATE_UNKNOWN";
         case E_M010_CARMOVESTATE_STOPPED_INIT: return "E_M010_CARMOVESTATE_STOPPED_INIT";
@@ -787,7 +787,7 @@ String W010_EmbUI_getCarMovementStateEnumString(M010_CARMOVESTATE_E state) {
     }
 }
 
-String W010_EmbUI_getCarTurnStateEnumString(M010_CARTURNSTATE_E state) {
+String W010_EmbUI_getCarTurnStateEnumString(T_M010_CarTurnState state) {
     switch (state) {
         case E_M010_CARTURNSTATE_CENTER: return "E_M010_CARTURNSTATE_CENTER";
         case E_M010_CARTURNSTATE_LEFT_1: return "E_M010_CARTURNSTATE_LEFT_1";
