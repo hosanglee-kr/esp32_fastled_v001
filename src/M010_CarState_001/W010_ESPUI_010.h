@@ -345,12 +345,10 @@ void W010_EmbUI_setupWebPages() {
 
             g_W010_Control_Language_Id = ESPUI.addControl(ControlType::Select,
                                                            W010_EmbUI_getCommonString("messages.lang_select_label", "Language Select").c_str(),
-                                                           "",
+                                                           "", // 초기값은 비워두고 나중에 업데이트
                                                            ControlColor::Wetasphalt,
-                                                           currentTabId,
-                                                           &W010_ESPUI_callback,
-                                                           reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT)));
-            
+                                                           currentTabId); // parentId까지만 전달
+			
             ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko", "Korean").c_str(), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
             ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en", "English").c_str(), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
 
