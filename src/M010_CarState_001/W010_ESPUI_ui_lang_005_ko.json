@@ -1,0 +1,265 @@
+{
+  "tabs": [
+    {
+      "id": "config",
+      "title_label": "시스템 설정",
+      "controls": [
+        {
+          "enum_id": "C_ID_MVSTATE_ACCELFILTER_ALPHA",
+          "label": "가속도 필터 Alpha"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN",
+          "label": "전진 시작 속도"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN",
+          "label": "후진 시작 속도"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX",
+          "label": "정지 판단 최대 속도"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX",
+          "label": "정지 판단 Y Accel"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX",
+          "label": "정지 판단 Yaw Gyro"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN",
+          "label": "정지 안정 최소 시간"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN",
+          "label": "움직임 안정 최소 시간"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD",
+          "label": "급감속 Accel Y"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD",
+          "label": "방지턱 Accel Z"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_SPEEDKMH_MIN",
+          "label": "방지턱 최소 속도"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_COOLDOWNMS",
+          "label": "방지턱 쿨다운"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_DECEL_DURATIONMS_HOLD",
+          "label": "급감속 유지 시간"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_BUMP_DURATIONMS_HOLD",
+          "label": "방지턱 유지 시간"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_SIGNALWAIT1_SECONDS",
+          "label": "신호대기1"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_SIGNALWAIT2_SECONDS",
+          "label": "신호대기2"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOPPED1_SECONDS",
+          "label": "정차1"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_STOPPED2_SECONDS",
+          "label": "정차2"
+        },
+        {
+          "enum_id": "C_ID_MVSTATE_PARK_SECONDS",
+          "label": "주차"
+        },
+        {
+          "enum_id": "C_ID_SERIALPRINT_INTERVALMS",
+          "label": "시리얼 출력 간격"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "직진 Yaw Thres"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR1 Yaw Thres"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR2 Yaw Thres"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD",
+          "label": "LR3 Yaw Thres"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_SPEEDKMH_MINSPEED",
+          "label": "회전 최소 속도"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD",
+          "label": "고속 회전 임계"
+        },
+        {
+          "enum_id": "C_ID_TURNSTATE_STABLEDURATIONMS",
+          "label": "회전 안정 시간"
+        },
+        {
+          "enum_id": "C_ID_SAVE_CONFIG_BTN",
+          "label": "설정 저장"
+        },
+        {
+          "enum_id": "C_ID_LOAD_CONFIG_BTN",
+          "label": "설정 불러오기"
+        },
+        {
+          "enum_id": "C_ID_RESET_CONFIG_BTN",
+          "label": "설정 초기화"
+        },
+        {
+          "enum_id": "C_ID_LANGUAGE_SELECT",
+          "label": "언어 선택"
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "title_label": "자동차 현재 상태",
+      "controls": [
+        {
+          "enum_id": "C_ID_CARMOVEMENTSTATE_LABEL",
+          "label": "움직임 상태:"
+        },
+        {
+          "enum_id": "C_ID_CARTURNSTATE_LABEL",
+          "label": "회전 상태:"
+        },
+        {
+          "enum_id": "C_ID_SPEED_KMH_LABEL",
+          "label": "추정 속도:"
+        },
+        {
+          "enum_id": "C_ID_ACCELX_MS2_LABEL",
+          "label": "AccelX:"
+        },
+        {
+          "enum_id": "C_ID_ACCELY_MS2_LABEL",
+          "label": "AccelY:"
+        },
+        {
+          "enum_id": "C_ID_ACCELZ_MS2_LABEL",
+          "label": "AccelZ:"
+        },
+        {
+          "enum_id": "C_ID_YAWANGLE_DEG_LABEL",
+          "label": "Yaw:"
+        },
+        {
+          "enum_id": "C_ID_PITCHANGLE_DEG_LABEL",
+          "label": "Pitch:"
+        },
+        {
+          "enum_id": "C_ID_YAWANGLEVELOCITY_DEGPS_LABEL",
+          "label": "Yaw 속도:"
+        },
+        {
+          "enum_id": "C_ID_ISEMERGENCYBRAKING_LABEL",
+          "label": "급감속 감지:"
+        },
+        {
+          "enum_id": "C_ID_ISSPEEDBUMPDETECTED_LABEL",
+          "label": "방지턱 감지:"
+        },
+        {
+          "enum_id": "C_ID_CURRENTSTOPTIME_SEC_LABEL",
+          "label": "정차 지속 시간:"
+        },
+        {
+          "enum_id": "g_W010_Control_Alaram_Id",
+          "label": "알림"
+        },
+        {
+          "enum_id": "g_W010_Control_Error_Id",
+          "label": "오류"
+        }
+      ]
+    }
+  ],
+  "common_strings": {
+    "car_movement_states": {
+      "E_M010_CARMOVESTATE_UNKNOWN": "알 수 없음",
+      "E_M010_CARMOVESTATE_STOPPED_INIT": "정차 중 (기본)",
+      "E_M010_CARMOVESTATE_SIGNAL_WAIT1": "신호대기 1",
+      "E_M010_CARMOVESTATE_SIGNAL_WAIT2": "신호대기 2",
+      "E_M010_CARMOVESTATE_STOPPED1": "정차 1",
+      "E_M010_CARMOVESTATE_STOPPED2": "정차 2",
+      "E_M010_CARMOVESTATE_PARKED": "주차 중",
+      "E_M010_CARMOVESTATE_FORWARD": "전진 중",
+      "E_M010_CARMOVESTATE_REVERSE": "후진 중"
+    },
+    "car_turn_states": {
+      "E_M010_CARTURNSTATE_CENTER": "직진 또는 정지",
+      "E_M010_CARTURNSTATE_LEFT_1": "약간 좌회전",
+      "E_M010_CARTURNSTATE_LEFT_2": "중간 좌회전",
+      "E_M010_CARTURNSTATE_LEFT_3": "급격한 좌회전",
+      "E_M010_CARTURNSTATE_RIGHT_1": "약간 우회전",
+      "E_M010_CARTURNSTATE_RIGHT_2": "중간 우회전",
+      "E_M010_CARTURNSTATE_RIGHT_3": "급격한 우회전"
+    },
+    "boolean_states": {
+      "true": "감지됨",
+      "false": "아님"
+    },
+    "units": {
+      "speed": " km/h",
+      "accel": " m/s^2",
+      "angle": " 도",
+      "angular_velocity": " 도/초",
+      "time_ms": " ms",
+      "time_seconds": " 초",
+      "time_minutes": "분"
+    },
+    "messages": {
+      "signal_wait1_suffix": "s 미만)",
+      "signal_wait2_suffix": "s 미만)",
+      "stopped1_suffix": "분 미만)",
+      "stopped2_suffix": "분 미만)",
+      "parked_prefix": " (>= ",
+      "parked_suffix": "분)",
+      "config_save_success": "설정값이 성공적으로 저장되었습니다.",
+      "config_save_fail": "파일 시스템에 설정값을 저장할 수 없습니다.",
+      "config_load_success": "설정값이 성공적으로 불러와졌습니다.",
+      "config_load_fail": "설정 파일을 찾을 수 없습니다. 기본값이 적용됩니다.",
+      "config_reset_success": "설정값이 기본값으로 초기화되었습니다.",
+      "config_reset_fail": "기본값 저장 중 오류가 발생했습니다.",
+      "unknown_command": "알 수 없는 명령입니다.",
+      "unknown_control_id": "알 수 없는 컨트롤 ID:",
+      "unknown_tab_id": "알 수 없는 탭 ID:",
+      "ui_config_load_fail": "UI 설정 JSON 파일 로드 실패. 기본 UI 상수값 사용 또는 UI 구성에 문제 발생 가능.",
+      "fs_mount_fail": "LittleFS 마운트 실패! UI 설정 로드 불가.",
+      "json_parse_fail": "JSON 파싱 실패:",
+      "ui_config_load_success": "UI 설정 파일 로드 및 파싱 완료.",
+      "ui_init_start": "ESPUI 초기화 중...",
+      "ui_init_done": "ESPUI 초기화 완료. 웹 인터페이스 접근 가능.",
+      "ui_setup_start": "ESPUI 웹페이지 UI 설정 중 (JSON 활용)...",
+      "ui_setup_done": "ESPUI 웹페이지 UI 설정 완료 (JSON 활용).",
+      "config_load_to_web_start": "웹 UI에 설정값 로드 중...",
+      "config_load_to_web_done": "웹 UI에 설정값 로드 완료.",
+      "callback_detected": "ESPUI 콜백 감지: ID=%d, Name=%s, Value=%s, Type=%d",
+      "lang_select_label": "언어 선택",
+      "lang_ko": "한국어",
+      "lang_en": "English",
+      "messages.ui_load_fail_critical": "UI 설정 로드 실패! 웹 UI가 올바르게 표시되지 않을 수 있습니다.",
+      "messages.lang_change_success": "언어가 성공적으로 변경되었습니다!",
+      "ui_rebuild_done": "UI 재구성 완료."
+    }
+  }
+}

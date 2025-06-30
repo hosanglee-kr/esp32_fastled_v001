@@ -299,7 +299,9 @@
       "callback_detected": "ESPUI Callback detected: ID=%d, Name=%s, Value=%s, Type=%d",
       "lang_select_label": "Language Select",
       "lang_ko": "Korean",
-      "lang_en": "English"
+      "lang_en": "English",
+      "messages.ui_load_fail_critical": "UI config load failed! ",
+      "messages.lang_change_success": "successfully Language changed!"
     }
   }
 }
