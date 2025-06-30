@@ -536,15 +536,15 @@ void W010_EmbUI_loadConfigToWebUI() {
         }
     }
 
-    // mvState_Config (이동 상태 감지 관련 설정)
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_ACCELFILTER_ALPHA_Id, String(g_M010_Config.mvState_accelFilter_Alpha, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN_Id, String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN_Id, String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX_Id, String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 3)); // 이름 수정
+      // mvState_Config (이동 상태 감지 관련 설정)
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_ACCELFILTER_ALPHA_Id, String(g_M010_Config.mvState_accelFilter_Alpha, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN_Id, String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN_Id, String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX_Id, String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 3)); 
     ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX_Id, String(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 3));
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX_Id, String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN_Id, String(g_M010_Config.mvState_Stop_durationMs_Stable_Min)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN_Id, String(g_M010_Config.mvState_Move_durationMs_Stable_Min)); // 이름 수정
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX_Id, String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN_Id, String(g_M010_Config.mvState_stop_durationMs_Stable_Min)); // 이름 수정
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN_Id, String(g_M010_Config.mvState_move_durationMs_Stable_Min)); // 이름 수정
     ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD_Id, String(g_M010_Config.mvState_Decel_accelMps2_Threshold, 3));
     ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD_Id, String(g_M010_Config.mvState_Bump_accelMps2_Threshold, 3));
     ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_BUMP_SPEEDKMH_MIN_Id, String(g_M010_Config.mvState_Bump_SpeedKmh_Min, 3));
@@ -552,24 +552,23 @@ void W010_EmbUI_loadConfigToWebUI() {
     ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_DECEL_DURATIONMS_HOLD_Id, String(g_M010_Config.mvState_Decel_durationMs_Hold));
     ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_BUMP_DURATIONMS_HOLD_Id, String(g_M010_Config.mvState_Bump_durationMs_Hold));
 
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_SIGNALWAIT1_SECONDS_Id, String(g_M010_Config.mvState_signalWait1_Seconds)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_SIGNALWAIT2_SECONDS_Id, String(g_M010_Config.mvState_signalWait2_Seconds)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOPPED1_SECONDS_Id, String(g_M010_Config.mvState_stopped1_Seconds)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOPPED2_SECONDS_Id, String(g_M010_Config.mvState_stopped2_Seconds)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_PARK_SECONDS_Id, String(g_M010_Config.mvState_park_Seconds)); // 이름 수정
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_SIGNALWAIT1_SECONDS_Id, String(g_M010_Config.mvState_signalWait1_Seconds)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_SIGNALWAIT2_SECONDS_Id, String(g_M010_Config.mvState_signalWait2_Seconds)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOPPED1_SECONDS_Id, String(g_M010_Config.mvState_stopped1_Seconds)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_STOPPED2_SECONDS_Id, String(g_M010_Config.mvState_stopped2_Seconds)); 
+    ESPUI.updateControlValue(g_W010_C_ID_MVSTATE_PARK_SECONDS_Id, String(g_M010_Config.mvState_park_Seconds)); 
     
     // Serial Print Interval
-    ESPUI.updateControlValue(g_W010_C_ID_SERIALPRINT_INTERVALMS_Id, String(g_M010_Config.serialPrint_intervalMs)); // 이름 수정
+    ESPUI.updateControlValue(g_W010_C_ID_SERIALPRINT_INTERVALMS_Id, String(g_M010_Config.serialPrint_intervalMs)); 
 
     // TurnState_Config (회전 상태 감지 관련 설정)
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_SPEEDKMH_MINSPEED_Id, String(g_M010_Config.turnState_speedKmh_MinSpeed, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD_Id, String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 3)); // 이름 수정
-    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_STABLEDURATIONMS_Id, String(g_M010_Config.turnState_stableDurationMs)); // 이름 수정
-
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD_Id, String(g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_SPEEDKMH_MINSPEED_Id, String(g_M010_Config.turnState_speedKmh_MinSpeed, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD_Id, String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 3)); 
+    ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_STABLEDURATIONMS_Id, String(g_M010_Config.turnState_StableDurationMs)); // 이름 수정
 	
     // 언어 선택 드롭다운 값 업데이트
     // ESPUI.updateControlValue(g_W010_Control_Language_Id, g_W010_currentLanguage);
