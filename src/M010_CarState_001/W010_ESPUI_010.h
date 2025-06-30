@@ -320,7 +320,16 @@ void W010_EmbUI_init() {
     }
 
     ESPUI.begin("Robot Eye Car", "roboteye", "carpassword");
-    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_init_done"));
+
+	Control* langControl = ESPUI.getControl(g_W010_Control_Language_Id);
+    if (langControl) {
+        langControl->callback = &W010_ESPUI_callback;
+        langControl->userData = reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT));
+    } else {
+        dbgP1_println(F("언어 선택 컨트롤을 찾을 수 없습니다. 콜백 할당 실패."));
+    }
+
+    dbgP1_println(W010_EmbUI_getCommonString("messages.ui_init_done", "ESPUI initialization done."));
 }
 
 
