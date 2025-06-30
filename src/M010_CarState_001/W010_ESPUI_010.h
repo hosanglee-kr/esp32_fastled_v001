@@ -175,9 +175,9 @@ const ControlMapEntry controlMap[] = {
 };
 const size_t controlMapSize = sizeof(controlMap) / sizeof(controlMap[0]);
 
-
+#include <Preferences.h>
 Preferences g_W010_preferences; // Preferences 객체
-String g_W010_currentLanguage; // 현재 언어 설정
+//String g_W010_currentLanguage; // 현재 언어 설정
 
 
 /**
