@@ -176,6 +176,33 @@ const ControlMapEntry controlMap[] = {
 const size_t controlMapSize = sizeof(controlMap) / sizeof(controlMap[0]);
 
 
+Preferences g_W010_preferences; // Preferences 객체
+String g_W010_currentLanguage; // 현재 언어 설정
+
+
+/**
+ * @brief 현재 선택된 언어를 영구 저장소에 저장합니다.
+ * Preferences 라이브러리를 사용하여 NVS에 저장합니다.
+ * @param langCode 저장할 언어 코드 (예: "ko", "en")
+ */
+void W010_EmbUI_saveLastLanguage(const String& langCode) {
+    dbgP1_printf(F("Saving last language: %s\n"), langCode.c_str());
+
+    // "embui" 네임스페이스로 Preferences를 엽니다.
+    if (!g_W010_preferences.begin("embui", false)) { // false는 읽기/쓰기 모드
+        dbgP1_println(F("Failed to open preferences for saving language."));
+        return;
+    }
+
+    // "last_lang" 키에 언어 코드를 저장합니다.
+    g_W010_preferences.putString("last_lang", langCode);
+    
+    // Preferences를 닫습니다. (변경 사항을 플래시에 기록)
+    g_W010_preferences.end();
+
+    dbgP1_println(F("Last language saved successfully."));
+}
+
 // ====================================================================================================
 // 함수 선언 (프로토타입)
 // ====================================================================================================
