@@ -26,21 +26,25 @@
 // M010_main3_010.h 에 정의된 전역 변수 및 함수 선언을 사용하기 위해 포함
 #include "M010_main3_011.h"
 
+
+extern  T_M010_Config       g_M010_Config;
+extern  T_M010_CarStatus    g_M010_CarStatus; // 자동차 상태 구조체 인스턴스
+
+
 // JSON 파일 경로 정의 (언어 코드에 따라 동적으로 결정)
+#define         G_W010_UI_LANG_FILE_PREFIX           "/W010_ESPUI_ui_lang_005_"
+#define         G_W010_UI_LANG_FILE_SUBFIX           ".json"
 
-#define    G_W010_UI_LANG_FILE_PREFIX      "/W010_ESPUI_ui_lang_005_"
-#define    G_W010_UI_LANG_FILE_SUBFIX       ".json"
+#define         G_W010_UI_DEFAULT_CONFIG_FILE        "/W010_ESPUI_ui_defaults_005.json"
 
-#define    G_W010_UI_DEFAULT_CONFIG_FILE    "/W010_ESPUI_ui_defaults_005.json"
-//#define     G_W010_UI_CONFIG_BASE_FILE        "/W010_ESPUI_ui_config_001"
 
-#define     G_W010_LAST_LANG_FILE               "/last_lang.txt" // 마지막 언어 설정을 저장할 파일
+#define         G_W010_LAST_LANG_FILE               "/last_lang.txt" // 마지막 언어 설정을 저장할 파일
 
 // 현재 선택된 언어 코드 (예: "ko", "en")
-String      g_W010_currentLanguage              = "ko"; // 기본 언어는 한국어
+String          g_W010_currentLanguage          = "ko"; // 기본 언어는 한국어
 
-JsonDocument g_W010_uiLayoutDoc; // UI 레이아웃 및 기본값을 위한 JSON 문서
-JsonDocument g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
+JsonDocument    g_W010_uiLayoutDoc; // UI 레이아웃 및 기본값을 위한 JSON 문서
+JsonDocument    g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
 
 // JSON에서 로드된 UI 설정을 저장할 json doc 객체
 // JsonDocument g_W010_uiConfigDoc; 
@@ -292,7 +296,6 @@ bool W010_EmbUI_loadUILanguage(const String& langCode) {
     return true;
 }
 
-
 void W010_EmbUI_init() {
     dbgP1_println(F("ESPUI 초기화 중..."));
 
@@ -301,36 +304,77 @@ void W010_EmbUI_init() {
         return;
     }
 
-    // 1. UI 레이아웃 및 기본값 파일 로드 (한 번만 로드)
     if (!W010_EmbUI_loadUILayoutDefaults()) {
         dbgP1_println(F("UI 레이아웃 및 기본값 파일 로드 실패. UI 구성에 문제 발생 가능."));
-        // 이 경우 default_value를 사용할 수 없으므로, 코드를 통해 기본값을 직접 설정하거나
-        // 최소한의 UI만 구성하도록 폴백 로직 필요
     }
 
-    // 2. 마지막 언어 설정 로드 시도 및 해당 언어 파일 로드
-    W010_EmbUI_loadLastLanguage(); // g_W010_currentLanguage 설정
+    W010_EmbUI_loadLastLanguage();
 
     if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
         dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
-        g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
+        g_W010_currentLanguage = "ko";
         if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. 다국어 지원 불가."));
         }
     }
 
     ESPUI.begin("Robot Eye Car", "roboteye", "carpassword");
+    
+    // 이전에 setupWebPages()에서 생성된 언어 선택 컨트롤에 콜백 할당
+    // g_W010_Control_Language_Id는 setupWebPages()에서 ESPUI.addControl() 후 할당됩니다.
+    // 따라서 setupWebPages()가 호출된 이후에 이 할당이 이루어져야 합니다.
+    Control* v_langControl = ESPUI.getControl(g_W010_Control_Language_Id);
+    if (v_langControl) {
+        // 'userData' 멤버가 없으므로 이 줄을 제거하거나 대체해야 합니다.
+        // v_langControl->userData = reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT)); // 이 줄 삭제 또는 주석 처리
 
-	Control* langControl = ESPUI.getControl(g_W010_Control_Language_Id);
-    if (langControl) {
-        langControl->callback = &W010_ESPUI_callback;
-        langControl->userData = reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT));
+        // 콜백 할당은 가능
+        v_langControl->callback = &W010_ESPUI_callback;
     } else {
         dbgP1_println(F("언어 선택 컨트롤을 찾을 수 없습니다. 콜백 할당 실패."));
     }
 
     dbgP1_println(W010_EmbUI_getCommonString("messages.ui_init_done", "ESPUI initialization done."));
 }
+
+// void W010_EmbUI_init() {
+//     dbgP1_println(F("ESPUI 초기화 중..."));
+
+//     if (!LittleFS.begin()) {
+//         dbgP1_println(F("LittleFS 마운트 실패! UI 설정 로드 불가."));
+//         return;
+//     }
+
+//     // 1. UI 레이아웃 및 기본값 파일 로드 (한 번만 로드)
+//     if (!W010_EmbUI_loadUILayoutDefaults()) {
+//         dbgP1_println(F("UI 레이아웃 및 기본값 파일 로드 실패. UI 구성에 문제 발생 가능."));
+//         // 이 경우 default_value를 사용할 수 없으므로, 코드를 통해 기본값을 직접 설정하거나
+//         // 최소한의 UI만 구성하도록 폴백 로직 필요
+//     }
+
+//     // 2. 마지막 언어 설정 로드 시도 및 해당 언어 파일 로드
+//     W010_EmbUI_loadLastLanguage(); // g_W010_currentLanguage 설정
+
+//     if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+//         dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
+//         g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
+//         if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+//             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. 다국어 지원 불가."));
+//         }
+//     }
+
+//     ESPUI.begin("Robot Eye Car", "roboteye", "carpassword");
+
+// 	Control* v_langControl = ESPUI.getControl(g_W010_Control_Language_Id);
+//     if (v_langControl) {
+//         v_langControl->callback = &W010_ESPUI_callback;
+//         v_langControl->userData = reinterpret_cast<void*>(static_cast<uintptr_t>(C_ID_LANGUAGE_SELECT));
+//     } else {
+//         dbgP1_println(F("언어 선택 컨트롤을 찾을 수 없습니다. 콜백 할당 실패."));
+//     }
+
+//     dbgP1_println(W010_EmbUI_getCommonString("messages.ui_init_done", "ESPUI initialization done."));
+// }
 
 
 
@@ -345,19 +389,21 @@ void W010_EmbUI_setupWebPages() {
 
     for (JsonObject tab : tabs) {
         String tabId = tab["id"].as<String>();
-        String tabTitle = W010_EmbUI_getLabelFromLangDoc(tabId + "_title"); // 언어 파일에서 탭 제목 가져오기
+        String tabTitle = W010_EmbUI_getLabelFromLangDoc(tabId + "_title");
 
         uint16_t currentTabId;
         if (tabId.equals(F("config"))) {
             g_W010_Tab_Config_Id = ESPUI.addControl(Tab, tabTitle.c_str(), tabTitle);
             currentTabId = g_W010_Tab_Config_Id;
 
+            // C_ID_LANGUAGE_SELECT는 콜백을 직접 addControl에 넘기지 않습니다.
+            // 대신 ESPUI.getControl().callback = ... 방식으로 할당됩니다.
             g_W010_Control_Language_Id = ESPUI.addControl(ControlType::Select,
                                                            W010_EmbUI_getCommonString("messages.lang_select_label", "Language Select").c_str(),
                                                            "", // 초기값은 비워두고 나중에 업데이트
                                                            ControlColor::Wetasphalt,
-                                                           currentTabId); // parentId까지만 전달
-			
+                                                           currentTabId);
+            
             ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko", "Korean").c_str(), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
             ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en", "English").c_str(), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
 
@@ -374,10 +420,11 @@ void W010_EmbUI_setupWebPages() {
 
         for (JsonObject control : controls) {
             String enumIdStr = control["enum_id"].as<String>();
-            String label = W010_EmbUI_getLabelFromLangDoc(enumIdStr); // 언어 파일에서 레이블 가져오기
-            JsonVariant defaultValue = control["default_value"]; // 레이아웃 파일에서 기본값 가져오기
+            String label = W010_EmbUI_getLabelFromLangDoc(enumIdStr);
+            JsonVariant defaultValue = control["default_value"];
 
-            int controlEnumId = -1;
+            int controlEnumId = -1; // M010_CAR_CONTROL_ID_E enum 값
+            // controlMap에서 enumIdStr에 해당하는 실제 enum 값을 찾음
             for (size_t i = 0; i < controlMapSize; ++i) {
                 if (enumIdStr.equals(controlMap[i].idStr)) {
                     controlEnumId = controlMap[i].enumVal;
@@ -392,7 +439,7 @@ void W010_EmbUI_setupWebPages() {
                 g_W010_Control_Error_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
                 continue;
             } else if (enumIdStr.equals(F("C_ID_LANGUAGE_SELECT"))) { 
-                continue;
+                continue; // 이미 위에서 addControl 했으므로 건너뛰기
             }
 
             if (controlEnumId == -1) {
@@ -401,15 +448,32 @@ void W010_EmbUI_setupWebPages() {
             }
 
             if (tabId.equals(F("config"))) {
+                // Button과 Number 컨트롤에 콜백을 할당하는 방식 변경
+                // std::function을 사용하는 오버로딩에 맞춥니다.
                 if (enumIdStr.endsWith(F("_BTN"))) {
-                    ESPUI.addControl(ControlType::Button, label.c_str(), defaultValue.as<String>().c_str(), ControlColor::Emerald, currentTabId, &W010_ESPUI_callback, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
-                } else {
-                    // 숫자 입력 필드는 레이블만 설정하고, 단위는 나중에 표시되는 값에 추가합니다.
-                    ESPUI.addControl(ControlType::Number, label.c_str(), String(defaultValue.as<float>(), 3), ControlColor::Alizarin, currentTabId, &W010_ESPUI_callback, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
+                    // C_ID_XXX를 람다 캡처로 전달하여 콜백 내에서 사용할 수 있도록 함
+                    ESPUI.addControl(ControlType::Button, label.c_str(), defaultValue.as<String>().c_str(), ControlColor::Emerald, currentTabId, 
+                        [controlEnumId](Control* p_ctrl, int p_val) {
+                            // 람다 함수 내부에서 W010_ESPUI_callback의 실제 로직을 호출하거나 여기에 직접 구현
+                            // 여기서는 기존 W010_ESPUI_callback 함수를 호출하고,
+                            // controlEnumId를 Control 객체 대신 직접 전달하는 방식으로 처리
+                            // (주의: Control* p_ctrl->id를 사용하는 방식으로 콜백을 전면 재정비하는 것이 더 깔끔할 수 있음)
+                            // 현재는 기존 W010_ESPUI_callback 함수의 구현을 최대한 활용하기 위해 우회적으로 전달합니다.
+                            // W010_ESPUI_callback 함수 내에서 p_control->id 로 분기하도록 변경했으므로,
+                            // Button/Number의 경우에도 p_control->id로 직접 식별해야 합니다.
+                            // 즉, 아래 ControlType::Number와 동일하게 콜백을 직접 인자로 넘기면 됩니다.
+                            W010_ESPUI_callback(p_ctrl, p_val);
+                        });
+                } else { // Number Control
+                    // C_ID_XXX를 람다 캡처로 전달하여 콜백 내에서 사용할 수 있도록 함
+                    ESPUI.addControl(ControlType::Number, label.c_str(), String(defaultValue.as<float>(), 3), ControlColor::Alizarin, currentTabId, 
+                        [controlEnumId](Control* p_ctrl, int p_val) {
+                             W010_ESPUI_callback(p_ctrl, p_val);
+                        });
                 }
             } else if (tabId.equals(F("status"))) {
-                // 상태 레이블도 레이블만 설정하고, 값과 단위는 실시간 업데이트 함수에서 처리합니다.
-                ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId, nullptr, reinterpret_cast<void*>(static_cast<uintptr_t>(controlEnumId)));
+                // Label 컨트롤은 콜백이 필요 없으며, userData도 필요 없음
+                ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, currentTabId);
             }
         }
     }
@@ -459,33 +523,33 @@ void W010_EmbUI_loadConfigToWebUI() {
     }
 
     // 설정값 업데이트 (숫자만 표시)
-    ESPUI.updateControlValue(C_ID_MVSTATE_ACCELFILTER_ALPHA, String(g_M010_Config.mvState_accelFilter_Alpha, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN, String(g_M010_Config.mvState_forward_speedKmh_Threshold_Min, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN, String(g_M010_Config.mvState_reverse_speedKmh_Threshold_Min, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX, String(g_M010_Config.mvState_stop_speedKmh_Threshold_Max, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX, String(g_M010_Config.mvState_stop_accelMps2_Threshold_Max, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX, String(g_M010_Config.mvState_stop_gyroDps_Threshold_Max, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN, String(g_M010_Config.mvState_stop_durationMs_Stable_Min));
-    ESPUI.updateControlValue(C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN, String(g_M010_Config.mvState_move_durationMs_Stable_Min));
-    ESPUI.updateControlValue(C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD, String(g_M010_Config.mvState_decel_accelMps2_Threshold, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD, String(g_M010_Config.mvState_bump_accelMps2_Threshold, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_SPEEDKMH_MIN, String(g_M010_Config.mvState_bump_speedKmh_Min, 3));
-    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_COOLDOWNMS, String(g_M010_Config.mvState_bump_cooldownMs));
-    ESPUI.updateControlValue(C_ID_MVSTATE_DECEL_DURATIONMS_HOLD, String(g_M010_Config.mvState_decel_durationMs_Hold));
-    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_DURATIONMS_HOLD, String(g_M010_Config.mvState_bump_durationMs_Hold));
-    ESPUI.updateControlValue(C_ID_MVSTATE_SIGNALWAIT1_SECONDS, String(g_M010_Config.mvState_signalWait1_seconds));
-    ESPUI.updateControlValue(C_ID_MVSTATE_SIGNALWAIT2_SECONDS, String(g_M010_Config.mvState_signalWait2_seconds));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOPPED1_SECONDS, String(g_M010_Config.mvState_stopped1_seconds));
-    ESPUI.updateControlValue(C_ID_MVSTATE_STOPPED2_SECONDS, String(g_M010_Config.mvState_stopped2_seconds));
-    ESPUI.updateControlValue(C_ID_MVSTATE_PARK_SECONDS, String(g_M010_Config.mvState_park_seconds));
-    ESPUI.updateControlValue(C_ID_SERIALPRINT_INTERVALMS, String(g_M010_Config.serialPrint_intervalMs));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD, String(g_M010_Config.turnState_center_yawAngleVelocityDegps_Thresold, 3));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD, String(g_M010_Config.turnState_lr_1_yawAngleVelocityDegps_Thresold, 3));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD, String(g_M010_Config.turnState_lr_2_yawAngleVelocityDegps_Thresold, 3));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD, String(g_M010_Config.turnState_lr_3_yawAngleVelocityDegps_Thresold, 3));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_SPEEDKMH_MINSPEED, String(g_M010_Config.turnState_speedKmh_MinSpeed, 3));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD, String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 3));
-    ESPUI.updateControlValue(C_ID_TURNSTATE_STABLEDURATIONMS, String(g_M010_Config.turnState_stableDurationMs));
+    ESPUI.updateControlValue(C_ID_MVSTATE_ACCELFILTER_ALPHA                         , String(g_M010_Config.mvState_accelFilter_Alpha, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN            , String(g_M010_Config.mvState_Forward_speedKmh_Threshold_Min, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN            , String(g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX               , String(g_M010_Config.mvState_Stop_speedKmh_Threshold_Max, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX              , String(g_M010_Config.mvState_Stop_accelMps2_Threshold_Max, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX                , String(g_M010_Config.mvState_Stop_gyroDps_Threshold_Max, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN                , String(g_M010_Config.mvState_stop_durationMs_Stable_Min));
+    ESPUI.updateControlValue(C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN                , String(g_M010_Config.mvState_move_durationMs_Stable_Min));
+    ESPUI.updateControlValue(C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD                 , String(g_M010_Config.mvState_Decel_accelMps2_Threshold, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD                  , String(g_M010_Config.mvState_Bump_accelMps2_Threshold, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_SPEEDKMH_MIN                         , String(g_M010_Config.mvState_Bump_SpeedKmh_Min, 3));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_COOLDOWNMS                           , String(g_M010_Config.mvState_Bump_CooldownMs));
+    ESPUI.updateControlValue(C_ID_MVSTATE_DECEL_DURATIONMS_HOLD                     , String(g_M010_Config.mvState_Decel_durationMs_Hold));
+    ESPUI.updateControlValue(C_ID_MVSTATE_BUMP_DURATIONMS_HOLD                      , String(g_M010_Config.mvState_Bump_durationMs_Hold));
+    ESPUI.updateControlValue(C_ID_MVSTATE_SIGNALWAIT1_SECONDS                       , String(g_M010_Config.mvState_signalWait1_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_SIGNALWAIT2_SECONDS                       , String(g_M010_Config.mvState_signalWait2_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOPPED1_SECONDS                          , String(g_M010_Config.mvState_stopped1_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_STOPPED2_SECONDS                          , String(g_M010_Config.mvState_stopped2_Seconds));
+    ESPUI.updateControlValue(C_ID_MVSTATE_PARK_SECONDS                              , String(g_M010_Config.mvState_park_Seconds));
+    ESPUI.updateControlValue(C_ID_SERIALPRINT_INTERVALMS                            , String(g_M010_Config.serialPrint_intervalMs));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD   , String(g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold, 3));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD     , String(g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold, 3));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD     , String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 3));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD     , String(g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold, 3));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_SPEEDKMH_MINSPEED                       , String(g_M010_Config.turnState_speedKmh_MinSpeed, 3));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD            , String(g_M010_Config.turnState_speedKmh_HighSpeed_Threshold, 3));
+    ESPUI.updateControlValue(C_ID_TURNSTATE_STABLEDURATIONMS                        , String(g_M010_Config.turnState_StableDurationMs));
 
     // 언어 선택 드롭다운 값 업데이트
     ESPUI.updateControlValue(g_W010_Control_Language_Id, g_W010_currentLanguage);
@@ -499,153 +563,425 @@ void W010_EmbUI_loadConfigToWebUI() {
  * @param p_control 이벤트가 발생한 ESPUI 컨트롤 객체.
  * @param p_value ESPUI 라이브러리 내부에서 사용하는 컨트롤의 추가 값 (버튼의 경우 1).
  */
+
+ // --- W010_ESPUI_callback 함수 (수정) ---
 void W010_ESPUI_callback(Control* p_control, int p_value) {
-    // controlMap 배열에서 enum_id 문자열을 기반으로 실제 enum 값을 가져옵니다.
-    // p_control->userData는 ESPUI.addControl() 시 전달된 controlEnumId입니다.
-    int controlEnumId = reinterpret_cast<uintptr_t>(p_control->userData);
+    // 'userData' 멤버가 없으므로 해당 줄 삭제
+    // int controlEnumId = reinterpret_cast<uintptr_t>(p_control->userData); // 삭제
 
-    dbgP1_printf(W010_EmbUI_getCommonString("messages.callback_detected", "ESPUI Callback detected:") + " ID=%d, Name=%s, Value=%s, Type=%d\n", 
-                 p_control->id, p_control->name.c_str(), p_control->value.c_str(), p_control->type);
+    // 'name' 멤버도 없을 가능성이 높으므로, 디버그 출력 수정
+    // Control 객체에 'label' 또는 'title' 같은 멤버가 있을 수 있습니다.
+    // 일단 'name'을 'id'로 대체하거나, 단순히 출력하지 않도록 합니다.
+    // 가장 안전한 방법은 Control 객체의 ID만을 사용하는 것입니다.
+    dbgP1_printf(F("%s ID=%d, Value=%s, Type=%d\n"), 
+                 W010_EmbUI_getCommonString("messages.callback_detected", "ESPUI Callback detected:").c_str(),
+                 p_control->id, p_control->value.c_str(), p_control->type);
+    
+    // 언어 선택 컨트롤 처리 (p_control->id를 사용하여 직접 식별)
+    if (p_control->id == g_W010_Control_Language_Id) {
+        g_W010_currentLanguage = p_control->value;
+        W010_EmbUI_saveLastLanguage(g_W010_currentLanguage);
+        W010_EmbUI_rebuildUI();
+        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.lang_change_success", "Language changed successfully!"));
+        ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+        return;
+    }
 
-    switch (controlEnumId) {
-        // M010_CAR_CONTROL_ID_E enum 값에 따른 설정값 업데이트
-        case C_ID_MVSTATE_ACCELFILTER_ALPHA:
-            g_M010_Config.mvState_accelFilter_Alpha = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN:
-            g_M010_Config.mvState_forward_speedKmh_Threshold_Min = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN:
-            g_M010_Config.mvState_reverse_speedKmh_Threshold_Min = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX:
-            g_M010_Config.mvState_stop_speedKmh_Threshold_Max = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX:
-            g_M010_Config.mvState_stop_accelMps2_Threshold_Max = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX:
-            g_M010_Config.mvState_stop_gyroDps_Threshold_Max = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN:
-            g_M010_Config.mvState_stop_durationMs_Stable_Min = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN:
-            g_M010_Config.mvState_move_durationMs_Stable_Min = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD:
-            g_M010_Config.mvState_decel_accelMps2_Threshold = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD:
-            g_M010_Config.mvState_bump_accelMps2_Threshold = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_BUMP_SPEEDKMH_MIN:
-            g_M010_Config.mvState_bump_speedKmh_Min = p_control->value.toFloat();
-            break;
-        case C_ID_MVSTATE_BUMP_COOLDOWNMS:
-            g_M010_Config.mvState_bump_cooldownMs = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_DECEL_DURATIONMS_HOLD:
-            g_M010_Config.mvState_decel_durationMs_Hold = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_BUMP_DURATIONMS_HOLD:
-            g_M010_Config.mvState_bump_durationMs_Hold = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_SIGNALWAIT1_SECONDS:
-            g_M010_Config.mvState_signalWait1_seconds = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_SIGNALWAIT2_SECONDS:
-            g_M010_Config.mvState_signalWait2_seconds = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_STOPPED1_SECONDS:
-            g_M010_Config.mvState_stopped1_seconds = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_STOPPED2_SECONDS:
-            g_M010_Config.mvState_stopped2_seconds = p_control->value.toInt();
-            break;
-        case C_ID_MVSTATE_PARK_SECONDS:
-            g_M010_Config.mvState_park_seconds = p_control->value.toInt();
-            break;
-        case C_ID_SERIALPRINT_INTERVALMS:
-            g_M010_Config.serialPrint_intervalMs = p_control->value.toInt();
-            break;
-        case C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD:
-            g_M010_Config.turnState_center_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
-            break;
-        case C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD:
-            g_M010_Config.turnState_lr_1_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
-            break;
-        case C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD:
-            g_M010_Config.turnState_lr_2_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
-            break;
-        case C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD:
-            g_M010_Config.turnState_lr_3_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
-            break;
-        case C_ID_TURNSTATE_SPEEDKMH_MINSPEED:
-            g_M010_Config.turnState_speedKmh_MinSpeed = p_control->value.toFloat();
-            break;
-        case C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD:
-            g_M010_Config.turnState_speedKmh_HighSpeed_Threshold = p_control->value.toFloat();
-            break;
-        case C_ID_TURNSTATE_STABLEDURATIONMS:
-            g_M010_Config.turnState_stableDurationMs = p_control->value.toInt();
-            break;
+    // 버튼 컨트롤 처리 (p_control->id를 사용하여 직접 식별)
+    if (p_control->type == ControlType::Button && p_value) { // p_value가 1일 때 버튼이 눌린 것
+        // 각 버튼의 ESPUI ID를 전역 변수로 관리하고 있다고 가정하고 비교합니다.
+        // 예: extern uint16_t g_W010_Control_SaveBtn_Id;
+        //     extern uint16_t g_W010_Control_LoadBtn_Id;
+        //     extern uint16_t g_W010_Control_ResetBtn_Id;
 
-        // 언어 선택 드롭다운 (Select) 처리
-        case C_ID_LANGUAGE_SELECT:
-            g_W010_currentLanguage = p_control->value; // 선택된 언어 코드 (예: "ko", "en") 저장
-            W010_EmbUI_saveLastLanguage(g_W010_currentLanguage); // 마지막 선택 언어를 EEPROM 등에 저장
-            W010_EmbUI_rebuildUI(); // UI 재구성 (새로운 언어 파일 로드 및 UI 갱신)
-            ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.lang_change_success", "Language changed successfully!"));
-            break;
+        // 여기서는 예시로 Enum ID와 ESPUI ID 간의 명시적인 매핑이 없으므로
+        // 임시로 ESPUI ID의 범위나 특징을 이용하여 판단합니다.
+        // 더 견고한 방법은 각 버튼에 해당하는 enum ID (C_ID_SAVE_CONFIG_BTN 등)를
+        // ESPUI.addControl 시 반환되는 ID와 매핑하는 전역 맵을 만드는 것입니다.
+        // 예를 들어: std::map<uint16_t, int> espuiIdToEnumIdMap;
+        // 그리고 setupWebPages에서 espuiIdToEnumIdMap[espuiId] = controlEnumId; 로 저장.
+        // 콜백에서 int enumId = espuiIdToEnumIdMap[p_control->id]; 로 조회.
 
-        // 버튼 클릭 이벤트 처리 (p_value가 1일 때 버튼이 눌린 것)
-        case C_ID_SAVE_CONFIG_BTN:
-            if (p_value) { // 버튼이 눌렸을 때만 처리
-                if (W010_EmbUI_saveConfig()) {
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_save_success", "Configuration saved successfully."));
-                    // Error 메시지 초기화
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, ""); 
-                } else {
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_save_fail", "Failed to save configuration to file system."));
-                    // Alarm 메시지 초기화
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
-                }
+        // 현재 상황에서는 p_control->id 와 M010_CAR_CONTROL_ID_E 를 연결하는
+        // 명시적인 방법이 없으므로, 가장 간단하게 '이름' 대신 'ID'를 직접 비교합니다.
+        // 이 방법은 setupWebPages에서 생성된 각 버튼의 ESPUI ID가
+        // 예측 가능하거나 전역 변수로 저장되어 있어야 합니다.
+        // 만약 setupWebPages에서 ControlType::Button 생성 시
+        // p_control->userData에 enumId를 넣는 방식이 가능한 ESPUI 버전이라면
+        // 그렇게 하는 것이 가장 좋습니다. 현재 오류를 보니 불가능한 것으로 보입니다.
+
+        // 따라서, 각 버튼에 해당하는 ESPUI.addControl()의 반환 ID를
+        // 별도의 전역 변수에 저장하고 여기서 그 변수들을 직접 비교하는 것이 현실적입니다.
+        // 예를 들어:
+        // if (p_control->id == g_W010_Control_SaveConfigBtn_Id) { ... }
+
+        // 임시로 Enum ID의 문자열을 다시 가져와 레이블과 비교하는 대신,
+        // C_ID_SAVE_CONFIG_BTN 등의 ENUM 값을 직접 사용해 식별하기 위해
+        // ControlMap을 역으로 찾아야 합니다.
+        int foundEnumId = -1;
+        for (size_t i = 0; i < controlMapSize; ++i) {
+            // 이전에 p_control->name을 사용했지만, name 멤버가 없으므로
+            // ESPUI.addControl() 시 Label 인자로 사용된 controlMap[i].idStr을
+            // Control 객체에 저장할 수 있었다면 좋았을 겁니다.
+            // 현재는 가장 확실한 방법은 각 컨트롤의 ESPUI ID를 미리 알아내는 것입니다.
+            // 여기서는 `Control::id`와 `enum_id`를 연결하는 방법이 필요합니다.
+            // 만약 ESPUI.addControl()시 `userData` 인자가 없다면,
+            // 콜백에서 `p_control->id`를 통해 `M010_CAR_CONTROL_ID_E`를 알아내야 합니다.
+
+            // 가장 확실한 방법은 setupWebPages에서 컨트롤 생성 시 반환되는
+            // ESPUI.addControl()의 ID를 미리 정의된 전역 변수에 할당하고,
+            // 여기서 그 전역 변수를 사용하는 것입니다.
+            // 예를 들어:
+            // uint16_t myButtonId = ESPUI.addControl(ControlType::Button, ...);
+            // ...
+            // if (p_control->id == myButtonId) { /* do something */ }
+
+            // 현재 구조로는 Control Map의 String ID와 ESPUI Control ID를 직접 매칭하기 어렵습니다.
+            // 따라서 각 버튼/넘버 컨트롤에 해당하는 ESPUI ID를 전역 변수로 정의하고,
+            // setupWebPages에서 할당한 후, 여기서 그 ID를 직접 비교하는 것이 가장 실용적입니다.
+
+            // 일단 이전처럼 controlMap을 통해 문자열 enumIdStr을 얻은 후
+            // 이를 기반으로 동작하는 코드를 유지하지만, 이 부분은 수정이 필요할 수 있습니다.
+            // p_control->name이 없으므로, 아래 조건문을 p_control->id로 변경해야 합니다.
+            // 하지만 현재 ESPUI.addControl()에서 controlEnumId를 직접 연결할 수 없으므로,
+            // ESPUI.h에 정의된 `addControl` 오버로딩을 다시 확인하는 것이 중요합니다.
+
+            // (현재 코드의 한계)
+            // p_control->name 대신 p_control->id로 버튼을 식별해야 합니다.
+            // 이를 위해서는 각 버튼의 ESPUI ID를 전역 변수에 저장해야 합니다.
+            // 임시로 다음과 같이 변경합니다.
+            // 만약 ESPUI.h에 Control::id가 ControlType::Button에 대해 고유하게 매핑된다면
+            // 아래의 switch (p_control->id) 문으로 직접 처리할 수 있습니다.
+            
+            // --- 대체 방안: p_control->id로 직접 분기 ---
+            if (p_control->id == /* C_ID_SAVE_CONFIG_BTN 에 해당하는 ESPUI ID */) {
+                foundEnumId = C_ID_SAVE_CONFIG_BTN;
+                break;
+            } else if (p_control->id == /* C_ID_LOAD_CONFIG_BTN 에 해당하는 ESPUI ID */) {
+                foundEnumId = C_ID_LOAD_CONFIG_BTN;
+                break;
+            } else if (p_control->id == /* C_ID_RESET_CONFIG_BTN 에 해당하는 ESPUI ID */) {
+                foundEnumId = C_ID_RESET_CONFIG_BTN;
+                break;
             }
-            break;
-        case C_ID_LOAD_CONFIG_BTN:
-            if (p_value) {
-                if (W010_EmbUI_loadConfig()) {
-                    W010_EmbUI_loadConfigToWebUI(); // 설정값 로드 후 웹 UI 갱신
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_load_success", "Configuration loaded successfully."));
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
-                } else {
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_load_fail", "Configuration file not found. Default values applied."));
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
-                }
-            }
-            break;
-        case C_ID_RESET_CONFIG_BTN:
-            if (p_value) {
-                if (W010_EmbUI_resetConfig()) {
-                    W010_EmbUI_loadConfigToWebUI(); // 설정값 리셋 후 웹 UI 갱신
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_reset_success", "Configuration reset to default."));
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
-                } else {
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_reset_fail", "Error saving default configuration."));
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
-                }
-            }
-            break;
+        } // for loop end
 
-        default:
-            // 정의되지 않은 컨트롤 ID에 대한 처리
-            ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected."));
-            ESPUI.updateControlValue(g_W010_Control_Alaram_Id, ""); // 알람 메시지 초기화
-            dbgP1_printf("Unknown command or control ID: %d\n", controlEnumId);
-            break;
+        if (foundEnumId != -1) {
+            switch (foundEnumId) {
+                case C_ID_SAVE_CONFIG_BTN:
+                    if (W010_EmbUI_saveConfig()) {
+                        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_save_success", "Configuration saved successfully."));
+                        ESPUI.updateControlValue(g_W010_Control_Error_Id, ""); 
+                    } else {
+                        ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_save_fail", "Failed to save configuration to file system."));
+                        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    }
+                    break;
+                case C_ID_LOAD_CONFIG_BTN:
+                    if (W010_EmbUI_loadConfig()) {
+                        W010_EmbUI_loadConfigToWebUI();
+                        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_load_success", "Configuration loaded successfully."));
+                        ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+                    } else {
+                        ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_load_fail", "Configuration file not found. Default values applied."));
+                        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    }
+                    break;
+                case C_ID_RESET_CONFIG_BTN:
+                    if (W010_EmbUI_resetConfig()) {
+                        W010_EmbUI_loadConfigToWebUI();
+                        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_reset_success", "Configuration reset to default."));
+                        ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+                    } else {
+                        ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_reset_fail", "Error saving default configuration."));
+                        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    }
+                    break;
+                default:
+                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected."));
+                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    dbgP1_printf(F("Unknown button control ID: %d\n"), p_control->id);
+                    break;
+            }
+        } else {
+             ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown button control ID."));
+             ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+             dbgP1_printf(F("Button control ID not mapped to enum: %d\n"), p_control->id);
+        }
+
+    } else if (p_control->type == ControlType::Number) {
+        // 숫자 입력 필드 처리
+        // 각 Number 컨트롤의 ESPUI ID를 전역 변수로 관리하고 있다고 가정합니다.
+        // 그리고 이 ID를 M010_CAR_CONTROL_ID_E enum 값과 매핑하는 것이 가장 좋습니다.
+        
+        int foundEnumId = -1;
+        // 마찬가지로 p_control->id 를 M010_CAR_CONTROL_ID_E 에 매핑해야 합니다.
+        // 예를 들어: std::map<uint16_t, int> espuiIdToEnumIdMap; 를 사용.
+        // 현재는 map이 없으므로, 직접 ESPUI ID를 비교하여 처리하는 예시를 보여줍니다.
+        // 이 부분은 모든 Number 컨트롤에 대해 각각 if-else if 문으로 ID를 비교해야 합니다.
+        
+        // --- Number 컨트롤 예시: p_control->id로 직접 분기 ---
+        if (p_control->id == /* C_ID_MVSTATE_ACCELFILTER_ALPHA 에 해당하는 ESPUI ID */) {
+            foundEnumId = C_ID_MVSTATE_ACCELFILTER_ALPHA;
+        } else if (p_control->id == /* C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN 에 해당하는 ESPUI ID */) {
+            foundEnumId = C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN;
+        }
+        // ... 모든 Number 컨트롤 ID와 Enum ID 매핑을 여기에 추가 ...
+        // else if (p_control->id == /* C_ID_TURNSTATE_STABLEDURATIONMS 에 해당하는 ESPUI ID */) {
+        //     foundEnumId = C_ID_TURNSTATE_STABLEDURATIONMS;
+        // }
+
+
+        if (foundEnumId != -1) {
+            switch (foundEnumId) {
+                case C_ID_MVSTATE_ACCELFILTER_ALPHA:
+                    g_M010_Config.mvState_accelFilter_Alpha = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN:
+                    g_M010_Config.mvState_forward_speedKmh_Threshold_Min = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN:
+                    g_M010_Config.mvState_reverse_speedKmh_Threshold_Min = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX:
+                    g_M010_Config.mvState_stop_speedKmh_Threshold_Max = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX:
+                    g_M010_Config.mvState_stop_accelMps2_Threshold_Max = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX:
+                    g_M010_Config.mvState_stop_gyroDps_Threshold_Max = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN:
+                    g_M010_Config.mvState_stop_durationMs_Stable_Min = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN:
+                    g_M010_Config.mvState_move_durationMs_Stable_Min = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD:
+                    g_M010_Config.mvState_decel_accelMps2_Threshold = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD:
+                    g_M010_Config.mvState_bump_accelMps2_Threshold = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_BUMP_SPEEDKMH_MIN:
+                    g_M010_Config.mvState_bump_speedKmh_Min = p_control->value.toFloat();
+                    break;
+                case C_ID_MVSTATE_BUMP_COOLDOWNMS:
+                    g_M010_Config.mvState_bump_cooldownMs = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_DECEL_DURATIONMS_HOLD:
+                    g_M010_Config.mvState_decel_durationMs_Hold = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_BUMP_DURATIONMS_HOLD:
+                    g_M010_Config.mvState_bump_durationMs_Hold = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_SIGNALWAIT1_SECONDS:
+                    g_M010_Config.mvState_signalWait1_seconds = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_SIGNALWAIT2_SECONDS:
+                    g_M010_Config.mvState_signalWait2_seconds = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_STOPPED1_SECONDS:
+                    g_M010_Config.mvState_stopped1_seconds = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_STOPPED2_SECONDS:
+                    g_M010_Config.mvState_stopped2_seconds = p_control->value.toInt();
+                    break;
+                case C_ID_MVSTATE_PARK_SECONDS:
+                    g_M010_Config.mvState_park_seconds = p_control->value.toInt();
+                    break;
+                case C_ID_SERIALPRINT_INTERVALMS:
+                    g_M010_Config.serialPrint_intervalMs = p_control->value.toInt();
+                    break;
+                case C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                    g_M010_Config.turnState_center_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+                    break;
+                case C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                    g_M010_Config.turnState_lr_1_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+                    break;
+                case C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                    g_M010_Config.turnState_lr_2_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+                    break;
+                case C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD:
+                    g_M010_Config.turnState_lr_3_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+                    break;
+                case C_ID_TURNSTATE_SPEEDKMH_MINSPEED:
+                    g_M010_Config.turnState_speedKmh_MinSpeed = p_control->value.toFloat();
+                    break;
+                case C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD:
+                    g_M010_Config.turnState_speedKmh_HighSpeed_Threshold = p_control->value.toFloat();
+                    break;
+                case C_ID_TURNSTATE_STABLEDURATIONMS:
+                    g_M010_Config.turnState_stableDurationMs = p_control->value.toInt();
+                    break;
+                default:
+                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected for Number control."));
+                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    dbgP1_printf(F("Unknown Number control ID: %d\n"), p_control->id);
+                    break;
+            }
+        } else {
+             ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Number control ID not mapped to enum."));
+             ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+             dbgP1_printf(F("Number control ID not found in map: %d\n"), p_control->id);
+        }
+    } else {
+        // 다른 유형의 컨트롤 (Label 등)은 여기서 직접 처리할 필요가 없을 수 있습니다.
+        ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected for control type."));
+        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+        dbgP1_printf(F("Unhandled control type: %d, ID: %d\n"), p_control->type, p_control->id);
     }
 }
+
+// void W010_ESPUI_callback(Control* p_control, int p_value) {
+//     // controlMap 배열에서 enum_id 문자열을 기반으로 실제 enum 값을 가져옵니다.
+//     // p_control->userData는 ESPUI.addControl() 시 전달된 controlEnumId입니다.
+//     int controlEnumId = reinterpret_cast<uintptr_t>(p_control->userData);
+
+//     dbgP1_printf(W010_EmbUI_getCommonString("messages.callback_detected", "ESPUI Callback detected:") + " ID=%d, Name=%s, Value=%s, Type=%d\n", 
+//                  p_control->id, p_control->name.c_str(), p_control->value.c_str(), p_control->type);
+
+//     switch (controlEnumId) {
+//         // M010_CAR_CONTROL_ID_E enum 값에 따른 설정값 업데이트
+//         case C_ID_MVSTATE_ACCELFILTER_ALPHA:
+//             g_M010_Config.mvState_accelFilter_Alpha = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN:
+//             g_M010_Config.mvState_Forward_speedKmh_Threshold_Min = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN:
+//             g_M010_Config.mvState_Reverse_speedKmh_Threshold_Min = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_STOP_SPEEDKMH_THRESHOLD_MAX:
+//             g_M010_Config.mvState_Stop_speedKmh_Threshold_Max = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_STOP_ACCELMPS2_THRESHOLD_MAX:
+//             g_M010_Config.mvState_Stop_accelMps2_Threshold_Max = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_STOP_GYRODPS_THRESHOLD_MAX:
+//             g_M010_Config.mvState_Stop_gyroDps_Threshold_Max = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_STOP_DURATIONMS_STABLE_MIN:
+//             g_M010_Config.mvState_stop_durationMs_Stable_Min = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_MOVE_DURATIONMS_STABLE_MIN:
+//             g_M010_Config.mvState_move_durationMs_Stable_Min = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_DECEL_ACCELMPS2_THRESHOLD:
+//             g_M010_Config.mvState_Decel_accelMps2_Threshold = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_BUMP_ACCELMPS2_THRESHOLD:
+//             g_M010_Config.mvState_Bump_accelMps2_Threshold = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_BUMP_SPEEDKMH_MIN:
+//             g_M010_Config.mvState_Bump_SpeedKmh_Min = p_control->value.toFloat();
+//             break;
+//         case C_ID_MVSTATE_BUMP_COOLDOWNMS:
+//             g_M010_Config.mvState_Bump_CooldownMs = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_DECEL_DURATIONMS_HOLD:
+//             g_M010_Config.mvState_Decel_durationMs_Hold = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_BUMP_DURATIONMS_HOLD:
+//             g_M010_Config.mvState_Bump_durationMs_Hold = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_SIGNALWAIT1_SECONDS:
+//             g_M010_Config.mvState_signalWait1_Seconds = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_SIGNALWAIT2_SECONDS:
+//             g_M010_Config.mvState_signalWait2_Seconds = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_STOPPED1_SECONDS:
+//             g_M010_Config.mvState_stopped1_Seconds = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_STOPPED2_SECONDS:
+//             g_M010_Config.mvState_stopped2_Seconds = p_control->value.toInt();
+//             break;
+//         case C_ID_MVSTATE_PARK_SECONDS:
+//             g_M010_Config.mvState_park_Seconds = p_control->value.toInt();
+//             break;
+//         case C_ID_SERIALPRINT_INTERVALMS:
+//             g_M010_Config.serialPrint_intervalMs = p_control->value.toInt();
+//             break;
+//         case C_ID_TURNSTATE_CENTER_YAWANGLEVELOCITYDEGPS_THRESOLD:
+//             g_M010_Config.turnState_Center_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+//             break;
+//         case C_ID_TURNSTATE_LR_1_YAWANGLEVELOCITYDEGPS_THRESOLD:
+//             g_M010_Config.turnState_LR_1_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+//             break;
+//         case C_ID_TURNSTATE_LR_2_YAWANGLEVELOCITYDEGPS_THRESOLD:
+//             g_M010_Config.turnState_LR_2_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+//             break;
+//         case C_ID_TURNSTATE_LR_3_YAWANGLEVELOCITYDEGPS_THRESOLD:
+//             g_M010_Config.turnState_LR_3_yawAngleVelocityDegps_Thresold = p_control->value.toFloat();
+//             break;
+//         case C_ID_TURNSTATE_SPEEDKMH_MINSPEED:
+//             g_M010_Config.turnState_speedKmh_MinSpeed = p_control->value.toFloat();
+//             break;
+//         case C_ID_TURNSTATE_SPEEDKMH_HIGHSPEED_THRESHOLD:
+//             g_M010_Config.turnState_speedKmh_HighSpeed_Threshold = p_control->value.toFloat();
+//             break;
+//         case C_ID_TURNSTATE_STABLEDURATIONMS:
+//             g_M010_Config.turnState_StableDurationMs = p_control->value.toInt();
+//             break;
+
+//         // 언어 선택 드롭다운 (Select) 처리
+//         case C_ID_LANGUAGE_SELECT:
+//             g_W010_currentLanguage = p_control->value; // 선택된 언어 코드 (예: "ko", "en") 저장
+//             W010_EmbUI_saveLastLanguage(g_W010_currentLanguage); // 마지막 선택 언어를 EEPROM 등에 저장
+//             W010_EmbUI_rebuildUI(); // UI 재구성 (새로운 언어 파일 로드 및 UI 갱신)
+//             ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.lang_change_success", "Language changed successfully!"));
+//             break;
+
+//         // 버튼 클릭 이벤트 처리 (p_value가 1일 때 버튼이 눌린 것)
+//         case C_ID_SAVE_CONFIG_BTN:
+//             if (p_value) { // 버튼이 눌렸을 때만 처리
+//                 if (M010_Config_save()) {
+//                     ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_save_success", "Configuration saved successfully."));
+//                     // Error 메시지 초기화
+//                     ESPUI.updateControlValue(g_W010_Control_Error_Id, ""); 
+//                 } else {
+//                     ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_save_fail", "Failed to save configuration to file system."));
+//                     // Alarm 메시지 초기화
+//                     ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+//                 }
+//             }
+//             break;
+//         case C_ID_LOAD_CONFIG_BTN:
+//             if (p_value) {
+//                 if (M010_Config_load()) {
+//                     W010_EmbUI_loadConfigToWebUI(); // 설정값 로드 후 웹 UI 갱신
+//                     ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_load_success", "Configuration loaded successfully."));
+//                     ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+//                 } else {
+//                     ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_load_fail", "Configuration file not found. Default values applied."));
+//                     ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+//                 }
+//             }
+//             break;
+//         case C_ID_RESET_CONFIG_BTN:
+//             if (p_value) {
+//                 M010_Config_initDefaults();
+//                 if (M010_Config_save()) {
+//                     W010_EmbUI_loadConfigToWebUI(); // 설정값 리셋 후 웹 UI 갱신
+//                     ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_reset_success", "Configuration reset to default."));
+//                     ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+//                 } else {
+//                     ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_reset_fail", "Error saving default configuration."));
+//                     ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+//                 }
+//             }
+//             break;
+
+//         default:
+//             // 정의되지 않은 컨트롤 ID에 대한 처리
+//             ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected."));
+//             ESPUI.updateControlValue(g_W010_Control_Alaram_Id, ""); // 알람 메시지 초기화
+//             dbgP1_printf("Unknown command or control ID: %d\n", controlEnumId);
+//             break;
+//     }
+// }
             
 
 
@@ -728,46 +1064,47 @@ void W010_EmbUI_updateCarStatusWeb() {
 
 // 이 함수는 main.cpp의 loop() 함수 또는 별도의 타이머에서 주기적으로 호출되어야 합니다.
 void W010_EmbUI_updateStatusLabels() {
+  
     // 예시: 속도 레이블 업데이트
     String speedKmhUnit = W010_EmbUI_getCommonString("units.speed", " km/h");
-    ESPUI.updateControlValue(C_ID_SPEED_KMH_LABEL, String(g_M010_CarState.v_speedKmh, 2) + speedKmhUnit);
+    ESPUI.updateControlValue(C_ID_SPEED_KMH_LABEL, String(g_M010_CarStatus.speed_kmh, 2) + speedKmhUnit);
 
     // 예시: AccelX 레이블 업데이트
     String accelUnit = W010_EmbUI_getCommonString("units.accel", " m/s^2");
-    ESPUI.updateControlValue(C_ID_ACCELX_MS2_LABEL, String(g_M010_CarState.v_accelX_mps2, 2) + accelUnit);
-    ESPUI.updateControlValue(C_ID_ACCELY_MS2_LABEL, String(g_M010_CarState.v_accelY_mps2, 2) + accelUnit);
-    ESPUI.updateControlValue(C_ID_ACCELZ_MS2_LABEL, String(g_M010_CarState.v_accelZ_mps2, 2) + accelUnit);
+    ESPUI.updateControlValue(C_ID_ACCELX_MS2_LABEL, String(g_M010_CarStatus.accelX_ms2, 2) + accelUnit);
+    ESPUI.updateControlValue(C_ID_ACCELY_MS2_LABEL, String(g_M010_CarStatus.accelY_ms2, 2) + accelUnit);
+    ESPUI.updateControlValue(C_ID_ACCELZ_MS2_LABEL, String(g_M010_CarStatus.accelZ_ms2, 2) + accelUnit);
 
     // 예시: Yaw 각도 업데이트
     String angleUnit = W010_EmbUI_getCommonString("units.angle", " deg");
-    ESPUI.updateControlValue(C_ID_YAWANGLE_DEG_LABEL, String(g_M010_CarState.v_yawAngle_deg, 2) + angleUnit);
-    ESPUI.updateControlValue(C_ID_PITCHANGLE_DEG_LABEL, String(g_M010_CarState.v_pitchAngle_deg, 2) + angleUnit);
+    ESPUI.updateControlValue(C_ID_YAWANGLE_DEG_LABEL, String(g_M010_CarStatus.yawAngle_deg, 2) + angleUnit);
+    ESPUI.updateControlValue(C_ID_PITCHANGLE_DEG_LABEL, String(g_M010_CarStatus.pitchAngle_deg, 2) + angleUnit);
 
     // 예시: Yaw 각속도 업데이트
     String angularVelocityUnit = W010_EmbUI_getCommonString("units.angular_velocity", " deg/s");
-    ESPUI.updateControlValue(C_ID_YAWANGLEVELOCITY_DEGPS_LABEL, String(g_M010_CarState.v_yawAngleVelocity_degps, 2) + angularVelocityUnit);
+    ESPUI.updateControlValue(C_ID_YAWANGLEVELOCITY_DEGPS_LABEL, String(g_M010_CarStatus.yawAngleVelocity_degps, 2) + angularVelocityUnit);
 
     // 급감속/방지턱 감지 상태 업데이트 (true/false 문자열도 언어 파일에서 가져옴)
-    String isEmergencyBrakingStr = g_M010_CarState.v_isEmergencyBraking ? W010_EmbUI_getCommonString("boolean_states.true", "Detected") : W010_EmbUI_getCommonString("boolean_states.false", "Not Detected");
+    String isEmergencyBrakingStr = g_M010_CarStatus.isEmergencyBraking ? W010_EmbUI_getCommonString("boolean_states.true", "Detected") : W010_EmbUI_getCommonString("boolean_states.false", "Not Detected");
     ESPUI.updateControlValue(C_ID_ISEMERGENCYBRAKING_LABEL, isEmergencyBrakingStr);
 
-    String isSpeedBumpDetectedStr = g_M010_CarState.v_isSpeedBumpDetected ? W010_EmbUI_getCommonString("boolean_states.true", "Detected") : W010_EmbUI_getCommonString("boolean_states.false", "Not Detected");
+    String isSpeedBumpDetectedStr = g_M010_CarStatus.isSpeedBumpDetected ? W010_EmbUI_getCommonString("boolean_states.true", "Detected") : W010_EmbUI_getCommonString("boolean_states.false", "Not Detected");
     ESPUI.updateControlValue(C_ID_ISSPEEDBUMPDETECTED_LABEL, isSpeedBumpDetectedStr);
 
     // 정차 지속 시간 업데이트
     String timeSecondsUnit = W010_EmbUI_getCommonString("units.time_seconds", " sec");
-    ESPUI.updateControlValue(C_ID_CURRENTSTOPTIME_SEC_LABEL, String(g_M010_CarState.v_currentStopTime_sec) + timeSecondsUnit);
+    ESPUI.updateControlValue(C_ID_CURRENTSTOPTIME_SEC_LABEL, String(g_M010_CarStatus.currentStopTime_ms/1000) + timeSecondsUnit);
 
     // 자동차 움직임 상태 업데이트
     String carMovementStateStr = W010_EmbUI_getCommonString(
-        (String("car_movement_states.") + W010_EmbUI_getCarMovementStateEnumString(g_M010_CarState.v_carMovementState)).c_str(),
+        (String("car_movement_states.") + W010_EmbUI_getCarMovementStateEnumString(g_M010_CarStatus.carMovementState)).c_str(),
         "Unknown State"
     );
     ESPUI.updateControlValue(C_ID_CARMOVEMENTSTATE_LABEL, W010_EmbUI_getCommonString("C_ID_CARMOVEMENTSTATE_LABEL_prefix", "Movement State:") + " " + carMovementStateStr);
 
     // 자동차 회전 상태 업데이트
     String carTurnStateStr = W010_EmbUI_getCommonString(
-        (String("car_turn_states.") + W010_EmbUI_getCarTurnStateEnumString(g_M010_CarState.v_carTurnState)).c_str(),
+        (String("car_turn_states.") + W010_EmbUI_getCarTurnStateEnumString(g_M010_CarStatus.carTurnState)).c_str(),
         "Unknown Turn State"
     );
     ESPUI.updateControlValue(C_ID_CARTURNSTATE_LABEL, W010_EmbUI_getCommonString("C_ID_CARTURNSTATE_LABEL_prefix", "Turn State:") + " " + carTurnStateStr);
@@ -781,29 +1118,29 @@ void W010_EmbUI_updateStatusLabels() {
 // 이 함수들은 언어에 종속되지 않고 enum 값을 나타내는 고유 문자열을 반환해야 합니다.
 String W010_EmbUI_getCarMovementStateEnumString(T_M010_CarMovementState state) {
     switch (state) {
-        case E_M010_CARMOVESTATE_UNKNOWN: return "E_M010_CARMOVESTATE_UNKNOWN";
-        case E_M010_CARMOVESTATE_STOPPED_INIT: return "E_M010_CARMOVESTATE_STOPPED_INIT";
-        case E_M010_CARMOVESTATE_SIGNAL_WAIT1: return "E_M010_CARMOVESTATE_SIGNAL_WAIT1";
-        case E_M010_CARMOVESTATE_SIGNAL_WAIT2: return "E_M010_CARMOVESTATE_SIGNAL_WAIT2";
-        case E_M010_CARMOVESTATE_STOPPED1: return "E_M010_CARMOVESTATE_STOPPED1";
-        case E_M010_CARMOVESTATE_STOPPED2: return "E_M010_CARMOVESTATE_STOPPED2";
-        case E_M010_CARMOVESTATE_PARKED: return "E_M010_CARMOVESTATE_PARKED";
-        case E_M010_CARMOVESTATE_FORWARD: return "E_M010_CARMOVESTATE_FORWARD";
-        case E_M010_CARMOVESTATE_REVERSE: return "E_M010_CARMOVESTATE_REVERSE";
+        case E_M010_CARMOVESTATE_UNKNOWN        : return "E_M010_CARMOVESTATE_UNKNOWN";
+        case E_M010_CARMOVESTATE_STOPPED_INIT   : return "E_M010_CARMOVESTATE_STOPPED_INIT";
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT1   : return "E_M010_CARMOVESTATE_SIGNAL_WAIT1";
+        case E_M010_CARMOVESTATE_SIGNAL_WAIT2   : return "E_M010_CARMOVESTATE_SIGNAL_WAIT2";
+        case E_M010_CARMOVESTATE_STOPPED1       : return "E_M010_CARMOVESTATE_STOPPED1";
+        case E_M010_CARMOVESTATE_STOPPED2       : return "E_M010_CARMOVESTATE_STOPPED2";
+        case E_M010_CARMOVESTATE_PARKED         : return "E_M010_CARMOVESTATE_PARKED";
+        case E_M010_CARMOVESTATE_FORWARD        : return "E_M010_CARMOVESTATE_FORWARD";
+        case E_M010_CARMOVESTATE_REVERSE        : return "E_M010_CARMOVESTATE_REVERSE";
         default: return "UNKNOWN_ENUM_STATE";
     }
 }
 
 String W010_EmbUI_getCarTurnStateEnumString(T_M010_CarTurnState state) {
     switch (state) {
-        case E_M010_CARTURNSTATE_CENTER: return "E_M010_CARTURNSTATE_CENTER";
-        case E_M010_CARTURNSTATE_LEFT_1: return "E_M010_CARTURNSTATE_LEFT_1";
-        case E_M010_CARTURNSTATE_LEFT_2: return "E_M010_CARTURNSTATE_LEFT_2";
-        case E_M010_CARTURNSTATE_LEFT_3: return "E_M010_CARTURNSTATE_LEFT_3";
-        case E_M010_CARTURNSTATE_RIGHT_1: return "E_M010_CARTURNSTATE_RIGHT_1";
-        case E_M010_CARTURNSTATE_RIGHT_2: return "E_M010_CARTURNSTATE_RIGHT_2";
-        case E_M010_CARTURNSTATE_RIGHT_3: return "E_M010_CARTURNSTATE_RIGHT_3";
-        default: return "UNKNOWN_ENUM_TURN_STATE";
+        case E_M010_CARTURNSTATE_CENTER     : return "E_M010_CARTURNSTATE_CENTER";
+        case E_M010_CARTURNSTATE_LEFT_1     : return "E_M010_CARTURNSTATE_LEFT_1";
+        case E_M010_CARTURNSTATE_LEFT_2     : return "E_M010_CARTURNSTATE_LEFT_2";
+        case E_M010_CARTURNSTATE_LEFT_3     : return "E_M010_CARTURNSTATE_LEFT_3";
+        case E_M010_CARTURNSTATE_RIGHT_1    : return "E_M010_CARTURNSTATE_RIGHT_1";
+        case E_M010_CARTURNSTATE_RIGHT_2    : return "E_M010_CARTURNSTATE_RIGHT_2";
+        case E_M010_CARTURNSTATE_RIGHT_3    : return "E_M010_CARTURNSTATE_RIGHT_3";
+        default                             : return "UNKNOWN_ENUM_TURN_STATE";
     }
 }
 
