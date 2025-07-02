@@ -239,8 +239,8 @@ Preferences g_W010_preferences; // Preferences 객체
 // ====================================================================================================
 String W010_EmbUI_getCommonString(const char* key, const char* defaultVal = ""); // 다국어 문자열 가져오는 헬퍼 함수
 String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr); // 언어 문서에서 enum_id에 해당하는 label을 찾는 함수
-bool W010_EmbUI_loadUILayoutDefaults(); // 
-bool W010_EmbUI_loadUILanguage(const String& langCode); // 언어 파일 로드 함수
+bool W010_EmbUI_load_Json_UiLayout(); // 
+bool W010_EmbUI_load_Json_UiLanguage(const String& langCode); // 언어 파일 로드 함수
 void W010_EmbUI_init(); // 함수 이름은 EmbUI 그대로 두지만, 내부 구현은 ESPUI를 사용
 void W010_EmbUI_setupWebPages();
 void W010_EmbUI_loadConfigToWebUI();
@@ -285,7 +285,7 @@ String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr) {
     return String(""); // 찾지 못함
 }
 
-bool W010_EmbUI_loadUILayoutDefaults() {
+bool W010_EmbUI_load_Json_UiLayout() {
 	const char* filePath = G_W010_UI_DEFAULT_CONFIG_FILE; // 고정된 기본값 파일
     dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 중: %s\n", filePath);
 
@@ -305,7 +305,7 @@ bool W010_EmbUI_loadUILayoutDefaults() {
     return true;
 }
 
-bool W010_EmbUI_loadUILanguage(const String& langCode) {
+bool W010_EmbUI_load_Json_UiLanguage(const String& langCode) {
     String filePath = String(G_W010_UI_LANG_FILE_PREFIX) + langCode + G_W010_UI_LANG_FILE_SUBFIX;
     dbgP1_printf("UI 언어 파일 로드 중: %s\n", filePath.c_str());
 
@@ -333,16 +333,16 @@ void W010_EmbUI_init() {
         return;
     }
 
-    if (!W010_EmbUI_loadUILayoutDefaults()) {
+    if (!W010_EmbUI_load_Json_UiLayout()) {
         dbgP1_println(F("UI 레이아웃 및 기본값 파일 로드 실패. UI 구성에 문제 발생 가능."));
     }
 
-    W010_EmbUI_loadLastLanguage(); // Preferences에서 마지막 언어 로드
+    W010_EmbUI_load_LastLanguage(); // Preferences에서 마지막 언어 로드
 
-    if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+    if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLanguage)) {
         dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
         g_W010_currentLanguage = "ko";
-        if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+        if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLanguage)) {
             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. 다국어 지원 불가."));
         }
     }
@@ -898,10 +898,10 @@ void W010_EmbUI_rebuildUI() {
     dbgP1_printf("UI 재구성 중... 새로운 언어: %s\n", g_W010_currentLanguage.c_str());
 
     // 1. 새로운 언어의 UI 설정 JSON 파일 로드
-    if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+    if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLanguage)) {
         dbgP1_printf("UI 설정 JSON 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
         g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
-        if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+        if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLanguage)) {
             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. UI 업데이트 불가."));
             ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.ui_load_fail_critical"));
             return; // 치명적인 오류이므로 여기서 종료
