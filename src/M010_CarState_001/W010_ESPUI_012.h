@@ -37,8 +37,6 @@ extern T_M010_CarStatus    g_M010_CarStatus; // 자동차 상태 구조체 인�
 #define G_W010_UI_DEFAULT_CONFIG_FILE        "/W010_ESPUI_ui_defaults_005.json"
 
 
-#define G_W010_LAST_LANG_FILE               "/last_lang.txt" // 마지막 언어 설정을 저장할 파일
-
 // 현재 선택된 언어 코드 (예: "ko", "en")
 String          g_W010_currentLanguage          = "ko"; // 기본 언어는 한국어
 
