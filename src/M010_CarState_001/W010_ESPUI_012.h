@@ -24,7 +24,7 @@
 #include <LittleFS.h> // LittleFS 파일 시스템 라이브러리 포함 (ESP32의 경우 <FS.h>와 함께 사용)
 
 // M010_main3_010.h 에 정의된 전역 변수 및 함수 선언을 사용하기 위해 포함
-#include "M010_main3_011.h" // T_M010_Config, T_M010_CarStatus, M010_Config_save, M010_Config_load, M010_Config_initDefaults 등 포함
+#include "M010_main3_012.h" // T_M010_Config, T_M010_CarStatus, M010_Config_save, M010_Config_load, M010_Config_initDefaults 등 포함
 
 extern T_M010_Config       g_M010_Config;
 extern T_M010_CarStatus    g_M010_CarStatus; // 자동차 상태 구조체 인스턴스
