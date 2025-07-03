@@ -337,7 +337,7 @@ void W010_EmbUI_init() {
         dbgP1_println(F("UI 레이아웃 및 기본값 파일 로드 실패. UI 구성에 문제 발생 가능."));
     }
 
-    W010_EmbUI_load_LastLanguage(); // Preferences에서 마지막 언어 로드
+    W010_EmbUI_loadLastLanguage(); // Preferences에서 마지막 언어 로드
 
     if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLanguage)) {
         dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
