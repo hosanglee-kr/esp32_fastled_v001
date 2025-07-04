@@ -183,11 +183,11 @@
           "label": "정차 지속 시간:"
         },
         {
-          "enum_id": "g_W010_Control_Alaram_Id",
+          "enum_id": "C_ID_ALARM_LABEL",
           "label": "알림"
         },
         {
-          "enum_id": "g_W010_Control_Error_Id",
+          "enum_id": "C_ID_ERROR_LABEL",
           "label": "오류"
         }
       ]
