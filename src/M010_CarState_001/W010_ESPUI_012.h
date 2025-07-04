@@ -24,7 +24,7 @@
 #include <LittleFS.h> // LittleFS 파일 시스템 라이브러리 포함 (ESP32의 경우 <FS.h>와 함께 사용)
 
 // M010_main3_010.h 에 정의된 전역 변수 및 함수 선언을 사용하기 위해 포함
-#include "M010_main3_011.h" // T_M010_Config, T_M010_CarStatus, M010_Config_save, M010_Config_load, M010_Config_initDefaults 등 포함
+#include "M010_main3_012.h" // T_M010_Config, T_M010_CarStatus, M010_Config_save, M010_Config_load, M010_Config_initDefaults 등 포함
 
 extern T_M010_Config       g_M010_Config;
 extern T_M010_CarStatus    g_M010_CarStatus; // 자동차 상태 구조체 인스턴스
@@ -37,10 +37,8 @@ extern T_M010_CarStatus    g_M010_CarStatus; // 자동차 상태 구조체 인�
 #define G_W010_UI_DEFAULT_CONFIG_FILE        "/W010_ESPUI_ui_defaults_005.json"
 
 
-#define G_W010_LAST_LANG_FILE               "/last_lang.txt" // 마지막 언어 설정을 저장할 파일
-
 // 현재 선택된 언어 코드 (예: "ko", "en")
-String          g_W010_currentLanguage          = "ko"; // 기본 언어는 한국어
+String          g_W010_currentLang          = "ko"; // 기본 언어는 한국어
 
 JsonDocument    g_W010_uiLayoutDoc; // UI 레이아웃 및 기본값을 위한 JSON 문서
 JsonDocument    g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
@@ -49,17 +47,17 @@ JsonDocument    g_W010_uiLangDoc;   // 다국어 문자열을 위한 JSON 문서
 // 전역 변수 선언
 // ====================================================================================================
 
-// ESPUI는 페이지 자체를 컨트롤로 추가하고, 그 ID를 페이지 ID로 사용합니다.
-uint16_t g_W010_Tab_Config_Id;
-uint16_t g_W010_Tab_Status_Id;
-
-uint16_t g_W010_Control_Alaram_Id;
-uint16_t g_W010_Control_Error_Id;
-uint16_t g_W010_Control_Language_Id; // 언어 선택 드롭다운 컨트롤 ID
-
 // ESPUI 컨트롤 ID를 저장할 전역 변수들
 // enum 값과 ESPUI.addControl()이 반환하는 실제 ID를 매핑하는 역할
 // 이렇게 전역 변수로 관리해야 콜백에서 p_control->id 와 비교할 수 있습니다.
+
+uint16_t g_W010_Tab_Config_Id;
+uint16_t g_W010_Tab_Status_Id;
+
+uint16_t g_W010_C_ID_ALARAM_LABEL_Id;
+uint16_t g_W010_C_ID_ERROR_LABEL_Id;
+uint16_t g_W010_C_ID_LANG_SELECT_Id; // 언어 선택 드롭다운 컨트롤 ID
+
 uint16_t g_W010_C_ID_MVSTATE_ACCELFILTER_ALPHA_Id;
 uint16_t g_W010_C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN_Id;
 uint16_t g_W010_C_ID_MVSTATE_REVERSE_SPEEDKMH_THRESHOLD_MIN_Id;
@@ -157,8 +155,8 @@ enum {
     C_ID_CURRENTSTOPTIME_SEC_LABEL,
     
     // 알림 및 오류 레이블 (JSON에는 enum_id로 정의되어 있지 않지만, 편의상 여기에 추가)
-    // 이들은 g_W010_Control_Alaram_Id, g_W010_Control_Error_Id 와 직접 연결됩니다.
-    // JSON의 "g_W010_Control_Alaram_Id", "g_W010_Control_Error_Id"는 실제 컨트롤 ID가 아니라
+    // 이들은 g_W010_Ctl_Alaram_Id, g_W010_Control_Error_Id 와 직접 연결됩니다.
+    // JSON의 "C_ID_ALARM_LABEL", "C_ID_ERROR_LABEL"는 실제 컨트롤 ID가 아니라
     // 레이블을 위한 플레이스홀더로 사용된 것으로 보입니다.
     // 하지만 콜백에서 enum ID로 처리하기 위해 여기에 추가했습니다.
     C_ID_ALARM_LABEL,
@@ -166,22 +164,22 @@ enum {
 };
 
 // 매직 문자열을 위한 상수 정의
-#define BTN_CMD_SAVE_CONFIG     F("save_config")
-#define BTN_CMD_LOAD_CONFIG     F("load_config")
-#define BTN_CMD_RESET_CONFIG    F("reset_config")
+// #define BTN_CMD_SAVE_CONFIG     F("save_config")
+// #define BTN_CMD_LOAD_CONFIG     F("load_config")
+// #define BTN_CMD_RESET_CONFIG    F("reset_config")
 
 // JSON enum_id와 C++ enum 값 매핑을 위한 구조체
-struct ControlMapEntry {
-    const char* idStr;
-    int enumVal;
-    uint16_t* espuiIdPtr; // ESPUI.addControl()이 반환하는 실제 ID를 저장할 포인터
+struct UiControl_Map_ST {
+    const char* enum_Id_str;
+    int         enum_no;
+    uint16_t*   ui_ctl_var_ptr; // ESPUI.addControl()이 반환하는 실제 ID를 저장할 포인터
 };
 
 // 모든 컨트롤 ID를 매핑하는 배열
 // ** 중요: 이 배열의 순서는 JSON 파일의 "controls" 배열 순서와 일치해야 합니다.
 //          또는 enum_idStr을 사용하여 동적으로 찾을 수 있도록 구현해야 합니다.
 //          여기서는 각 컨트롤의 ESPUI ID를 저장할 전역 변수 포인터를 추가했습니다.
-const ControlMapEntry controlMap[] = {
+const UiControl_Map_ST g_W010_UiControlMap_Arr[] = {
     // Config Page Controls
     {"C_ID_MVSTATE_ACCELFILTER_ALPHA"                       , C_ID_MVSTATE_ACCELFILTER_ALPHA                    , &g_W010_C_ID_MVSTATE_ACCELFILTER_ALPHA_Id},
     {"C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN"          , C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN       , &g_W010_C_ID_MVSTATE_FORWARD_SPEEDKMH_THRESHOLD_MIN_Id},
@@ -213,7 +211,7 @@ const ControlMapEntry controlMap[] = {
     {"C_ID_SAVE_CONFIG_BTN"                                 , C_ID_SAVE_CONFIG_BTN                              , &g_W010_C_ID_SAVE_CONFIG_BTN_Id},
     {"C_ID_LOAD_CONFIG_BTN"                                 , C_ID_LOAD_CONFIG_BTN                              , &g_W010_C_ID_LOAD_CONFIG_BTN_Id},
     {"C_ID_RESET_CONFIG_BTN"                                , C_ID_RESET_CONFIG_BTN                             , &g_W010_C_ID_RESET_CONFIG_BTN_Id},
-    {"C_ID_LANGUAGE_SELECT"                                 , C_ID_LANGUAGE_SELECT                              , &g_W010_Control_Language_Id}, // 이 ID는 이미 전역으로 선언됨
+    {"C_ID_LANGUAGE_SELECT"                                 , C_ID_LANGUAGE_SELECT                              , &g_W010_C_ID_LANG_SELECT_Id}, // 이 ID는 이미 전역으로 선언됨
 
     // Status Page Controls
     {"C_ID_CARMOVEMENTSTATE_LABEL"                          , C_ID_CARMOVEMENTSTATE_LABEL                       , &g_W010_C_ID_CARMOVEMENTSTATE_LABEL_Id},
@@ -228,10 +226,10 @@ const ControlMapEntry controlMap[] = {
     {"C_ID_ISEMERGENCYBRAKING_LABEL"                        , C_ID_ISEMERGENCYBRAKING_LABEL                     , &g_W010_C_ID_ISEMERGENCYBRAKING_LABEL_Id},
     {"C_ID_ISSPEEDBUMPDETECTED_LABEL"                       , C_ID_ISSPEEDBUMPDETECTED_LABEL                    , &g_W010_C_ID_ISSPEEDBUMPDETECTED_LABEL_Id},
     {"C_ID_CURRENTSTOPTIME_SEC_LABEL"                       , C_ID_CURRENTSTOPTIME_SEC_LABEL                    , &g_W010_C_ID_CURRENTSTOPTIME_SEC_LABEL_Id},
-    {"g_W010_Control_Alaram_Id"                             , C_ID_ALARM_LABEL                                  , &g_W010_Control_Alaram_Id}, // 이 ID는 이미 전역으로 선언됨
-    {"g_W010_Control_Error_Id"                              , C_ID_ERROR_LABEL                                  , &g_W010_Control_Error_Id}  // 이 ID는 이미 전역으로 선언됨
+    {"C_ID_ALARM_LABEL"                                     , C_ID_ALARM_LABEL                                  , &g_W010_C_ID_ALARAM_LABEL_Id}, // 이 ID는 이미 전역으로 선언됨
+    {"C_ID_ERROR_LABEL"                                     , C_ID_ERROR_LABEL                                  , &g_W010_C_ID_ERROR_LABEL_Id}  // 이 ID는 이미 전역으로 선언됨
 };
-const size_t controlMapSize = sizeof(controlMap) / sizeof(controlMap[0]);
+const size_t g_W010_UiControlMap_Arr_Size = sizeof(g_W010_UiControlMap_Arr) / sizeof(g_W010_UiControlMap_Arr[0]);
 
 #include <Preferences.h>
 Preferences g_W010_preferences; // Preferences 객체
@@ -241,22 +239,20 @@ Preferences g_W010_preferences; // Preferences 객체
 // ====================================================================================================
 String W010_EmbUI_getCommonString(const char* key, const char* defaultVal = ""); // 다국어 문자열 가져오는 헬퍼 함수
 String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr); // 언어 문서에서 enum_id에 해당하는 label을 찾는 함수
-bool W010_EmbUI_loadUILayoutDefaults(); // 
-bool W010_EmbUI_loadUILanguage(const String& langCode); // 언어 파일 로드 함수
-void W010_EmbUI_init(); // 함수 이름은 EmbUI 그대로 두지만, 내부 구현은 ESPUI를 사용
-void W010_EmbUI_setupWebPages();
-void W010_EmbUI_loadConfigToWebUI();
-void W010_ESPUI_callback(Control* p_control, int p_value);
-void W010_EmbUI_updateCarStatusWeb();
+bool   W010_EmbUI_load_Json_UiLayout(); // 
+bool   W010_EmbUI_load_Json_UiLanguage(const String& langCode); // 언어 파일 로드 함수
+void   W010_EmbUI_init(); // 함수 이름은 EmbUI 그대로 두지만, 내부 구현은 ESPUI를 사용
+void   W010_EmbUI_setupWebPages();
+void   W010_EmbUI_loadConfigToWebUI();
+void   W010_ESPUI_callback(Control* p_control, int p_value);
+void   W010_EmbUI_updateCarStatusWeb();
 String W010_EmbUI_getCarTurnStateEnumString(T_M010_CarTurnState state);
 String W010_EmbUI_getCarMovementStateEnumString(T_M010_CarMovementState state);
-void W010_EmbUI_run();
-void W010_EmbUI_loadLastLanguage(); // 마지막 선택된 언어를 로드
-void W010_EmbUI_saveLastLanguage(); // 현재 언어 설정을 저장
-void W010_EmbUI_rebuildUI(); // UI를 다시 그리는 함수
-
-// ESPUI ID를 enum 값으로 변환하는 헬퍼 함수
-int W010_EmbUI_getEnumIdFromEspuiId(uint16_t espuiId);
+void   W010_EmbUI_run();
+void   W010_EmbUI_load_Pref_LastLang(); // 마지막 선택된 언어를 로드
+void   W010_EmbUI_save_Pref_LastLang(); // 현재 언어 설정을 저장
+void   W010_EmbUI_rebuildUI(); // UI를 다시 그리는 함수
+int    W010_EmbUI_getEnumIdFromEspuiId(uint16_t espuiId);  // ESPUI ID를 enum 값으로 변환하는 헬퍼 함수
 
 // ====================================================================================================
 // 함수 정의
@@ -270,16 +266,16 @@ String W010_EmbUI_getCommonString(const char* key, const char* p_defaultVal) {
     return String(p_defaultVal);
 }
 
-// 새로운 헬퍼 함수: 언어 문서에서 enum_id에 해당하는 label을 찾는 함수
+// 언어 문서에서 enum_id에 해당하는 label을 찾는 함수
 String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr) {
-    JsonArray tabs = g_W010_uiLangDoc["tabs"].as<JsonArray>(); // g_W010_uiLangDoc 사용
-    for (JsonObject tab : tabs) {
-        JsonArray controls = tab["controls"].as<JsonArray>();
-        for (JsonObject control : controls) {
-            if (control["enum_id"].as<String>().equals(p_enumIdStr)) {
-                JsonVariant labelVariant = control["label"];
-                if (!labelVariant.isNull()) {
-                    return labelVariant.as<String>();
+    JsonArray v_json_tabs_arr = g_W010_uiLangDoc["tabs"].as<JsonArray>(); // g_W010_uiLangDoc 사용
+    for (JsonObject v_json_tab : v_json_tabs_arr) {
+        JsonArray v_json_ctrs_arr = v_json_tab["controls"].as<JsonArray>();
+        for (JsonObject v_json_ctr : v_json_ctrs_arr) {
+            if (v_json_ctr["enum_id"].as<String>().equals(p_enumIdStr)) {
+                JsonVariant v_jsonVar_ctr_label = v_json_ctr["label"];
+                if (!v_jsonVar_ctr_label.isNull()) {
+                    return v_jsonVar_ctr_label.as<String>();
                 }
             }
         }
@@ -287,43 +283,43 @@ String W010_EmbUI_getLabelFromLangDoc(const String& p_enumIdStr) {
     return String(""); // 찾지 못함
 }
 
-bool W010_EmbUI_loadUILayoutDefaults() {
-	const char* filePath = G_W010_UI_DEFAULT_CONFIG_FILE; // 고정된 기본값 파일
-    dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 중: %s\n", filePath);
+bool W010_EmbUI_load_Json_UiLayout() {
+	const char* v_filePath = G_W010_UI_DEFAULT_CONFIG_FILE; // 고정된 기본값 파일
+    dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 중: %s\n", v_filePath);
 
-    File configFile = LittleFS.open(filePath, "r");
-    if (!configFile) {
-        dbgP1_printf("파일 열기 실패: %s\n", filePath);
+    File v_configFile = LittleFS.open(v_filePath, "r");
+    if (!v_configFile) {
+        dbgP1_printf("파일 열기 실패: %s\n", v_filePath);
         return false;
     }
 
-    DeserializationError error = deserializeJson(g_W010_uiLayoutDoc, configFile);
-    configFile.close();
+    DeserializationError error = deserializeJson(g_W010_uiLayoutDoc, v_configFile);
+    v_configFile.close();
     if (error) {
         dbgP1_printf("JSON 파싱 실패: %s\n", error.c_str());
         return false;
     }
-    dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 및 파싱 완료: %s\n", filePath);
+    dbgP1_printf("UI 레이아웃 및 기본값 파일 로드 및 파싱 완료: %s\n", v_filePath);
     return true;
 }
 
-bool W010_EmbUI_loadUILanguage(const String& langCode) {
-    String filePath = String(G_W010_UI_LANG_FILE_PREFIX) + langCode + G_W010_UI_LANG_FILE_SUBFIX;
-    dbgP1_printf("UI 언어 파일 로드 중: %s\n", filePath.c_str());
+bool W010_EmbUI_load_Json_UiLanguage(const String& langCode) {
+    String v_filePath = String(G_W010_UI_LANG_FILE_PREFIX) + langCode + G_W010_UI_LANG_FILE_SUBFIX;
+    dbgP1_printf("UI 언어 파일 로드 중: %s\n", v_filePath.c_str());
 
-    File langFile = LittleFS.open(filePath, "r");
-    if (!langFile) {
-        dbgP1_printf("파일 열기 실패: %s\n", filePath.c_str());
+    File v_langFile = LittleFS.open(v_filePath, "r");
+    if (!v_langFile) {
+        dbgP1_printf("파일 열기 실패: %s\n", v_filePath.c_str());
         return false;
     }
 
-    DeserializationError error = deserializeJson(g_W010_uiLangDoc, langFile);
-    langFile.close();
+    DeserializationError error = deserializeJson(g_W010_uiLangDoc, v_langFile);
+    v_langFile.close();
     if (error) {
         dbgP1_printf("JSON 파싱 실패: %s\n", error.c_str());
         return false;
     }
-    dbgP1_printf("UI 언어 파일 로드 및 파싱 완료: %s\n", filePath.c_str());
+    dbgP1_printf("UI 언어 파일 로드 및 파싱 완료: %s\n", v_filePath.c_str());
     return true;
 }
 
@@ -335,16 +331,16 @@ void W010_EmbUI_init() {
         return;
     }
 
-    if (!W010_EmbUI_loadUILayoutDefaults()) {
+    if (!W010_EmbUI_load_Json_UiLayout()) {
         dbgP1_println(F("UI 레이아웃 및 기본값 파일 로드 실패. UI 구성에 문제 발생 가능."));
     }
 
-    W010_EmbUI_loadLastLanguage(); // Preferences에서 마지막 언어 로드
+    W010_EmbUI_load_Pref_LastLang(); // Preferences에서 마지막 언어 로드
 
-    if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
-        dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
-        g_W010_currentLanguage = "ko";
-        if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+    if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLang)) {
+        dbgP1_printf("UI 언어 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLang.c_str());
+        g_W010_currentLang = "ko";
+        if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLang)) {
             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. 다국어 지원 불가."));
         }
     }
@@ -355,7 +351,7 @@ void W010_EmbUI_init() {
     // setupWebPages()를 먼저 호출하여 컨트롤 ID가 할당되도록 합니다.
     W010_EmbUI_setupWebPages(); 
     
-    Control* v_langControl = ESPUI.getControl(g_W010_Control_Language_Id);
+    Control* v_langControl = ESPUI.getControl(g_W010_C_ID_LANG_SELECT_Id);
     if (v_langControl) {
         v_langControl->callback = &W010_ESPUI_callback;
     } else {
@@ -372,20 +368,21 @@ void W010_EmbUI_init() {
 void W010_EmbUI_setupWebPages() {
     dbgP1_println(W010_EmbUI_getCommonString("messages.ui_setup_start", "UI setup start..."));
 
-    JsonArray v_tabs = g_W010_uiLayoutDoc["tabs"].as<JsonArray>();
+    JsonArray v_json_tabs_arr = g_W010_uiLayoutDoc["tabs"].as<JsonArray>();
 
-    for (JsonObject v_tab : v_tabs) {
-        String tabId = v_tab["id"].as<String>();
-        String tabTitle = W010_EmbUI_getLabelFromLangDoc(tabId + "_title");
+    for (JsonObject v_json_tab : v_json_tabs_arr) {
+        String v_ctl_tabId   = v_json_tab["id"].as<String>();
+        String v_ctl_tabName = W010_EmbUI_getLabelFromLangDoc(v_ctl_tabId + "_title");
 
         uint16_t v_currentTab_Id;
-        if (tabId.equals(F("config"))) {
-            g_W010_Tab_Config_Id = ESPUI.addControl(Tab, tabTitle.c_str(), tabTitle);
+        if (v_ctl_tabId.equals(F("config"))) {
+            g_W010_Tab_Config_Id = ESPUI.addControl(Tab, v_ctl_tabName.c_str(), v_ctl_tabName);
             ESPUI.setVertical(g_W010_Tab_Config_Id, true); // Config 탭 세로 정렬
+            
             v_currentTab_Id = g_W010_Tab_Config_Id;
 
             // 언어 선택 드롭다운은 여기서 ID를 미리 저장합니다.
-            g_W010_Control_Language_Id = ESPUI.addControl(
+            g_W010_C_ID_LANG_SELECT_Id = ESPUI.addControl(
                                                             ControlType::Select,
                                                             W010_EmbUI_getCommonString("messages.lang_select_label", "Language Select").c_str(),
                                                             "", // 초기값은 비워두고 나중에 업데이트
@@ -393,62 +390,63 @@ void W010_EmbUI_setupWebPages() {
                                                             v_currentTab_Id
                                                         );
             
-            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko", "Korean").c_str(), "ko", ControlColor::Alizarin, g_W010_Control_Language_Id);
-            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en", "English").c_str(), "en", ControlColor::Alizarin, g_W010_Control_Language_Id);
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_ko", "Korean").c_str(), "ko", ControlColor::Alizarin, g_W010_C_ID_LANG_SELECT_Id);
+            ESPUI.addControl( ControlType::Option, W010_EmbUI_getCommonString("messages.lang_en", "English").c_str(), "en", ControlColor::Alizarin, g_W010_C_ID_LANG_SELECT_Id);
 
-        } else if (tabId.equals(F("status"))) {
-            g_W010_Tab_Status_Id = ESPUI.addControl(ControlType::Tab, tabTitle.c_str(), F(""), ControlColor::Wetasphalt);
+        } else if (v_ctl_tabId.equals(F("status"))) {
+            g_W010_Tab_Status_Id = ESPUI.addControl(ControlType::Tab, v_ctl_tabName.c_str(), F(""), ControlColor::Wetasphalt);
             ESPUI.setVertical(g_W010_Tab_Status_Id, true); // Status 탭 세로 정렬
             v_currentTab_Id = g_W010_Tab_Status_Id;
         } else {
-            dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_tab_id", "Unknown Tab ID:") + " %s\n").c_str(), tabId.c_str());
+            dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_tab_id", "Unknown Tab ID:") + " %s\n").c_str(), v_ctl_tabId.c_str());
             continue;
         }
 
-		JsonArray v_controls = v_tab["controls"].as<JsonArray>();
+		JsonArray v_json_ctrs_arr = v_json_tab["controls"].as<JsonArray>();
 
-        for (JsonObject v_control : v_controls) {
-            String enumIdStr = v_control["enum_id"].as<String>();
-            String label = W010_EmbUI_getLabelFromLangDoc(enumIdStr);
-            JsonVariant defaultValue = v_control["default_value"];
+        for (JsonObject v_json_ctr : v_json_ctrs_arr) {
+            String      v_ctr_Id_str       = v_json_ctr["enum_id"].as<String>();
+            String      v_ctr_lable        = W010_EmbUI_getLabelFromLangDoc(v_ctr_Id_str);
+            JsonVariant v_ctr_defaultValue = v_json_ctr["default_value"];
 
-            // controlMap에서 enumIdStr에 해당하는 실제 enum 값과 ESPUI ID 포인터를 찾음
-            int controlEnumId = -1;
+            // g_W010_UiControlMap_Arr에서 enum_Id_str에 해당하는 실제 enum 값과 ESPUI ID 포인터를 찾음
+            int       controlEnumId     = -1;
             uint16_t* espuiIdStoragePtr = nullptr;
-            for (size_t i = 0; i < controlMapSize; ++i) {
-                if (enumIdStr.equals(controlMap[i].idStr)) {
-                    controlEnumId = controlMap[i].enumVal;
-                    espuiIdStoragePtr = controlMap[i].espuiIdPtr;
+            
+            for (size_t i = 0; i < g_W010_UiControlMap_Arr_Size; ++i) {
+                if (v_ctr_Id_str.equals(g_W010_UiControlMap_Arr[i].enum_Id_str)) {
+                    controlEnumId     = g_W010_UiControlMap_Arr[i].enum_no;
+                    espuiIdStoragePtr = g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr;
                     break;
                 }
             }
             
-            if (enumIdStr.equals(F("g_W010_Control_Alaram_Id"))) {
-                g_W010_Control_Alaram_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
+            if (v_ctr_Id_str.equals(F("C_ID_ALARM_LABEL"))) {
+                g_W010_C_ID_ALARAM_LABEL_Id = ESPUI.addControl(ControlType::Label, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
                 continue;
-            } else if (enumIdStr.equals(F("g_W010_Control_Error_Id"))) {
-                g_W010_Control_Error_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
+            } else if (v_ctr_Id_str.equals(F("C_ID_ERROR_LABEL"))) {
+                g_W010_C_ID_ERROR_LABEL_Id = ESPUI.addControl(ControlType::Label, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
                 continue;
-            } else if (enumIdStr.equals(F("C_ID_LANGUAGE_SELECT"))) { 
+            } else if (v_ctr_Id_str.equals(F("C_ID_LANGUAGE_SELECT"))) { 
                 continue; // 이미 위에서 addControl 했으므로 건너뛰기
             }
 
             if (controlEnumId == -1 || espuiIdStoragePtr == nullptr) {
-                dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_control_id", "Unknown control ID:") + " %s\n").c_str(), enumIdStr.c_str());
+                dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_control_id", "Unknown control ID:") + " %s\n").c_str(), v_ctr_Id_str.c_str());
                 continue;
             }
 
-            if (tabId.equals(F("config"))) {
-                if (enumIdStr.endsWith(F("_BTN"))) {
+            if (v_ctl_tabId.equals(F("config"))) {
+                if (v_ctr_Id_str.endsWith(F("_BTN"))) {
                     // 버튼 컨트롤: 콜백에서 p_control->id로 식별 가능하도록 등록하고 ID 저장
-                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Button, label.c_str(), defaultValue.as<String>().c_str(), ControlColor::Emerald, v_currentTab_Id, &W010_ESPUI_callback);
+                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Button, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>().c_str(), ControlColor::Emerald, v_currentTab_Id, &W010_ESPUI_callback);
                 } else { // Number Control
                     // Number 컨트롤: 콜백에서 p_control->id로 식별 가능하도록 등록하고 ID 저장
-                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Number, label.c_str(), String(defaultValue.as<float>(), 3), ControlColor::Alizarin, v_currentTab_Id, &W010_ESPUI_callback);
+                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Number, v_ctr_lable.c_str(), String(v_ctr_defaultValue.as<float>(), 3), ControlColor::Alizarin, v_currentTab_Id, &W010_ESPUI_callback);
                 }
-            } else if (tabId.equals(F("status"))) {
+            } else if (v_ctl_tabId.equals(F("status"))) {
                 // Label 컨트롤: ID만 저장하고 콜백은 필요 없음
-                *espuiIdStoragePtr = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
+                *espuiIdStoragePtr = ESPUI.addControl(ControlType::Label, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
             }
         }
     }
@@ -465,29 +463,29 @@ void W010_EmbUI_loadConfigToWebUI() {
     dbgP1_println(W010_EmbUI_getCommonString("messages.config_load_to_web_start", "Loading config to web UI..."));
 
     // 모든 컨트롤의 레이블 업데이트 (언어 변경 시)
-    JsonArray tabs = g_W010_uiLayoutDoc["tabs"].as<JsonArray>();
-    for (JsonObject tab : tabs) {
-        String tabId = tab["id"].as<String>();
-        String tabTitle = W010_EmbUI_getLabelFromLangDoc(tabId + "_title");
+    JsonArray v_json_tabs_arr = g_W010_uiLayoutDoc["tabs"].as<JsonArray>();
+    for (JsonObject v_json_tab : v_json_tabs_arr) {
+        String v_ctl_tabId = v_json_tab["id"].as<String>();
+        String v_ctl_tabName = W010_EmbUI_getLabelFromLangDoc(v_ctl_tabId + "_title");
         
         uint16_t currentTabEspuiId = 0;
-        if (tabId.equals(F("config"))) currentTabEspuiId = g_W010_Tab_Config_Id;
-        else if (tabId.equals(F("status"))) currentTabEspuiId = g_W010_Tab_Status_Id;
+        if (v_ctl_tabId.equals(F("config"))) currentTabEspuiId = g_W010_Tab_Config_Id;
+        else if (v_ctl_tabId.equals(F("status"))) currentTabEspuiId = g_W010_Tab_Status_Id;
 
         if (currentTabEspuiId != 0) {
-			ESPUI.updateControlLabel(currentTabEspuiId, tabTitle.c_str());
+			ESPUI.updateControlLabel(currentTabEspuiId, v_ctl_tabName.c_str());
         }
 
-        JsonArray controls = tab["controls"].as<JsonArray>();
-        for (JsonObject control : controls) {
-            String enumIdStr = control["enum_id"].as<String>();
-            String label = W010_EmbUI_getLabelFromLangDoc(enumIdStr); // 언어 파일에서 레이블 가져오기
+        JsonArray v_json_ctrs_arr = v_json_tab["controls"].as<JsonArray>();
+        for (JsonObject v_json_ctr : v_json_ctrs_arr) {
+            String v_ctr_Id_str = v_json_ctr["enum_id"].as<String>();
+            String v_ctr_lable = W010_EmbUI_getLabelFromLangDoc(v_ctr_Id_str); // 언어 파일에서 레이블 가져오기
 
             // ESPUI ID를 찾아서 레이블 업데이트
-            for (size_t i = 0; i < controlMapSize; ++i) {
-                if (enumIdStr.equals(controlMap[i].idStr)) {
-                    if (*controlMap[i].espuiIdPtr != 0) { // ESPUI ID가 할당된 경우에만
-                        ESPUI.updateControlLabel(*controlMap[i].espuiIdPtr, label.c_str());
+            for (size_t i = 0; i < g_W010_UiControlMap_Arr_Size; ++i) {
+                if (v_ctr_Id_str.equals(g_W010_UiControlMap_Arr[i].enum_Id_str)) {
+                    if (*g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr != 0) { // ESPUI ID가 할당된 경우에만
+                        ESPUI.updateControlLabel(*g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr, v_ctr_lable.c_str());
                     }
                     break;
                 }
@@ -530,7 +528,7 @@ void W010_EmbUI_loadConfigToWebUI() {
     ESPUI.updateControlValue(g_W010_C_ID_TURNSTATE_STABLEDURATIONMS_Id, String(g_M010_Config.turnState_StableDurationMs)); // 이름 수정
 	
     // 언어 선택 드롭다운 값 업데이트
-    ESPUI.updateControlValue(g_W010_Control_Language_Id, g_W010_currentLanguage);
+    ESPUI.updateControlValue(g_W010_C_ID_LANG_SELECT_Id, g_W010_currentLang);
 
     dbgP1_println(W010_EmbUI_getCommonString("messages.config_load_to_web_done", "Config loaded to web UI."));
 }
@@ -549,19 +547,19 @@ void W010_ESPUI_callback(Control* p_control, int p_value) {
     int controlEnumId = W010_EmbUI_getEnumIdFromEspuiId(p_control->id);
 
     if (controlEnumId == -1) {
-        ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown control ID received in callback."));
-        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+        ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown control ID received in callback."));
+        ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
         dbgP1_printf(F("Unknown control ID in callback: %d\n"), p_control->id);
         return;
     }
 
-    // 언어 선택 컨트롤 처리 (g_W010_Control_Language_Id는 이미 전역으로 직접 참조 가능)
-    if (p_control->id == g_W010_Control_Language_Id) {
-        g_W010_currentLanguage = p_control->value;
-        W010_EmbUI_saveLastLanguage(); // 인자 없는 버전 호출
+    // 언어 선택 컨트롤 처리 (g_W010_C_ID_LANG_SELECT_Id는 이미 전역으로 직접 참조 가능)
+    if (p_control->id == g_W010_C_ID_LANG_SELECT_Id) {
+        g_W010_currentLang = p_control->value;
+        W010_EmbUI_save_Pref_LastLang(); // 인자 없는 버전 호출
         W010_EmbUI_rebuildUI();
-        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.lang_change_success", "Language changed successfully!"));
-        ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+        ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, W010_EmbUI_getCommonString("messages.lang_change_success", "Language changed successfully!"));
+        ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, "");
         return;
     }
 
@@ -570,37 +568,37 @@ void W010_ESPUI_callback(Control* p_control, int p_value) {
         switch (controlEnumId) {
             case C_ID_SAVE_CONFIG_BTN:
                 if (M010_Config_save()) {
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_save_success", "Configuration saved successfully."));
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, ""); 
+                    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, W010_EmbUI_getCommonString("messages.config_save_success", "Configuration saved successfully."));
+                    ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, ""); 
                 } else {
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_save_fail", "Failed to save configuration to file system."));
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.config_save_fail", "Failed to save configuration to file system."));
+                    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
                 }
                 break;
             case C_ID_LOAD_CONFIG_BTN:
                 if (M010_Config_load()) {
                     W010_EmbUI_loadConfigToWebUI();
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_load_success", "Configuration loaded successfully."));
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+                    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, W010_EmbUI_getCommonString("messages.config_load_success", "Configuration loaded successfully."));
+                    ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, "");
                 } else {
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_load_fail", "Configuration file not found. Default values applied."));
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.config_load_fail", "Configuration file not found. Default values applied."));
+                    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
                 }
                 break;
             case C_ID_RESET_CONFIG_BTN:
                 M010_Config_initDefaults();
                 if (M010_Config_save()) { // 기본값으로 초기화 후 저장 시도
                     W010_EmbUI_loadConfigToWebUI();
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.config_reset_success", "Configuration reset to default."));
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, "");
+                    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, W010_EmbUI_getCommonString("messages.config_reset_success", "Configuration reset to default."));
+                    ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, "");
                 } else { // 기본값 저장 실패 시
-                    ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.config_reset_fail", "Error saving default configuration."));
-                    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                    ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.config_reset_fail", "Error saving default configuration."));
+                    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
                 }
                 break;
             default:
-                ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected."));
-                ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected."));
+                ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
                 dbgP1_printf(F("Unknown button control ID: %d\n"), p_control->id);
                 break;
         }
@@ -689,15 +687,15 @@ void W010_ESPUI_callback(Control* p_control, int p_value) {
                 g_M010_Config.turnState_StableDurationMs = p_control->value.toInt();
                 break;
             default:
-                ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected for Number control."));
-                ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+                ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected for Number control."));
+                ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
                 dbgP1_printf(F("Unknown Number control ID: %d\n"), p_control->id);
                 break;
         }
     } else {
         // 다른 유형의 컨트롤 (Label 등)은 여기서 직접 처리할 필요가 없을 수 있습니다.
-        ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected for control type."));
-        ESPUI.updateControlValue(g_W010_Control_Alaram_Id, "");
+        ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.unknown_command", "Unknown command detected for control type."));
+        ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, "");
         dbgP1_printf(F("Unhandled control type: %d, ID: %d\n"), p_control->type, p_control->id);
     }
 }
@@ -708,14 +706,14 @@ void W010_ESPUI_callback(Control* p_control, int p_value) {
  * @return 매핑되는 enum 값, 없으면 -1 반환
  */
 int W010_EmbUI_getEnumIdFromEspuiId(uint16_t espuiId) {
-    for (size_t i = 0; i < controlMapSize; ++i) {
-        if (controlMap[i].espuiIdPtr != nullptr && *controlMap[i].espuiIdPtr == espuiId) {
-            return controlMap[i].enumVal;
+    for (size_t i = 0; i < g_W010_UiControlMap_Arr_Size; ++i) {
+        if (g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr != nullptr && *g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr == espuiId) {
+            return g_W010_UiControlMap_Arr[i].enum_no;
         }
     }
-    // 알림 및 오류 레이블은 controlMap에 직접 enumVal을 가지고 있지 않으므로 별도 처리
-    if (espuiId == g_W010_Control_Alaram_Id) return C_ID_ALARM_LABEL;
-    if (espuiId == g_W010_Control_Error_Id) return C_ID_ERROR_LABEL;
+    // 알림 및 오류 레이블은 g_W010_UiControlMap_Arr에 직접 enum_no을 가지고 있지 않으므로 별도 처리
+    if (espuiId == g_W010_C_ID_ALARAM_LABEL_Id) return C_ID_ALARM_LABEL;
+    if (espuiId == g_W010_C_ID_ERROR_LABEL_Id) return C_ID_ERROR_LABEL;
 
     return -1; // 찾지 못함
 }
@@ -847,7 +845,7 @@ void W010_EmbUI_run() {
 /**
  * @brief Preferences에서 마지막으로 선택된 언어 설정을 로드합니다.
  */
-void W010_EmbUI_loadLastLanguage() {
+void W010_EmbUI_load_Pref_LastLang() {
     dbgP1_println(F("Loading last language from Preferences..."));
 
     // "embui" 네임스페이스로 Preferences를 엽니다.
@@ -863,19 +861,19 @@ void W010_EmbUI_loadLastLanguage() {
     g_W010_preferences.end();
 
     if (loadedLang.length() > 0) {
-        g_W010_currentLanguage = loadedLang;
-        dbgP1_printf("Last used language loaded: %s\n", g_W010_currentLanguage.c_str());
+        g_W010_currentLang = loadedLang;
+        dbgP1_printf("Last used language loaded: %s\n", g_W010_currentLang.c_str());
     } else {
         dbgP1_println(F("No last language setting found. Using default (ko)."));
-        g_W010_currentLanguage = "ko"; //Preferences에 값이 없을 경우 기본값 설정
+        g_W010_currentLang = "ko"; //Preferences에 값이 없을 경우 기본값 설정
     }
 }
 
 /**
  * @brief 현재 선택된 언어 설정을 Preferences에 저장합니다.
  */
-void W010_EmbUI_saveLastLanguage() {
-    dbgP1_printf(F("Saving current language to Preferences: %s\n"), g_W010_currentLanguage.c_str());
+void W010_EmbUI_save_Pref_LastLang() {
+    dbgP1_printf(F("Saving current language to Preferences: %s\n"), g_W010_currentLang.c_str());
 
     // "embui" 네임스페이스로 Preferences를 엽니다.
     if (!g_W010_preferences.begin("embui", false)) { // false는 읽기/쓰기 모드
@@ -884,7 +882,7 @@ void W010_EmbUI_saveLastLanguage() {
     }
 
     // "last_lang" 키에 현재 언어 코드를 저장합니다.
-    g_W010_preferences.putString("last_lang", g_W010_currentLanguage);
+    g_W010_preferences.putString("last_lang", g_W010_currentLang);
     
     // Preferences를 닫습니다. (변경 사항을 플래시에 기록)
     g_W010_preferences.end();
@@ -897,15 +895,15 @@ void W010_EmbUI_saveLastLanguage() {
  * 언어 변경 시 UI 전체를 리로드하는 데 사용됩니다.
  */
 void W010_EmbUI_rebuildUI() {
-    dbgP1_printf("UI 재구성 중... 새로운 언어: %s\n", g_W010_currentLanguage.c_str());
+    dbgP1_printf("UI 재구성 중... 새로운 언어: %s\n", g_W010_currentLang.c_str());
 
     // 1. 새로운 언어의 UI 설정 JSON 파일 로드
-    if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
-        dbgP1_printf("UI 설정 JSON 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLanguage.c_str());
-        g_W010_currentLanguage = "ko"; // 실패 시 기본 언어로 강제 설정
-        if (!W010_EmbUI_loadUILanguage(g_W010_currentLanguage)) {
+    if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLang)) {
+        dbgP1_printf("UI 설정 JSON 파일 (%s) 로드 실패. 기본 언어(ko)로 재시도.\n", g_W010_currentLang.c_str());
+        g_W010_currentLang = "ko"; // 실패 시 기본 언어로 강제 설정
+        if (!W010_EmbUI_load_Json_UiLanguage(g_W010_currentLang)) {
             dbgP1_println(F("기본 언어 UI 설정 파일도 로드 실패. UI 업데이트 불가."));
-            ESPUI.updateControlValue(g_W010_Control_Error_Id, W010_EmbUI_getCommonString("messages.ui_load_fail_critical"));
+            ESPUI.updateControlValue(g_W010_C_ID_ERROR_LABEL_Id, W010_EmbUI_getCommonString("messages.ui_load_fail_critical"));
             return; // 치명적인 오류이므로 여기서 종료
         }
     }
@@ -914,7 +912,7 @@ void W010_EmbUI_rebuildUI() {
     W010_EmbUI_loadConfigToWebUI();
 
     // 3. 언어 변경 성공 메시지 표시 (선택 사항)
-    ESPUI.updateControlValue(g_W010_Control_Alaram_Id, W010_EmbUI_getCommonString("messages.lang_change_success"));
+    ESPUI.updateControlValue(g_W010_C_ID_ALARAM_LABEL_Id, W010_EmbUI_getCommonString("messages.lang_change_success"));
 
     dbgP1_println(W010_EmbUI_getCommonString("messages.ui_rebuild_done"));
 }
