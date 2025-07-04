@@ -405,47 +405,48 @@ void W010_EmbUI_setupWebPages() {
 		JsonArray v_json_ctrs_arr = v_json_tab["controls"].as<JsonArray>();
 
         for (JsonObject v_json_ctr : v_json_ctrs_arr) {
-            String v_enum_Id_str = v_json_ctr["enum_id"].as<String>();
-            String label = W010_EmbUI_getLabelFromLangDoc(v_enum_Id_str);
-            JsonVariant defaultValue = v_json_ctr["default_value"];
+            String      v_ctr_Id_str       = v_json_ctr["enum_id"].as<String>();
+            String      v_ctr_lable        = W010_EmbUI_getLabelFromLangDoc(v_ctr_Id_str);
+            JsonVariant v_ctr_defaultValue = v_json_ctr["default_value"];
 
             // g_W010_UiControlMap_Arr에서 enum_Id_str에 해당하는 실제 enum 값과 ESPUI ID 포인터를 찾음
-            int controlEnumId = -1;
+            int       controlEnumId     = -1;
             uint16_t* espuiIdStoragePtr = nullptr;
+            
             for (size_t i = 0; i < g_W010_UiControlMap_Arr_Size; ++i) {
-                if (v_enum_Id_str.equals(g_W010_UiControlMap_Arr[i].enum_Id_str)) {
-                    controlEnumId = g_W010_UiControlMap_Arr[i].enum_no;
+                if (v_ctr_Id_str.equals(g_W010_UiControlMap_Arr[i].enum_Id_str)) {
+                    controlEnumId     = g_W010_UiControlMap_Arr[i].enum_no;
                     espuiIdStoragePtr = g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr;
                     break;
                 }
             }
             
-            if (v_enum_Id_str.equals(F("C_ID_ALARM_LABEL"))) {
-                g_W010_C_ID_ALARAM_LABEL_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
+            if (v_ctr_Id_str.equals(F("C_ID_ALARM_LABEL"))) {
+                g_W010_C_ID_ALARAM_LABEL_Id = ESPUI.addControl(ControlType::Label, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
                 continue;
-            } else if (v_enum_Id_str.equals(F("C_ID_ERROR_LABEL"))) {
-                g_W010_C_ID_ERROR_LABEL_Id = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
+            } else if (v_ctr_Id_str.equals(F("C_ID_ERROR_LABEL"))) {
+                g_W010_C_ID_ERROR_LABEL_Id = ESPUI.addControl(ControlType::Label, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
                 continue;
-            } else if (v_enum_Id_str.equals(F("C_ID_LANGUAGE_SELECT"))) { 
+            } else if (v_ctr_Id_str.equals(F("C_ID_LANGUAGE_SELECT"))) { 
                 continue; // 이미 위에서 addControl 했으므로 건너뛰기
             }
 
             if (controlEnumId == -1 || espuiIdStoragePtr == nullptr) {
-                dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_control_id", "Unknown control ID:") + " %s\n").c_str(), v_enum_Id_str.c_str());
+                dbgP1_printf(String(W010_EmbUI_getCommonString("messages.unknown_control_id", "Unknown control ID:") + " %s\n").c_str(), v_ctr_Id_str.c_str());
                 continue;
             }
 
             if (v_ctl_tabId.equals(F("config"))) {
-                if (v_enum_Id_str.endsWith(F("_BTN"))) {
+                if (v_ctr_Id_str.endsWith(F("_BTN"))) {
                     // 버튼 컨트롤: 콜백에서 p_control->id로 식별 가능하도록 등록하고 ID 저장
-                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Button, label.c_str(), defaultValue.as<String>().c_str(), ControlColor::Emerald, v_currentTab_Id, &W010_ESPUI_callback);
+                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Button, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>().c_str(), ControlColor::Emerald, v_currentTab_Id, &W010_ESPUI_callback);
                 } else { // Number Control
                     // Number 컨트롤: 콜백에서 p_control->id로 식별 가능하도록 등록하고 ID 저장
-                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Number, label.c_str(), String(defaultValue.as<float>(), 3), ControlColor::Alizarin, v_currentTab_Id, &W010_ESPUI_callback);
+                    *espuiIdStoragePtr = ESPUI.addControl(ControlType::Number, v_ctr_lable.c_str(), String(v_ctr_defaultValue.as<float>(), 3), ControlColor::Alizarin, v_currentTab_Id, &W010_ESPUI_callback);
                 }
             } else if (v_ctl_tabId.equals(F("status"))) {
                 // Label 컨트롤: ID만 저장하고 콜백은 필요 없음
-                *espuiIdStoragePtr = ESPUI.addControl(ControlType::Label, label.c_str(), defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
+                *espuiIdStoragePtr = ESPUI.addControl(ControlType::Label, v_ctr_lable.c_str(), v_ctr_defaultValue.as<String>(), ControlColor::Wetasphalt, v_currentTab_Id);
             }
         }
     }
@@ -477,14 +478,14 @@ void W010_EmbUI_loadConfigToWebUI() {
 
         JsonArray v_json_ctrs_arr = v_json_tab["controls"].as<JsonArray>();
         for (JsonObject v_json_ctr : v_json_ctrs_arr) {
-            String v_enum_Id_str = v_json_ctr["enum_id"].as<String>();
-            String label = W010_EmbUI_getLabelFromLangDoc(v_enum_Id_str); // 언어 파일에서 레이블 가져오기
+            String v_ctr_Id_str = v_json_ctr["enum_id"].as<String>();
+            String v_ctr_lable = W010_EmbUI_getLabelFromLangDoc(v_ctr_Id_str); // 언어 파일에서 레이블 가져오기
 
             // ESPUI ID를 찾아서 레이블 업데이트
             for (size_t i = 0; i < g_W010_UiControlMap_Arr_Size; ++i) {
-                if (v_enum_Id_str.equals(g_W010_UiControlMap_Arr[i].enum_Id_str)) {
+                if (v_ctr_Id_str.equals(g_W010_UiControlMap_Arr[i].enum_Id_str)) {
                     if (*g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr != 0) { // ESPUI ID가 할당된 경우에만
-                        ESPUI.updateControlLabel(*g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr, label.c_str());
+                        ESPUI.updateControlLabel(*g_W010_UiControlMap_Arr[i].ui_ctl_var_ptr, v_ctr_lable.c_str());
                     }
                     break;
                 }
